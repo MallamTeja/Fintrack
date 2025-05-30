@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinTrack - Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Authentication check script -->
+  <script type="module" src="js/auth/authCheck.js"></script>
+  <style>
+    /* Reuse theme variables and styles from SavingGoals.html */
+    :root {
+      /* Light theme */
+      --bg-light: #ffffff;
+      --text-light: #1a1a1a;
+      --card-bg-light: #ffffff;
+      --primary-light: #2563eb;
+      --primary-hover-light: #1d4ed8;
+      --border-light: #e2e8f0;
+      
+      /* Dark theme */
+      --bg-dark: #1e293b;
+      --text-dark: #f8fafc; 
+      --card-bg-dark: #1e293b;
+      --primary-dark: #4f46e5;
+      --primary-hover-dark: #4338ca;
+      --border-dark: #334155;
+    }
+
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text-color: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --primary: var(--primary-light);
+      --primary-hover: var(--primary-hover-light);
+      --border: var(--border-light);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-color: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --primary: var(--primary-dark);
+      --primary-hover: var(--primary-hover-dark);
+      --border: var(--border-dark);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+    }
+
+    input, select, textarea {
+      background-color: var(--bg);
+      color: var(--text-color) !important;
+      border: 1px solid var(--border);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    nav a {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    nav a.active {
+      background-color: var(--primary-hover);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+
+    nav a.active::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      height: 60%;
+      width: 4px;
+      background: rgb(238, 234, 234);
+      border-radius: 2px;
+    }
+
+    nav a:hover:not(.active) {
+      background-color: var(--primary-hover);
+      transform: translateX(4px);
+    }
+
+    /* Dark theme nav link colors and backgrounds */
+    [data-theme="dark"] nav a {
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    [data-theme="dark"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Light theme nav link colors and backgrounds */
+    [data-theme="light"] nav a {
+      color: var(--text-light);
+    }
+
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Card style */
+    .card {
+      box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    [data-theme="dark"] .card {
+      box-shadow: 0 4px 6px rgba(115, 178, 207, 0.3);
+    }
+
+    [data-theme="dark"] .card:hover {
+      box-shadow: 0 10px 20px rgba(115, 178, 207, 0.5);
+    }
+
+    /* Accordion styles */
+    .accordion-header {
+      cursor: pointer;
+      padding: 1rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      margin-bottom: 0.5rem;
+      -webkit-user-select: none;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0 0 0.75rem 0.75rem;
+      padding: 0 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .accordion-content.open {
+      padding: 1rem 1.5rem;
+      max-height: 1000px; /* large enough for content */
+    }
+
+    /* Toggle switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Radio buttons */
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Modal styles */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+    }
+
+    .modal-bg.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      color: var(--text-color);
+      text-align: center;
+    }
+
+    .modal h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal p {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal button {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      margin: 0 0.5rem;
+      min-width: 100px;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-cancel {
+      background-color: #ccc;
+      color: #333;
+    }
+
+    .btn-cancel:hover {
+      background-color: #bbb;
+    }
+
+    .btn-confirm {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-confirm:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Toast alert */
+    #toast {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+    }
+
+    #toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav a {
+        margin: 0.25rem 0;
+      }
+    }
+  </style>
+</head>
+<body class="transition-all duration-300 flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md">
+    <div class="flex flex-col">
+      <div class="flex items-center">
+        <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
+      </div>
+      <p class="text-xs text-blue-500">track your money</p>
+    </div>
+    <nav class="flex flex-col gap-2">
+        <a href="dashboard.html" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="addTransactions.html" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Transactions
+        </a>
+        <a href="insights.html" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          Insights
+        </a>
+        <a href="savingGoals.html" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          Savings Goals
+        </a>
+        <a href="expensesLimits.html" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Expenses Limits
+        </a>
+        <a href="settings.html" class="flex items-center gap-2 text-lg font-semibold transition-colors duration-300 rounded-md bg-blue-500 text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Settings
+        </a>
+      </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col p-6 md:p-10 overflow-y-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-semibold text-blue-500">Settings</h1>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105" aria-label="Toggle Theme">
+          <svg id="themeIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        <div class="relative">
+          <button id="profileButton" 
+                  class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  aria-label="User Profile">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
+            <span class="font-medium text-black dark:text-gray-200">User</span>
+          </button>
+          <div id="profileDropdown" 
+               class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top"
+               role="menu" aria-orientation="vertical" aria-labelledby="profileButton">
+            <div class="py-1" role="none">
+              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200" role="menuitem">john@example.com</div>
+              <button id="logoutButton" 
+                      class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                      role="menuitem">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h1 class="text-3xl font-semibold mb-6 text-blue-500">Settings</h1>
+
+    <!-- Tabs -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button class="tab-btn px-4 py-2 rounded-md bg-blue-500 text-white font-semibold" data-tab="reset-data">Reset Data</button>
+      <button class="tab-btn px-4 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold" data-tab="export-backup">Export & Backup</button>
+      <button class="tab-btn px-4 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold" data-tab="appearance">Appearance</button>
+      <button class="tab-btn px-4 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold" data-tab="notifications">Notifications</button>
+      <button class="tab-btn px-4 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold" data-tab="categories">Manage Categories</button>
+      <button class="tab-btn px-4 py-2 rounded-md bg-gray-300 text-gray-700 font-semibold" data-tab="currency">Currency</button>
+    </div>
+
+    <!-- Add header bars for toggles and buttons in Appearance and Notifications -->
+    <style>
+      .section-header-bar {
+        background-color: var(--primary);
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        -webkit-user-select: none;
+      user-select: none;
+      }
+    </style>
+
+    <!-- Tab Contents -->
+    <section id="reset-data" class="tab-content card">
+      <h2 class="text-xl font-semibold mb-4">Reset All Data</h2>
+      <p class="mb-4">This will permanently delete all your transactions and savings goals. This action cannot be undone.</p>
+      <button id="openResetModal" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-semibold">Reset All Data</button>
+    </section>
+
+    <section id="export-backup" class="tab-content card hidden">
+      <h2 class="text-xl font-semibold mb-4">Export & Backup</h2>
+      <form id="exportForm" class="space-y-4">
+        <div>
+          <label class="block font-medium mb-1">Export data as:</label>
+          <select name="exportFormat" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required title="Export Format">
+            <option value="csv">CSV</option>
+            <option value="excel">Excel</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Backup options:</label>
+          <select name="backupOption" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required title="Backup Option">
+            <option value="local">Download Locally</option>
+            <option value="google">Sync to Google Drive</option>
+          </select>
+        </div>
+        <div>
+          <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Export / Backup Now</button>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Last backup: <span id="lastBackupTime">Never</span></p>
+      </form>
+    </section>
+
+    <section id="appearance" class="tab-content card hidden">
+      <h2 class="text-xl font-semibold mb-4">Appearance</h2>
+      <div class="section-header-bar">Theme Toggle</div>
+      <form id="appearanceForm" class="space-y-4">
+        <div>
+          <label class="block font-medium mb-1">Toggle Theme:</label>
+          <div class="radio-group">
+            <label><input type="radio" name="theme" value="light" /> Light Mode</label>
+            <label><input type="radio" name="theme" value="dark" /> Dark Mode</label>
+            <label><input type="radio" name="theme" value="system" checked /> System Default</label>
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Time-Based Theme Switcher:</label>
+          <div class="flex items-center gap-4">
+            <div>
+              <label for="darkStart" class="block text-sm">Dark Mode Start</label>
+              <input type="time" id="darkStart" name="darkStart" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value="19:00" />
+            </div>
+            <div>
+              <label for="darkEnd" class="block text-sm">Dark Mode End</label>
+              <input type="time" id="darkEnd" name="darkEnd" class="p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value="06:00" />
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Save Appearance Settings</button>
+      </form>
+    </section>
+
+    <section id="notifications" class="tab-content card hidden">
+      <h2 class="text-xl font-semibold mb-4">Notification Preferences</h2>
+      <div class="section-header-bar">Notification Toggles</div>
+      <form id="notificationsForm" class="space-y-4">
+        <div class="flex items-center gap-2">
+          <label for="expenseAlerts" class="flex-1">Expense Limit Alerts</label>
+          <label class="switch">
+            <input type="checkbox" id="expenseAlerts" name="expenseAlerts" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="savingsReminders" class="flex-1">Savings Goal Reminders</label>
+          <label class="switch">
+            <input type="checkbox" id="savingsReminders" name="savingsReminders" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="summaryReports" class="flex-1">Weekly or Monthly Summary Reports</label>
+          <label class="switch">
+            <input type="checkbox" id="summaryReports" name="summaryReports" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Save Preferences</button>
+      </form>
+    </section>
+
+    <section id="categories" class="tab-content card hidden">
+      <h2 class="text-xl font-semibold mb-4">Manage Categories</h2>
+
+      <div class="mb-6">
+        <h3 class="font-semibold mb-2">Income Categories</h3>
+        <ul id="incomeCategories" class="mb-2 space-y-2">
+          <li class="flex justify-between items-center border border-gray-300 rounded p-2">
+            <span>Salary</span>
+            <div class="flex gap-2">
+              <button class="edit-btn text-blue-500 hover:underline" data-type="income" data-name="Salary">Edit</button>
+              <button class="delete-btn text-red-500 hover:underline" data-type="income" data-name="Salary">Delete</button>
+            </div>
+          </li>
+          <li class="flex justify-between items-center border border-gray-300 rounded p-2">
+            <span>Freelance</span>
+            <div class="flex gap-2">
+              <button class="edit-btn text-blue-500 hover:underline" data-type="income" data-name="Freelance">Edit</button>
+              <button class="delete-btn text-red-500 hover:underline" data-type="income" data-name="Freelance">Delete</button>
+            </div>
+          </li>
+        </ul>
+        <div class="flex gap-2">
+          <input type="text" id="newIncomeCategory" placeholder="Enter new category name" class="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600" />
+          <button id="addIncomeCategory" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Add Category</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-semibold mb-2">Expense Categories</h3>
+        <ul id="expenseCategories" class="mb-2 space-y-2">
+          <li class="flex justify-between items-center border border-gray-300 rounded p-2">
+            <span>Food</span>
+            <div class="flex gap-2">
+              <button class="edit-btn text-blue-500 hover:underline" data-type="expense" data-name="Food">Edit</button>
+              <button class="delete-btn text-red-500 hover:underline" data-type="expense" data-name="Food">Delete</button>
+            </div>
+          </li>
+          <li class="flex justify-between items-center border border-gray-300 rounded p-2">
+            <span>Travel</span>
+            <div class="flex gap-2">
+              <button class="edit-btn text-blue-500 hover:underline" data-type="expense" data-name="Travel">Edit</button>
+              <button class="delete-btn text-red-500 hover:underline" data-type="expense" data-name="Travel">Delete</button>
+            </div>
+          </li>
+        </ul>
+        <div class="flex gap-2">
+          <input type="text" id="newExpenseCategory" placeholder="Enter new category name" class="flex-1 p-2 border rounded dark:bg-gray-700 dark:border-gray-600" />
+          <button id="addExpenseCategory" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Add Category</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="currency" class="tab-content card hidden">
+      <h2 class="text-xl font-semibold mb-4">Currency Format</h2>
+      <form id="currencyForm" class="space-y-4">
+        <div>
+          <label for="currencySelect" class="block font-medium mb-1">Select Currency</label>
+          <select id="currencySelect" name="currency" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+            <option value="INR" selected>Indian Rupee (₹)</option>
+            <option value="USD">US Dollar ($)</option>
+            <option value="EUR">Euro (€)</option>
+            <option value="GBP">Pound Sterling (£)</option>
+            <option value="JPY">Japanese Yen (¥)</option>
+          </select>
+        </div>
+        <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold">Save Changes</button>
+      </form>
+    </section>
+
+  </div>
+
+  <!-- Reset Confirmation Modal -->
+  <div id="resetModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle" aria-describedby="resetModalDesc">
+    <div class="modal">
+      <h3 id="resetModalTitle">Are you sure?</h3>
+      <p id="resetModalDesc">This will permanently delete all your transactions and savings goals. This action cannot be undone.</p>
+      <div class="flex justify-center mt-6">
+        <button id="cancelReset" class="btn-cancel">Cancel</button>
+        <button id="confirmReset" class="btn-confirm">Confirm Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Category Confirmation Modal -->
+  <div id="deleteCategoryModal" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="deleteCategoryTitle" aria-describedby="deleteCategoryDesc">
+    <div class="modal">
+      <h3 id="deleteCategoryTitle">Delete Category</h3>
+      <p id="deleteCategoryDesc">Are you sure you want to delete the category "<span id="categoryToDelete"></span>"? This action cannot be undone.</p>
+      <p id="categoryDeleteWarning" class="text-red-600 font-semibold hidden">Warning: This category is currently used in transactions and cannot be deleted.</p>
+      <div class="flex justify-center mt-6">
+        <button id="cancelDeleteCategory" class="btn-cancel">Cancel</button>
+        <button id="confirmDeleteCategory" class="btn-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Alert -->
+  <div id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <script type="module" src="js/settings.js"></script>
+  <script type="module" src="js/auth/logoutHandler.js"></script>
+</body>
+</html>

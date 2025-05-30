@@ -1,0 +1,153 @@
+/* Global styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* Authentication pages styling */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-header h1 {
+  color: #3366cc;
+  margin-bottom: 5px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.auth-header p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.auth-header h2 {
+  font-size: 22px;
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3366cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background-color: #2855b2;
+}
+
+.login-button:disabled {
+  background-color: #99b3e6;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.auth-footer a {
+  color: #3366cc;
+  text-decoration: none;
+}
+
+.error-message {
+  background-color: #ffeeee;
+  color: #cc3333;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Not Found styling */
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.not-found-container h1 {
+  font-size: 72px;
+  margin-bottom: 0;
+  color: #3366cc;
+}
+
+.not-found-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.not-found-container p {
+  max-width: 500px;
+  margin-bottom: 30px;
+}
+
+.back-link {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #3366cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.back-link:hover {
+  background-color: #2855b2;
+}

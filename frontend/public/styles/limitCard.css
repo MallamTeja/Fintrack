@@ -1,0 +1,273 @@
+/* Enhanced Styles for Expense Limits cards */
+
+.limit-card {
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid #3b82f6;
+}
+
+[data-theme="dark"] .limit-card {
+  background-color: #334155;
+  border-color: #4f46e5;
+}
+
+.limit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.limit-card h4 {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+[data-theme="dark"] .limit-card h4 {
+  color: #f8fafc;
+}
+
+.limit-card .category-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.limit-card .limit-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.limit-card .amount-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+[data-theme="dark"] .limit-card .amount-display {
+  color: #f8fafc;
+}
+
+.limit-card .limit-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.limit-card p {
+  color: #4b5563;
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+[data-theme="dark"] .limit-card p {
+  color: #cbd5e1;
+}
+
+.limit-card .date-range {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-theme="dark"] .limit-card .date-range {
+  color: #94a3b8;
+}
+
+.limit-card .progress-container {
+  margin: 1rem 0;
+}
+
+.limit-card .progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.limit-card .progress-percentage {
+  font-weight: 600;
+}
+
+.limit-card .progress-bar {
+  width: 100%;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  height: 0.75rem;
+  overflow: hidden;
+  margin: 0.5rem 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .limit-card .progress-bar {
+  background-color: #475569;
+}
+
+.limit-card .progress-fill {
+  height: 0.75rem;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+/* Progress fill color based on percentage */
+.limit-card .progress-fill.safe {
+  background-color: #10b981; /* Green */
+  background-image: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.limit-card .progress-fill.warning {
+  background-color: #f59e0b; /* Yellow/Amber */
+  background-image: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.limit-card .progress-fill.danger {
+  background-color: #ef4444; /* Red */
+  background-image: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* Status indicator */
+.limit-card .status-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.limit-card .status-indicator.safe {
+  background-color: #10b981;
+}
+
+.limit-card .status-indicator.warning {
+  background-color: #f59e0b;
+}
+
+.limit-card .status-indicator.danger {
+  background-color: #ef4444;
+}
+
+.limit-card .card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+[data-theme="dark"] .limit-card .card-actions {
+  border-color: #475569;
+}
+
+.limit-card .edit-btn,
+.limit-card .delete-btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.limit-card .edit-btn {
+  color: white;
+  background-color: #3b82f6;
+}
+
+.limit-card .edit-btn:hover {
+  background-color: #2563eb;
+}
+
+.limit-card .delete-btn {
+  color: white;
+  background-color: #ef4444;
+}
+
+.limit-card .delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.limit-card .btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Animation for card appearance */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.limit-card {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Shimmer effect for loading state */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.limit-card.loading {
+  pointer-events: none;
+}
+
+.limit-card.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+[data-theme="dark"] .limit-card.loading::after {
+  background: linear-gradient(90deg, 
+    rgba(30, 41, 59, 0),
+    rgba(30, 41, 59, 0.5),
+    rgba(30, 41, 59, 0)
+  );
+}
+
+/* Category icons */
+.category-icon.food { background-color: #10b981; }
+.category-icon.travelling { background-color: #3b82f6; }
+.category-icon.bills { background-color: #8b5cf6; }
+.category-icon.entertainment { background-color: #ec4899; }
+.category-icon.shopping { background-color: #f59e0b; }
+.category-icon.health { background-color: #06b6d4; }
+.category-icon.education { background-color: #6366f1; }
+.category-icon.other { background-color: #6b7280; }

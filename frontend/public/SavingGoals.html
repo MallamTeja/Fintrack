@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinTrack - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      /* Light theme */
+      --bg-light: #ffffff;
+      --text-light: #1a1a1a;
+      --card-bg-light: #ffffff;
+      --primary-light: #2563eb;
+      --primary-hover-light: #1d4ed8;
+      --border-light: #e2e8f0;
+      
+      /* Dark theme */
+      --bg-dark: #1e293b;
+      --text-dark: #f8fafc; 
+      --card-bg-dark: #1e293b;
+      --primary-dark: #4f46e5;
+      --primary-hover-dark: #4338ca;
+      --border-dark: #334155;
+    }
+
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text-color: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --primary: var(--primary-light);
+      --primary-hover: var(--primary-hover-light);
+      --border: var(--border-light);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-color: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --primary: var(--primary-dark);
+      --primary-hover: var(--primary-hover-dark);
+      --border: var(--border-dark);
+    }
+
+    [data-theme="light"] {
+      background-color: var(rgb(243, 232, 176));
+      color: var(--text-light);
+    }
+
+    [data-theme="light"] nav a {
+      background-color: var(rgb(243, 232, 176));
+      color: white !important;
+    }
+
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(rgb(243, 232, 176));
+      color: white !important;
+    }
+
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary-hover-light);
+    }
+
+    [data-theme="light"] #profileButton {
+      background-color: white;
+      color: black;
+    }
+
+    [data-theme="light"] #profileButton:hover {
+      background-color: #f3f4f6;
+    }
+
+    [data-theme="dark"] {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] nav a {
+      background-color: var(--primary-dark);
+      color: white !important;
+    }
+
+    [data-theme="dark"] nav a:hover:not(.active) {
+      background-color: var(--primary-hover-dark);
+      color: white !important;
+    }
+
+    [data-theme="dark"] nav a.active {
+      background-color: var(--primary-hover-dark);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-color);
+      transition: var(--transition);
+    }
+
+    button, [type="button"], [type="submit"] {
+      background-color: var(--primary);
+    }
+
+    button:hover, [type="button"]:hover, [type="submit"]:hover {
+      background-color: var(--primary-hover);
+    }
+
+    nav a {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      margin: 0.25rem 0;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      nav a {
+        min-width: fit-content;
+        margin: 0 0.25rem;
+      }
+      nav a.active::after {
+        right: auto;
+        bottom: -4px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+      }
+    }
+
+    /* Fade-in Animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 1s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    /* Savings Goals Specific Styles */
+    .card {
+      box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    [data-theme="dark"] .card {
+      box-shadow: 0 4px 6px rgba(115, 178, 207, 0.3);
+    }
+
+    [data-theme="dark"] .card:hover {
+      box-shadow: 0 10px 20px rgba(115, 178, 207, 0.5);
+    }
+
+    input, textarea, select {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+    }
+  </style>
+</head>
+<body class="transition-all duration-300 flex min-h-screen">
+  <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md hidden md:block">
+    <div class="flex flex-col">
+      <div class="flex items-center">
+        <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
+      </div>
+      <p class="text-xs text-blue-500">track your money</p>
+    </div>
+
+    <nav class="flex flex-col gap-2">
+      <a href="dashboard.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="addTransactions.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Add Transactions">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+        Add Transaction
+      </a>
+      <a href="insights.html" class="flex items-center gap-2 text-lg font-semibold transition-colors duration-300 rounded-md bg-blue-500 text-white active" title="Insights">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+        </svg>
+        Insights
+      </a>
+      <a href="SavingGoals.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        Savings Goals
+      </a>
+      <a href="expensesLimits.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Expenses Limits
+      </a>
+      <a href="settings.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Settings
+      </a>
+    </nav>
+  </aside>
+
+  
+  <div class="flex-1 flex flex-col">
+    <div class="flex items-center px-8 py-6 shadow-md sticky top-0 z-50 bg-opacity-90 backdrop-blur-md">
+      <h1 class="text-4xl font-bold text-blue-500 flex-1">Savings Goals</h1>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105">
+          <svg id="themeIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        <div class="relative">
+          <button id="profileButton" 
+                  class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  aria-expanded="false"
+                  aria-haspopup="true">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
+            <span class="font-medium text-black dark:text-gray-200">User</span>
+          </button>
+          <div id="profileDropdown" 
+               class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
+            <div class="py-1" role="menu" aria-orientation="vertical">
+              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">john@example.com</div>
+              <button id="logoutButton" 
+                      class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                      role="menuitem">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+    <!-- Dashboard Content -->
+    <main class="p-6 md:p-10 space-y-10">
+      
+      <!-- Add New Goal Button -->
+      <div class="flex justify-end mb-6">
+        <button id="addGoalBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Add New Saving Goal
+        </button>
+      </div>
+
+      <!-- Add Goal Modal -->
+      <div id="goalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+          <h2 class="text-xl font-semibold mb-4">Add New Saving Goal</h2>
+          
+          <form id="goalForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Goal Name</label>
+              <input type="text" name="goalName" placeholder="Vacation to Kerala" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Target Amount (₹)</label>
+              <input type="number" name="targetAmount" placeholder="50000" min="1" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Initial Saved Amount (₹)</label>
+              <input type="number" name="savedAmount" placeholder="5000" min="0" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Target Completion Date</label>
+              <input type="date" name="targetDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" required>
+            </div>
+            
+            <div class="flex justify-end gap-2">
+              <button type="button" id="cancelGoalBtn" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                Cancel
+              </button>
+              <button type="submit" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+                Create Goal
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Savings Goals Section -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Goal Card 1 -->
+        <div class="card p-6 fade-in">
+          <div class="flex justify-between items-start">
+            <h2 class="text-xl font-semibold text-blue-500">New Laptop</h2>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">On Track</span>
+              <button class="p-1 text-gray-500 hover:text-blue-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button class="p-1 text-gray-500 hover:text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mt-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Saved:</span>
+              <span class="font-medium">₹15,000 / ₹50,000</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1 dark:bg-gray-700">
+              <div class="bg-blue-500 h-2.5 rounded-full" style="width: 30%"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-between text-sm">
+            <div>
+              <span class="text-gray-500">Target Date:</span>
+              <span class="ml-2">2023-12-15</span>
+            </div>
+            <span class="text-blue-500 font-medium">30%</span>
+          </div>
+
+          <button class="mt-4 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors add-fund-btn">
+            Add Fund
+          </button>
+        </div>
+
+        <!-- Goal Card 2 -->
+        <div class="card p-6 fade-in">
+          <div class="flex justify-between items-start">
+            <h2 class="text-xl font-semibold text-purple-500">Vacation</h2>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Behind Schedule</span>
+              <button class="p-1 text-gray-500 hover:text-blue-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button class="p-1 text-gray-500 hover:text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mt-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Saved:</span>
+              <span class="font-medium">₹25,000 / ₹1,00,000</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1 dark:bg-gray-700">
+              <div class="bg-purple-500 h-2.5 rounded-full" style="width: 25%"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-between text-sm">
+            <div>
+              <span class="text-gray-500">Target Date:</span>
+              <span class="ml-2">2023-11-30</span>
+            </div>
+            <span class="text-purple-500 font-medium">25%</span>
+          </div>
+
+          <button class="mt-4 w-full py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors add-fund-btn">
+            Add Fund
+          </button>
+        </div>
+
+        <!-- Goal Card 3 -->
+        <div class="card p-6 fade-in">
+          <div class="flex justify-between items-start">
+            <h2 class="text-xl font-semibold text-green-500">Emergency Fund</h2>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Completed</span>
+              <button class="p-1 text-gray-500 hover:text-blue-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button class="p-1 text-gray-500 hover:text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mt-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Saved:</span>
+              <span class="font-medium">₹50,000 / ₹50,000</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1 dark:bg-gray-700">
+              <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-between text-sm">
+            <div>
+              <span class="text-gray-500">Target Date:</span>
+              <span class="ml-2">2023-10-15</span>
+            </div>
+            <span class="text-green-500 font-medium">100%</span>
+          </div>
+
+          <button class="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors add-fund-btn">
+            Add Fund
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Define variables
+    const htmlElement = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeToggle = document.getElementById('themeToggle');
+    const profileButton = document.getElementById('profileButton');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const addGoalBtn = document.getElementById('addGoalBtn');
+    const goalModal = document.getElementById('goalModal');
+    const cancelGoalBtn = document.getElementById('cancelGoalBtn');
+    const goalForm = document.getElementById('goalForm');
+
+    // Goal Modal Functionality
+    addGoalBtn.addEventListener('click', () => {
+      goalModal.classList.remove('hidden');
+    });
+
+    cancelGoalBtn.addEventListener('click', () => {
+      goalModal.classList.add('hidden');
+    });
+
+    goalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(goalForm);
+      const targetAmount = parseFloat(formData.get('targetAmount'));
+      const savedAmount = parseFloat(formData.get('savedAmount'));
+      const targetDate = new Date(formData.get('targetDate'));
+      
+      // Validate saved amount
+      if (savedAmount > targetAmount) {
+        alert('Saved amount cannot be greater than target amount');
+        return;
+      }
+      
+      // Validate target date
+      if (targetDate < new Date()) {
+        alert('Target date must be in the future');
+        return;
+      }
+      
+      // Create new goal card (implementation would go here)
+      alert('New goal created successfully!');
+      goalModal.classList.add('hidden');
+      goalForm.reset();
+    });
+
+    // Theme toggle functionality
+    function updateThemeIcon() {
+      const isDark = htmlElement.getAttribute("data-theme") === "dark";
+      themeIcon.innerHTML = isDark ? 
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+    }
+
+    // Toggle profile dropdown on click
+    profileButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
+      profileDropdown.classList.toggle('hidden', isExpanded);
+      profileButton.setAttribute('aria-expanded', !isExpanded);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      profileDropdown.classList.add('hidden');
+      profileButton.setAttribute('aria-expanded', 'false');
+    });
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      const current = htmlElement.getAttribute("data-theme");
+      htmlElement.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+      updateThemeIcon();
+    });
+
+    // Spending by Category Chart
+    const spendingCtx = document.getElementById('spendingChart').getContext('2d');
+    new Chart(spendingCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Food', 'Travel', 'Bills', 'Other'],
+        datasets: [{
+          label: 'Amount Spent (₹)',
+          data: [2000, 1500, 3000, 1000],
+          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // Helper function for category colors
+    function getCategoryColor(category) {
+      const colors = {
+        electronics: 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100',
+        travel: 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100',
+        health: 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100',
+        education: 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100',
+        home: 'bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100',
+        other: 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-100'
+      };
+      return colors[category] || colors.other;
+    }
+
+    // Initialize theme icon
+    updateThemeIcon();
+
+    // Add Fund button functionality
+    const addFundBtns = document.querySelectorAll('.add-fund-btn');
+    addFundBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            alert('Add Fund clicked');
+        });
+    });
+  </script>
+  <script type="module" src="js/auth/logoutHandler.js"></script>
+</body>
+</html>

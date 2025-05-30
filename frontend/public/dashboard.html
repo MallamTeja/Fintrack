@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head ng-app="fintrackApp">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FinTrack - Dashboard</title>
+    <link rel="stylesheet" href="styles/responsive.css" />
+    <link rel="stylesheet" href="styles/navbar.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <!-- Authentication check script -->
+    <script type="module" src="js/auth/authCheck.js"></script>
+    <!-- Import state management system and dashboard component as modules -->
+    <script type="module" src="js/state/index.js"></script>
+    <script type="module" src="js/components/dashboard.js"></script>
+    <script type="module" src="js/components/navbar.js"></script>
+    <style>
+      :root {
+        /* Light theme */
+        --bg-light: #ffffff;
+        --text-light: #1a1a1a;
+        --card-bg-light: #ffffff;
+        --primary-light: #2563eb;
+        --primary-hover-light: #1d4ed8;
+        --border-light: #e2e8f0;
+        
+        /* Dark theme */
+        --bg-dark: #1e293b;
+        --text-dark: #f8fafc; 
+        --card-bg-dark: #1e293b;
+        --primary-dark: #4f46e5;
+        --primary-hover-dark: #4338ca;
+        --border-dark: #334155;
+      }
+
+      [data-theme="light"] {
+        --bg: var(--bg-light);
+        --text-color: var(--text-light);
+        --card-bg: var(--card-bg-light);
+        --primary: var(--primary-light);
+        --primary-hover: var(--primary-hover-light);
+        --border: var(--border-light);
+      }
+
+      [data-theme="dark"] {
+        --bg: var(--bg-dark);
+        --text-color: var(--text-dark);
+        --card-bg: var(--card-bg-dark);
+        --primary: var(--primary-dark);
+        --primary-hover: var(--primary-hover-dark);
+        --border: var(--border-dark);
+      }
+
+      /* Navigation Animation Effects */
+      @keyframes slideIn {
+        from { transform: translateX(-100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+
+      nav a {
+        animation: slideIn 0.5s ease-out forwards;
+        opacity: 0;
+      }
+
+      nav a:nth-child(1) { animation-delay: 0.1s; }
+      nav a:nth-child(2) { animation-delay: 0.2s; }
+      nav a:nth-child(3) { animation-delay: 0.3s; }
+      nav a:nth-child(4) { animation-delay: 0.4s; }
+      nav a:nth-child(5) { animation-delay: 0.5s; }
+      nav a:nth-child(6) { animation-delay: 0.6s; }
+
+      /* Card Hover Effects */
+      .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      [data-theme="light"] {
+        background-color: var(--bg-light);
+        color: var(--text-light);
+      }
+
+      [data-theme="light"] nav a {
+        background-color: white;
+        color: #1a1a1a !important;
+      }
+
+      [data-theme="light"] nav a:hover:not(.active) {
+        background-color: #3b82f6;
+        color: white !important;
+      }
+
+      [data-theme="light"] nav a.active {
+        background-color: #2563eb;
+        color: white !important;
+      }
+
+      [data-theme="light"] #profileButton {
+        background-color: white;
+        color: black;
+        border-top-right-radius: 0.5rem;
+        padding-top: 0.25rem;
+        padding-right: 0.5rem;
+        border-radius: 1.5rem !important;
+        border: 1px solid #d1d5db; /* light gray - gray-300 */
+      }
+      [data-theme="dark"] #profileButton {
+        background-color: #1e293b;
+        color: white;
+        border-top-right-radius: 0.5rem;
+        padding-top: 0.25rem;
+        padding-right: 0.5rem;
+        border-radius: 1.5rem !important;
+        border: 1px solid #9ca3af; /* lighter gray - gray-400 */
+      }
+      [data-theme="light"] #profileButton span {
+        color: black !important;
+      }
+
+      [data-theme="light"] #profileButton:hover {
+        background-color: #f3f4f6;
+      }
+
+      [data-theme="dark"] {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      [data-theme="dark"] nav a {
+        color: var(--text-dark);
+      }
+
+      [data-theme="dark"] nav a:hover:not(.active) {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      [data-theme="dark"] nav a.active {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text-color);
+        transition: var(--transition);
+      }
+
+      button, [type="button"], [type="submit"] {
+        background-color: var(--primary);
+      }
+
+      button:hover, [type="button"]:hover, [type="submit"]:hover {
+        background-color: var(--primary-hover);
+      }
+
+      nav a {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        margin: 0.25rem 0;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+      }
+
+      nav a.active {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      nav a:hover:not(.active) {
+        background-color: var(--primary);
+        color: white;
+        transform: translateX(4px);
+      }
+
+/* Removed the right side white line on active nav link */
+      /* nav a.active::after {
+        content: '';
+        position: absolute;
+        right: -8px;
+        height: 60%;
+        width: 4px;
+        background: rgb(238, 234, 234);
+        border-radius: 2px;
+      } */
+
+      @media (max-width: 768px) {
+        nav {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          padding-bottom: 8px;
+        }
+        nav a {
+          min-width: -webkit-fill-available;
+          min-width: fit-content;
+          margin: 0 0.25rem;
+        }
+/* Removed the bottom line on active nav link in mobile view */
+/*      nav a.active::after {
+          right: auto;
+          bottom: -4px;
+          left: 0;
+          width: 100%;
+          height: 3px;
+        } */
+      }
+
+      /* Fade-in Animation */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 1s ease-out forwards;
+        animation-delay: 0.3s;
+      }
+
+      /* Savings Goals Specific Styles */
+      .card {
+        box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border);
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+      }
+
+      [data-theme="dark"] .card {
+        box-shadow: 0 4px 6px rgba(115, 178, 207, 0.3);
+      }
+
+      [data-theme="dark"] .card:hover {
+        box-shadow: 0 10px 20px rgba(115, 178, 207, 0.5);
+      }
+
+      input, textarea, select {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+      }
+      
+      /* Chart container styles */
+      .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body class="transition-all duration-300 flex min-h-screen">
+    <!-- Include the navbar component -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col">
+      <!-- Include the header component -->
+      <div id="header-container"></div>
+
+      <!-- Dashboard Content -->
+      <main class="p-6 md:p-10 space-y-10">
+        <!-- Cards -->
+        <div class="fade-in mb-6 text-2xl font-semibold text-blue-500 px-6">
+          Welcome Back User
+        </div>
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-transform duration-300 ease-in-out">
+            <div class="card p-6 fade-in">
+              <div class="flex items-center gap-3">
+                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
+                </svg>
+                <h2 class="text-xl font-semibold">Current Balance</h2>
+              </div>
+              <p class="text-2xl font-bold mt-2">₹0</p>
+              <p id="balanceChange" class="text-sm text-blue-500 mt-1">+1.2% from last week</p>
+            </div>
+          <div class="card income p-6 fade-in">
+            <div class="flex items-center gap-3">
+              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h2 class="text-xl font-semibold">Income</h2>
+            </div>
+            <p class="text-2xl font-bold mt-2">₹0</p>
+            <p class="text-sm text-green-500 mt-1">+2.5% from last month</p>
+          </div>
+          <div class="card p-6 fade-in">
+            <div class="flex items-center gap-3">
+              <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <h2 class="text-xl font-semibold">Expenses</h2>
+            </div>
+            <p class="text-2xl font-bold mt-2">₹0</p>
+            <p class="text-sm text-red-500 mt-1">-3.8% from last week</p>
+          </div>
+          <div class="card p-6 fade-in">
+            <div class="flex items-center gap-3">
+              <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
+              </svg>
+              <h2 class="text-xl font-semibold">Saving Rate</h2>
+            </div>
+            <p class="text-2xl font-bold mt-2">₹0</p>
+            <p class="text-sm text-purple-500 mt-1">+5.1% from last month</p>
+          </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Current Balance Breakdown Chart -->
+          <div class="card p-6 fade-in">
+            <h2 class="text-xl font-semibold mb-4">Current Balance Over This Month</h2>
+            <div class="chart-container">
+              <canvas id="balanceChart" class="fade-in"></canvas>
+            </div>
+          </div>
+          
+          <!-- Spending by Category Chart -->
+          <div class="card p-6 fade-in">
+            <h2 class="text-xl font-semibold mb-4">Spending by Category</h2>
+            <div class="chart-container">
+              <canvas id="spendingChart" class="fade-in"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Selection Cards -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Quick Categories</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Food Card -->
+            <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('food')">
+              <div class="flex flex-col items-center">
+                <div class="text-red-500 mb-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium">Food</div>
+                <div class="text-lg font-bold mt-1" id="foodAmount">₹2000</div>
+                <div class="text-xs text-red-500">Expense</div>
+              </div>
+            </div>
+
+            <!-- Travel Card -->
+            <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('travel')">
+              <div class="flex flex-col items-center">
+                <div class="text-blue-500 mb-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium">Travel</div>
+                <div class="text-lg font-bold mt-1" id="travelAmount">₹1500</div>
+                <div class="text-xs text-red-500">Expense</div>
+              </div>
+            </div>
+
+            <!-- Bills Card -->
+            <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('bills')">
+              <div class="flex flex-col items-center">
+                <div class="text-yellow-500 mb-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium">Bills</div>
+                <div class="text-lg font-bold mt-1" id="billsAmount">₹3000</div>
+                <div class="text-xs text-red-500">Expense</div>
+              </div>
+            </div>
+
+            <!-- Shopping Card -->
+            <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('shopping')">
+              <div class="flex flex-col items-center">
+                <div class="text-purple-500 mb-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium">Shopping</div>
+                <div class="text-lg font-bold mt-1" id="shoppingAmount">₹1800</div>
+                <div class="text-xs text-red-500">Expense</div>
+              </div>
+            </div>
+
+            <!-- Salary Card -->
+            <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('salary')">
+              <div class="flex flex-col items-center">
+                <div class="text-green-500 mb-2">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium">Salary</div>
+                <div class="text-lg font-bold mt-1" id="salaryAmount">₹50000</div>
+                <div class="text-xs text-green-500">Income</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recent Transactions Section -->
+        <!-- Removed as per user request -->
+      </main>
+    </div>
+
+    <script>
+      // Load navbar components
+      fetch('components/navbar.html')
+        .then(response => response.text())
+        .then(html => {
+          const navbarContainer = document.getElementById('navbar-container');
+          const headerContainer = document.getElementById('header-container');
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract and insert the sidebar
+          const sidebar = doc.querySelector('aside');
+          navbarContainer.appendChild(sidebar);
+          
+          // Extract and insert the header
+          const header = doc.querySelector('.flex.items-center.px-8');
+          headerContainer.appendChild(header);
+        })
+        .catch(error => console.error('Error loading navbar:', error));
+    </script>
+  </body>
+</html>

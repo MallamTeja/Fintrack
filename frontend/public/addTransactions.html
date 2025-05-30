@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FinTrack - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="js/state/index.js"></script>
+  <script src="js/transactionService.js"></script>
+  <style>
+    :root {
+      /* Light theme */
+      --bg-light: #ffffff;
+      --text-light: #1a1a1a;
+      --card-bg-light: #ffffff;
+      --primary-light: #2563eb;
+      --primary-hover-light: #1d4ed8;
+      --border-light: #e2e8f0;
+      
+      /* Dark theme */
+      --bg-dark: #1e293b;
+      --text-dark: #f8fafc; 
+      --card-bg-dark: #1e293b;
+      --primary-dark: #4f46e5;
+      --primary-hover-dark: #4338ca;
+      --border-dark: #334155;
+    }
+
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text-color: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --primary: var(--primary-light);
+      --primary-hover: var(--primary-hover-light);
+      --border: var(--border-light);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-color: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --primary: var(--primary-dark);
+      --primary-hover: var(--primary-hover-dark);
+      --border: var(--border-dark);
+    }
+
+    [data-theme="light"] {
+      background-color: var(rgb(243, 232, 176));
+      color: var(--text-light);
+    }
+
+    [data-theme="light"] nav a {
+      background-color: var(rgb(243, 232, 176));
+      color: white !important;
+    }
+
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(rgb(243, 232, 176));
+      color: white !important;
+    }
+
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary-hover-light);
+    }
+
+    [data-theme="light"] #profileButton {
+      background-color: white;
+      color: black;
+    }
+
+    [data-theme="light"] #profileButton:hover {
+      background-color: #f3f4f6;
+    }
+
+    [data-theme="dark"] {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] nav a {
+      background-color: var(--primary-dark);
+      color: white !important;
+    }
+
+    [data-theme="dark"] nav a:hover:not(.active) {
+      background-color: var(--primary-hover-dark);
+      color: white !important;
+    }
+
+    [data-theme="dark"] nav a.active {
+      background-color: var(--primary-hover-dark);
+    }
+    
+    [data-theme="light"] nav a {
+      color: var(--text-light);
+    }
+    
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      nav a {
+        min-width: fit-content;
+        margin: 0 0.25rem;
+      }
+      nav a.active::after {
+        right: auto;
+        bottom: -4px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+      }
+    }
+
+    /* Fade-in Animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 1s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    /* Savings Goals Specific Styles */
+    .card {
+      box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    [data-theme="dark"] .card {
+      box-shadow: 0 4px 6px rgba(115, 178, 207, 0.3);
+    }
+
+    [data-theme="dark"] .card:hover {
+      box-shadow: 0 10px 20px rgba(115, 178, 207, 0.5);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-color);
+      transition: var(--transition);
+    }
+
+    input, textarea, select {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      min-height: 2.75rem;
+      width: 100%;
+      border: 1px solid var(--border);
+    }
+
+    input:hover, textarea:hover, select:hover {
+      border-color: var(--primary);
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    button, [type="button"], [type="submit"] {
+      background-color: var(--primary);
+      padding: 0.75rem 1.5rem;
+      min-height: 2.75rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    button:hover, [type="button"]:hover, [type="submit"]:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .quick-amount-card {
+      min-height: 3.5rem !important;
+      padding: 0.75rem 1.5rem !important;
+    }
+
+    /* Form specific styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    /* Navigation styles */
+    nav a {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    nav a.active {
+      background-color: var(--primary-hover);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+    }
+
+    nav a:hover:not(.active) {
+      background-color: var(--primary-hover);
+      transform: translateX(4px);
+    }
+
+    /* Theme-specific styles */
+    [data-theme="dark"] nav a {
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    [data-theme="dark"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    [data-theme="light"] nav a {
+      color: var(--text-light);
+    }
+
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      nav a {
+        min-width: fit-content;
+        margin: 0 0.25rem;
+      }
+    }
+
+    /* Custom styles for the rebuilt transaction card */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Radio button animations */
+    .transaction-type:checked + div {
+      animation: radioScale 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes radioScale {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Quick amount card selected state */
+    .quick-amount-card.selected {
+      @apply bg-blue-500 text-white border-blue-600;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Input focus animations */
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      transform: translateY(-1px);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Card hover effect */
+    .card {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+      .quick-amount-card:hover {
+        background-color: rgba(59, 130, 246, 0.1);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      #quickAmounts {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body class="transition-all duration-300 flex min-h-screen">
+
+<aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md">
+  <div class="flex flex-col">
+    <div class="flex items-center">
+      <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
+    </div>
+    <p class="text-xs text-blue-500">track your money</p>
+  </div>
+  <nav class="flex flex-col gap-2">
+    <a href="dashboard.html" data-page="dashboard" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="addTransactions.html" data-page="addTransactions" class="flex items-center gap-2 text-lg font-semibold transition-colors duration-300 rounded-md bg-blue-500 text-white" title="Add Transactions">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+      </svg>
+      Add Transaction
+    </a>
+    <a href="insights.html" data-page="insights" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+      </svg>
+      Insights
+    </a>
+    <a href="SavingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+      Savings Goals
+    </a>
+    <a href="expensesLimits.html" data-page="expensesLimits" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Expenses Limits
+    </a>
+    <a href="settings.html" data-page="settings" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    Settings
+  </a>
+</nav>
+</aside>
+
+  <div class="flex-1 flex flex-col">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-semibold text-blue-500">Add Transaction</h1>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105">
+          <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        <div class="relative">
+          <button id="profileButton" 
+                  class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  aria-expanded="false"
+                  aria-haspopup="true">
+            <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
+            <span class="font-medium text-black dark:text-gray-200">User</span>
+          </button>
+          <div id="profileDropdown" 
+               class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
+            <div class="py-1" role="menu" aria-orientation="vertical">
+              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">john@example.com</div>
+              <button id="logoutButton" 
+                      class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                      role="menuitem">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+    <!-- Dashboard Content -->
+    <main class="p-6 md:p-10 space-y-10">
+
+      <!-- Add Transaction Section -->
+      <section id="add-transaction" class="max-w-3xl mx-auto p-8">
+        <div class="card bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden">
+          <!-- Card Header -->
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
+            <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              Add Transaction
+            </h2>
+          </div>
+
+          <!-- Card Body -->
+          <div class="p-8">
+            <form id="transactionForm" class="space-y-6">
+              <!-- Transaction Type Selector -->
+              <div class="form-group">
+                <label class="block font-medium mb-3 text-gray-700 dark:text-gray-300">Transaction Type</label>
+                <div class="flex gap-6">
+                  <label class="relative flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="transactionType" value="income" class="transaction-type peer sr-only" />
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-green-500 peer-checked:bg-green-500 transition-all">
+                      <div class="w-2.5 h-2.5 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 group-hover:text-green-500 transition-colors">Income</span>
+                  </label>
+                  <label class="relative flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="transactionType" value="expense" class="transaction-type peer sr-only" checked />
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-red-500 peer-checked:bg-red-500 transition-all">
+                      <div class="w-2.5 h-2.5 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
+                    </div>
+                    <span class="text-gray-700 dark:text-gray-300 group-hover:text-red-500 transition-colors">Expense</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Amount Input -->
+              <div class="form-group">
+                <label for="amount" class="block font-medium mb-2 text-gray-700 dark:text-gray-300">Amount</label>
+                <div class="relative">
+                  <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">₹</span>
+                  <input type="number" 
+                         id="amount" 
+                         name="amount" 
+                         placeholder="Enter amount" 
+                         min="0.01" 
+                         step="0.01" 
+                         required
+                         class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all" />
+                </div>
+              </div>
+
+              <!-- Quick Amount Cards -->
+              <div class="form-group">
+                <label class="block font-medium mb-3 text-gray-700 dark:text-gray-300">Quick Amounts</label>
+                <div id="quickAmounts" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <button type="button" class="quick-amount-card py-3 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 text-lg font-semibold hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all">₹100</button>
+                  <button type="button" class="quick-amount-card py-3 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 text-lg font-semibold hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all">₹500</button>
+                  <button type="button" class="quick-amount-card py-3 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 text-lg font-semibold hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all">₹1000</button>
+                  <button type="button" class="quick-amount-card py-3 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-gray-200 text-lg font-semibold hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all">₹5000</button>
+                </div>
+              </div>
+
+              <!-- Category Dropdown -->
+              <div class="form-group">
+                <label for="category" class="block font-medium mb-2 text-gray-700 dark:text-gray-300">Category</label>
+                <div class="relative">
+                  <select id="category" 
+                          name="category" 
+                          required
+                          class="w-full appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-3 px-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <!-- Options dynamically loaded -->
+                  </select>
+                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Custom Category Input (hidden by default) -->
+              <div id="customCategoryContainer" class="form-group hidden">
+                <label for="customCategory" class="block font-medium mb-2 text-gray-700 dark:text-gray-300">Custom Category</label>
+                <input type="text" 
+                       id="customCategory" 
+                       name="customCategory" 
+                       placeholder="Enter custom category"
+                       class="w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all" />
+              </div>
+
+              <!-- Date Picker -->
+              <div class="form-group">
+                <label for="date" class="block font-medium mb-2 text-gray-700 dark:text-gray-300">Date</label>
+                <input type="date" 
+                       id="date" 
+                       name="date" 
+                       required
+                       class="w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all" />
+              </div>
+
+              <!-- Description Field -->
+              <div class="form-group">
+                <label for="description" class="block font-medium mb-2 text-gray-700 dark:text-gray-300">Description (Optional)</label>
+                <textarea id="description" 
+                          name="description" 
+                          rows="3" 
+                          placeholder="Add a short note or description"
+                          class="w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all resize-none"></textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="form-group pt-4">
+                <button type="submit" 
+                        class="w-full sm:w-auto px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Add Transaction
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Define variables
+    const htmlElement = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeToggle = document.getElementById('themeToggle');
+    const profileButton = document.getElementById('profileButton');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    // Theme toggle functionality
+    function updateThemeIcon() {
+      const isDark = htmlElement.getAttribute("data-theme") === "dark";
+      themeIcon.innerHTML = isDark ? 
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+    }
+
+    // Toggle profile dropdown on click
+    profileButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
+      profileDropdown.classList.toggle('hidden', isExpanded);
+      profileButton.setAttribute('aria-expanded', !isExpanded);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      profileDropdown.classList.add('hidden');
+      profileButton.setAttribute('aria-expanded', 'false');
+    });
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+      const current = htmlElement.getAttribute("data-theme");
+      htmlElement.setAttribute("data-theme", current === "dark" ? "light" : "dark");
+      updateThemeIcon();
+    });
+
+    // Categories for Income and Expense
+    const categories = {
+      income: [
+        "Salary",
+        "Business",
+        "Investment",
+        "Gift",
+        "Other"
+      ],
+      expense: [
+        "Food",
+        "Travel",
+        "Bills",
+        "Entertainment",
+        "Health",
+        "Education",
+        "Other"
+      ]
+    };
+
+    // Elements
+    const transactionForm = document.getElementById('transactionForm');
+    const transactionTypeInputs = document.querySelectorAll('.transaction-type');
+    const categorySelect = document.getElementById('category');
+    const customCategoryContainer = document.getElementById('customCategoryContainer');
+    const customCategoryInput = document.getElementById('customCategory');
+    const amountInput = document.getElementById('amount');
+    const quickAmountCards = document.querySelectorAll('.quick-amount-card');
+
+    // Initialize date input to current date
+    const dateInput = document.getElementById('date');
+    dateInput.valueAsDate = new Date();
+
+    // Load categories based on selected transaction type
+    function loadCategories(type) {
+      categorySelect.innerHTML = '';
+      categories[type].forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.toLowerCase();
+        option.textContent = cat;
+        categorySelect.appendChild(option);
+      });
+      // Hide custom category input initially
+      customCategoryContainer.classList.add('hidden');
+      customCategoryInput.value = '';
+    }
+
+    // On transaction type change
+    transactionTypeInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        loadCategories(e.target.value);
+        // Reset amount and quick amount cards selection
+        amountInput.value = '';
+        clearQuickAmountSelection();
+      });
+    });
+
+    // On category change
+    categorySelect.addEventListener('change', () => {
+      if (categorySelect.value === 'other') {
+        customCategoryContainer.classList.remove('hidden');
+        customCategoryInput.setAttribute('required', 'required');
+      } else {
+        customCategoryContainer.classList.add('hidden');
+        customCategoryInput.removeAttribute('required');
+        customCategoryInput.value = '';
+      }
+    });
+
+    // Quick amount card click handler
+    quickAmountCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const amountText = card.textContent.replace('₹', '').trim();
+        amountInput.value = amountText;
+        highlightQuickAmountCard(card);
+      });
+    });
+
+    // Highlight selected quick amount card
+    function highlightQuickAmountCard(selectedCard) {
+      quickAmountCards.forEach(card => {
+        if (card === selectedCard) {
+          card.classList.add('bg-blue-500', 'text-white');
+          card.classList.remove('bg-gray-200', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-200');
+        } else {
+          card.classList.remove('bg-blue-500', 'text-white');
+          card.classList.add('bg-gray-200', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-200');
+        }
+      });
+    }
+
+    // Clear quick amount card selection
+    function clearQuickAmountSelection() {
+      quickAmountCards.forEach(card => {
+        card.classList.remove('bg-blue-500', 'text-white');
+        card.classList.add('bg-gray-200', 'text-gray-800', 'dark:bg-gray-700', 'dark:text-gray-200');
+      });
+    }
+
+    // If user manually changes amount, clear quick amount selection
+    amountInput.addEventListener('input', () => {
+      clearQuickAmountSelection();
+    });
+
+    // Form submission handler
+    transactionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validate amount positive
+      const amountValue = parseFloat(amountInput.value);
+      if (isNaN(amountValue) || amountValue <= 0) {
+        alert('Please enter a valid positive amount.');
+        return;
+      }
+
+      // Validate category or custom category
+      let categoryValue = categorySelect.value;
+      if (categoryValue === 'other') {
+        categoryValue = customCategoryInput.value.trim();
+        if (!categoryValue) {
+          alert('Please enter a custom category.');
+          return;
+        }
+      }
+
+      // Prepare transaction data
+      const transactionData = {
+        type: document.querySelector('input[name="transactionType"]:checked').value,
+        amount: amountValue,
+        category: categoryValue,
+        date: dateInput.value,
+        description: document.getElementById('description').value.trim()
+      };
+
+      // Show loading animation (simple disable button)
+      const submitButton = transactionForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Adding...';
+
+      // Perform real API call to add transaction
+      try {
+        const newTransaction = await window.transactionService.addTransaction(transactionData);
+        if (newTransaction) {
+          alert('Transaction added successfully');
+          // Reset form
+          transactionForm.reset();
+          loadCategories('expense'); // default to expense
+          dateInput.valueAsDate = new Date();
+          clearQuickAmountSelection();
+        } else {
+          alert('Failed to add transaction');
+        }
+      } catch (error) {
+        console.error('Error adding transaction:', error);
+        alert('Error adding transaction');
+      } finally {
+        // Restore button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Add Transaction';
+      }
+    });
+
+    // Initial load categories for default selected transaction type
+    const defaultType = document.querySelector('input[name="transactionType"]:checked').value;
+    loadCategories(defaultType);
+
+    // Initialize theme icon
+    updateThemeIcon();
+
+    // Transactions array populated via service
+    let recentTransactions = [];
+
+    // Subscribe to real-time transaction updates
+    transactionService.subscribe(transactions => {
+      recentTransactions = transactions;
+      renderRecentTransactions();
+    });
+
+    // Function to render recent transactions in the table
+    function renderRecentTransactions() {
+      const tbody = document.getElementById('transactionsTableBody');
+      tbody.innerHTML = '';
+      recentTransactions.forEach(tx => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700';
+
+        const dateTd = document.createElement('td');
+        dateTd.className = 'py-3 px-6 text-left whitespace-nowrap';
+        dateTd.textContent = tx.date;
+        tr.appendChild(dateTd);
+
+        const descTd = document.createElement('td');
+        descTd.className = 'py-3 px-6 text-left';
+        descTd.textContent = tx.description;
+        tr.appendChild(descTd);
+
+        const categoryTd = document.createElement('td');
+        categoryTd.className = 'py-3 px-6 text-left';
+        categoryTd.textContent = tx.category.charAt(0).toUpperCase() + tx.category.slice(1);
+        tr.appendChild(categoryTd);
+
+        const amountTd = document.createElement('td');
+        amountTd.className = 'py-3 px-6 text-right font-semibold';
+        amountTd.textContent = (tx.amount < 0 ? '-' : '+') + '₹' + Math.abs(tx.amount);
+        amountTd.style.color = tx.amount < 0 ? '#ef4444' : '#10b981'; // red for negative, green for positive
+        tr.appendChild(amountTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Initialize theme icon
+    updateThemeIcon();
+
+    // Handle add-transaction form submissions
+    transactionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const type = document.querySelector('input[name="transactionType"]:checked').value;
+      const amount = parseFloat(amountInput.value);
+      let category = categorySelect.value;
+      if (category === 'Other') category = customCategoryInput.value;
+      const date = document.getElementById('date').value;
+      const description = document.getElementById('description').value;
+      try {
+        await transactionService.addTransaction({ type, amount, category, date, description });
+        transactionForm.reset();
+        clearQuickAmountSelection();
+        loadCategories(type);
+      } catch (error) {
+        console.error('Add transaction error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

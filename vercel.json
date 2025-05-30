@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "frontend/public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/public/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "MONGO_URI": "your_actual_mongodb_connection_string",
+    "JWT_SECRET": "your_actual_jwt_secret",
+    "FRONTEND_URL": "https://fintrack-app.vercel.app"
+  }
+}
