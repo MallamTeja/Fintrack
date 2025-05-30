@@ -85,17 +85,17 @@
       }
 
       [data-theme="light"] nav a {
-        background-color: white;
-        color: #1a1a1a !important;
+        color: var(--text-light);
       }
 
       [data-theme="light"] nav a:hover:not(.active) {
         background-color: #3b82f6;
         color: white !important;
+        transform: translateX(4px);
       }
 
       [data-theme="light"] nav a.active {
-        background-color: #2563eb;
+        background-color: #3b82f6;
         color: white !important;
       }
 
@@ -106,23 +106,7 @@
         padding-top: 0.25rem;
         padding-right: 0.5rem;
         border-radius: 1.5rem !important;
-        border: 1px solid #d1d5db; /* light gray - gray-300 */
-      }
-      [data-theme="dark"] #profileButton {
-        background-color: #1e293b;
-        color: white;
-        border-top-right-radius: 0.5rem;
-        padding-top: 0.25rem;
-        padding-right: 0.5rem;
-        border-radius: 1.5rem !important;
-        border: 1px solid #9ca3af; /* lighter gray - gray-400 */
-      }
-      [data-theme="light"] #profileButton span {
-        color: black !important;
-      }
-
-      [data-theme="light"] #profileButton:hover {
-        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
       }
 
       [data-theme="dark"] {
@@ -135,13 +119,13 @@
       }
 
       [data-theme="dark"] nav a:hover:not(.active) {
-        background-color: var(--primary);
-        color: white;
+        background-color: #3b82f6;
+        color: white !important;
       }
 
       [data-theme="dark"] nav a.active {
-        background-color: var(--primary);
-        color: white;
+        background-color: #3b82f6;
+        color: white !important;
       }
 
       body {
@@ -171,13 +155,13 @@
       }
 
       nav a.active {
-        background-color: var(--primary);
-        color: white;
+        background-color: #3b82f6;
+        color: white !important;
       }
 
       nav a:hover:not(.active) {
-        background-color: var(--primary);
-        color: white;
+        background-color: #3b82f6;
+        color: white !important;
         transform: translateX(4px);
       }
 
@@ -272,13 +256,82 @@
     </style>
   </head>
   <body class="transition-all duration-300 flex min-h-screen">
-    <!-- Include the navbar component -->
-    <div id="navbar-container"></div>
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md">
+      <div class="flex flex-col">
+        <div class="flex items-center">
+          <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
+        </div>
+        <p class="text-xs text-blue-500">track your money</p>
+      </div>
+      <nav class="flex flex-col gap-2">
+        <a href="dashboard.html" data-page="dashboard" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md bg-blue-500 text-white" title="Dashboard">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="addTransactions.html" data-page="addTransactions" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Add Transactions">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Add Transaction
+        </a>
+        <a href="insights.html" data-page="insights" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+          </svg>
+          Insights
+        </a>
+        <a href="SavingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          Savings Goals
+        </a>
+        <a href="expensesLimits.html" data-page="expensesLimits" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Expenses Limits
+        </a>
+        <a href="settings.html" data-page="settings" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Settings
+        </a>
+      </nav>
+    </aside>
 
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col">
-      <!-- Include the header component -->
-      <div id="header-container"></div>
+      <!-- Header -->
+      <div class="flex items-center px-8 py-6 shadow-md sticky top-0 z-50 bg-opacity-90 backdrop-blur-md">
+        <h1 class="text-4xl font-bold text-blue-500 flex-1">Dashboard</h1>
+        <div class="flex items-center gap-2">
+          <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105" title="Toggle theme">
+            <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+          <div class="relative">
+            <button id="profileButton" class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600" aria-expanded="false" aria-haspopup="true">
+              <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
+              <span class="font-medium text-black dark:text-gray-200">User</span>
+            </button>
+            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
+              <div class="py-1" role="menu" aria-orientation="vertical">
+                <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">john@example.com</div>
+                <button id="logoutButton" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600" role="menuitem">
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Dashboard Content -->
       <main class="p-6 md:p-10 space-y-10">
@@ -431,24 +484,49 @@
     </div>
 
     <script>
-      // Load navbar components
-      fetch('components/navbar.html')
-        .then(response => response.text())
-        .then(html => {
-          const navbarContainer = document.getElementById('navbar-container');
-          const headerContainer = document.getElementById('header-container');
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          
-          // Extract and insert the sidebar
-          const sidebar = doc.querySelector('aside');
-          navbarContainer.appendChild(sidebar);
-          
-          // Extract and insert the header
-          const header = doc.querySelector('.flex.items-center.px-8');
-          headerContainer.appendChild(header);
-        })
-        .catch(error => console.error('Error loading navbar:', error));
+      // Theme toggle functionality
+      document.addEventListener('DOMContentLoaded', () => {
+        const htmlElement = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const profileButton = document.getElementById('profileButton');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme === 'dark');
+
+        // Theme toggle handler
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = htmlElement.getAttribute('data-theme');
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          htmlElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+          updateThemeIcon(newTheme === 'dark');
+        });
+
+        // Profile dropdown toggle
+        profileButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
+          profileDropdown.classList.toggle('hidden', isExpanded);
+          profileButton.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+          profileDropdown.classList.add('hidden');
+          profileButton.setAttribute('aria-expanded', 'false');
+        });
+
+        // Update theme icon
+        function updateThemeIcon(isDark) {
+          themeIcon.innerHTML = isDark ? 
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+        }
+      });
     </script>
   </body>
 </html>

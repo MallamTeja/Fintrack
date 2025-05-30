@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -43,31 +43,23 @@
     }
 
     [data-theme="light"] {
-      background-color: var(rgb(243, 232, 176));
+      background-color: var(--bg-light);
       color: var(--text-light);
     }
 
     [data-theme="light"] nav a {
-      background-color: var(rgb(243, 232, 176));
-      color: white !important;
+      color: var(--text-light);
     }
 
     [data-theme="light"] nav a:hover:not(.active) {
-      background-color: var(rgb(243, 232, 176));
+      background-color: #3b82f6;
       color: white !important;
+      transform: translateX(4px);
     }
 
     [data-theme="light"] nav a.active {
-      background-color: var(--primary-hover-light);
-    }
-
-    [data-theme="light"] #profileButton {
-      background-color: white;
-      color: black;
-    }
-
-    [data-theme="light"] #profileButton:hover {
-      background-color: #f3f4f6;
+      background-color: #3b82f6;
+      color: white !important;
     }
 
     [data-theme="dark"] {
@@ -76,17 +68,17 @@
     }
 
     [data-theme="dark"] nav a {
-      background-color: var(--primary-dark);
-      color: white !important;
+      color: var(--text-dark);
     }
 
     [data-theme="dark"] nav a:hover:not(.active) {
-      background-color: var(--primary-hover-dark);
+      background-color: #3b82f6;
       color: white !important;
     }
 
     [data-theme="dark"] nav a.active {
-      background-color: var(--primary-hover-dark);
+      background-color: #3b82f6;
+      color: white !important;
     }
 
     body {
@@ -116,13 +108,13 @@
     }
 
     nav a.active {
-      background-color: var(--primary);
-      color: white;
+      background-color: #3b82f6;
+      color: white !important;
     }
 
     nav a:hover:not(.active) {
-      background-color: var(--primary);
-      color: white;
+      background-color: #3b82f6;
+      color: white !important;
       transform: translateX(4px);
     }
 
@@ -203,37 +195,37 @@
     </div>
 
     <nav class="flex flex-col gap-2">
-      <a href="dashboard.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
+      <a href="dashboard.html" data-page="dashboard" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
         </svg>
         Dashboard
       </a>
-      <a href="addTransactions.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Add Transactions">
+      <a href="addTransactions.html" data-page="addTransactions" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Add Transactions">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
         Add Transaction
       </a>
-      <a href="insights.html" class="flex items-center gap-2 text-lg font-semibold transition-colors duration-300 rounded-md bg-blue-500 text-white active" title="Insights">
+      <a href="insights.html" data-page="insights" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
         </svg>
         Insights
       </a>
-      <a href="SavingGoals.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+      <a href="SavingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md bg-blue-500 text-white" title="Savings Goals">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
         </svg>
         Savings Goals
       </a>
-      <a href="expensesLimits.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
+      <a href="expensesLimits.html" data-page="expensesLimits" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         Expenses Limits
       </a>
-      <a href="settings.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
+      <a href="settings.html" data-page="settings" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
