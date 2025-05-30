@@ -1,0 +1,9 @@
+{
+  "jwtSecret": "fintrack-secret-key",
+  "mongoURI": "mongodb+srv://Teja:24r25a6705@finathondb.ti6sv5y.mongodb.net/finathondb?retryWrites=true&w=majority&appName=finathondb",
+  "port": 5000,
+  "websocket": {
+    "heartbeatInterval": 30000,
+    "reconnectInterval": 5000
+  }
+}

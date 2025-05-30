@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FinTrack - Insights</title>
+    <link rel="stylesheet" href="styles/responsive.css" />
+    <link rel="stylesheet" href="styles/navbar.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/transactionService.js"></script>
+    <script src="js/websocketService.js"></script>
+    <script type="module" src="js/components/navbar.js"></script>
+    <script type="module" src="js/auth/logoutHandler.js"></script>
+    <style>
+    .progress-45 { width: 45%; }
+    .progress-30 { width: 30%; }
+    .progress-15 { width: 15%; }
+    .progress-73 { width: 73%; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    :root {
+      --bg-light: #f8fafc;
+      --text-light: #1a1a1a;
+      --card-bg-light: #ffffff;
+      --primary-light: #2563eb;
+      --primary-hover-light: #1d4ed8;
+      --border-light: #e2e8f0;
+      
+      --bg-dark: #1e293b;
+      --text-dark: #f8fafc; 
+      --card-bg-dark: #1e293b;
+      --primary-dark: #4f46e5;
+      --primary-hover-dark: #4338ca;
+      --border-dark: #334155;
+    }
+
+    [data-theme="light"] {
+      --bg: var(--bg-light);
+      --text-color: var(--text-light);
+      --card-bg: var(--card-bg-light);
+      --primary: var(--primary-light);
+      --primary-hover: var(--primary-hover-light);
+      --border: var(--border-light);
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-color: var(--text-dark);
+      --card-bg: var(--card-bg-dark);
+      --primary: var(--primary-dark);
+      --primary-hover: var(--primary-hover-dark);
+      --border: var(--border-dark);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-color);
+    }
+
+    .card {
+      box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
+      border-radius: 1rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border);
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+    }
+
+    .stat-card {
+      position: relative;
+      padding-left: 1rem;
+      border-left: 4px solid;
+    }
+
+    .income-card { border-color: #10b981; }
+    .expense-card { border-color: #ef4444; }
+    .savings-card { border-color: #3b82f6; }
+    .budget-card { border-color: #f59e0b; }
+
+    nav a {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s ease;
+      margin: 0.25rem 0;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+      nav a {
+        min-width: 100%;
+        margin: 0 0.25rem;
+      }
+    }
+    </style>
+</head>
+<body class="transition-all duration-300 flex min-h-screen">
+    <!-- Include the navbar component -->
+    <div id="navbar-container"></div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col">
+      <!-- Include the header component -->
+      <div id="header-container"></div>
+
+      <!-- Rest of the insights content -->
+      <main class="p-6 md:p-10 space-y-8">
+        <!-- Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in">
+          <div class="card stat-card income-card hover:scale-105">
+            <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Total Income
+            </h3>
+            <p id="incomeValue" class="text-3xl font-bold text-green-500">₹0</p>
+            <div class="flex items-center gap-1 mt-2">
+              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+              <p class="text-sm text-green-500">+12% from last month</p>
+            </div>
+          </div>
+          <div class="card stat-card expense-card hover:scale-105">
+            <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              Total Expenses
+            </h3>
+            <p id="expenseValue" class="text-3xl font-bold text-red-500">₹0</p>
+            <div class="flex items-center gap-1 mt-2">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/>
+              </svg>
+              <p class="text-sm text-red-500">-5% from last month</p>
+            </div>
+          </div>
+          <div class="card stat-card savings-card hover:scale-105">
+            <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+              </svg>
+              Savings
+            </h3>
+            <p id="savingsValue" class="text-3xl font-bold text-blue-500">₹0</p>
+            <div class="flex items-center gap-1 mt-2">
+              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+              </svg>
+              <p id="savingsPercentageValue" class="text-sm text-blue-500">0% of income</p>
+            </div>
+          </div>
+          <div class="card stat-card budget-card hover:scale-105">
+            <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              Budget Status
+            </h3>
+            <p class="text-3xl font-bold text-yellow-500">73%</p>
+            <div class="flex items-center gap-1 mt-2">
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-yellow-500 h-2 rounded-full progress-73"></div>
+              </div>
+              <p class="text-sm text-yellow-500 ml-2">Used</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="flex gap-4 items-center">
+          <label for="dateFilter" class="font-semibold text-black dark:text-gray-200">Date Range:</label>
+          <select id="dateFilter" class="border rounded px-3 py-1 dark:bg-gray-700 dark:text-gray-200">
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="custom">Custom</option>
+          </select>
+          <div class="flex items-center gap-2 hidden" id="customDateInputs">
+            <label for="customStart" class="sr-only">Start Date</label>
+            <input type="date" id="customStart" class="border rounded px-3 py-1 dark:bg-gray-700 dark:text-gray-200" title="Start Date" placeholder="Start Date" />
+            <label for="customEnd" class="sr-only">End Date</label>
+            <input type="date" id="customEnd" class="border rounded px-3 py-1 dark:bg-gray-700 dark:text-gray-200" title="End Date" placeholder="End Date" />
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8" id="chartsContainer">
+          <h2 class="text-2xl font-bold col-span-full mb-4">Financial Analysis</h2>
+          <!-- Expense Categories Chart -->
+          <div class="card hover:scale-105 transition-transform">
+            <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+              </svg>
+              Expense Categories
+            </h3>
+            <canvas id="expenseChart" height="200"></canvas>
+          </div>
+          <!-- Income vs Expense Trend -->
+          <div class="card hover:scale-105 transition-transform">
+            <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+              Income vs Expense Trend
+            </h3>
+            <canvas id="trendChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Spending Categories -->
+        <div class="card hover:scale-105 transition-transform">
+          <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+            </svg>
+            Top Spending Categories
+          </h3>
+          <div class="space-y-4">
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-blue-600 h-2.5 rounded-full progress-45"></div>
+              </div>
+              <span class="ml-4 min-w-[100px]">Food (45%)</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-blue-600 h-2.5 rounded-full progress-30"></div>
+              </div>
+              <span class="ml-4 min-w-[100px]">Rent (30%)</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-blue-600 h-2.5 rounded-full progress-15"></div>
+              </div>
+              <span class="ml-4 min-w-[100px]">Transport (15%)</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Theme Toggle
+      const htmlElement = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      const themeToggle = document.getElementById('themeToggle');
+
+      // Theme toggle functionality
+      function updateThemeIcon() {
+        const isDark = htmlElement.getAttribute("data-theme") === "dark";
+        themeIcon.innerHTML = isDark ? 
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+        
+        // Update text colors for headings and labels based on theme
+        const isLight = !isDark;
+        const headings = document.querySelectorAll('h3.text-base.font-semibold.mb-2');
+        headings.forEach(h => {
+          h.style.color = isLight ? 'black' : '#d1d5db';
+        });
+        const dateLabel = document.querySelector('label[for="dateFilter"]');
+        if (dateLabel) {
+          dateLabel.style.color = isLight ? 'black' : '#d1d5db';
+        }
+        
+        // Update chart colors
+        if (expenseChart && trendChart) {
+          updateChartsTheme();
+        }
+      }
+
+      // Add visual feedback for date filter
+      document.getElementById('dateFilter').addEventListener('change', function() {
+        this.classList.add('ring-2', 'ring-blue-500');
+        setTimeout(() => this.classList.remove('ring-2', 'ring-blue-500'), 500);
+      });
+
+      // Add loading state for custom date inputs
+      document.getElementById('customStart').addEventListener('change', function() {
+        if (this.value && document.getElementById('customEnd').value) {
+          showLoading();
+          setTimeout(hideLoading, 800);
+        }
+      });
+
+      document.getElementById('customEnd').addEventListener('change', function() {
+        if (this.value && document.getElementById('customStart').value) {
+          showLoading();
+          setTimeout(hideLoading, 800);
+        }
+      });
+
+      // Theme toggle event listener
+      themeToggle.addEventListener('click', () => {
+        const current = htmlElement.getAttribute("data-theme");
+        const newTheme = current === "dark" ? "light" : "dark";
+        htmlElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon();
+      });
+
+      // Initialize charts on page load
+      window.addEventListener('DOMContentLoaded', () => {
+        initCharts();
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+          htmlElement.setAttribute("data-theme", savedTheme);
+          updateThemeIcon();
+        }
+      });
+
+      // Initialize Charts
+      let expenseChart, trendChart;
+      
+      // Load transaction service
+      const transactionService = window.transactionService || {
+        getAllTransactions: () => [],
+        getSpendingByCategory: () => ({}),
+        subscribe: () => {}
+      };
+
+      function initCharts() {
+        const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        
+        expenseChart = createExpenseChart(expenseCtx);
+        trendChart = createTrendChart(trendCtx);
+        
+        // Subscribe to transaction updates
+        transactionService.subscribe(transactions => {
+          updateStatCards(transactions);
+          updateChartsWithRealData(transactions);
+        });
+        
+        // Set initial data
+        updateCharts('monthly');
+      }
+
+      function createExpenseChart(ctx) {
+        return new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: [],
+            datasets: [{
+              data: [],
+              backgroundColor: [
+                '#3b82f6',
+                '#ef4444',
+                '#10b981',
+                '#f59e0b',
+                '#8b5cf6',
+                '#6366f1',
+                '#ec4899',
+                '#14b8a6',
+                '#f97316',
+                '#a855f7'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+
+      function createTrendChart(ctx) {
+        return new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Income',
+              data: [],
+              borderColor: '#10b981',
+              tension: 0.4
+            }, {
+              label: 'Expenses',
+              data: [],
+              borderColor: '#ef4444',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }
+
+      // Hide loading state
+      function hideLoading() {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.querySelectorAll('.chart-container').forEach(container => {
+          container.style.opacity = '1';
+          container.style.pointerEvents = 'auto';
+        });
+      }
+
+      // Show loading state
+      function showLoading() {
+        document.getElementById('loadingState').classList.remove('hidden');
+        document.querySelectorAll('.chart-container').forEach(container => {
+          container.style.opacity = '0.5';
+          container.style.pointerEvents = 'none';
+        });
+      }
+
+      // Hide loading state
+      function hideLoading() {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.querySelectorAll('.chart-container').forEach(container => {
+          container.style.opacity = '1';
+          container.style.pointerEvents = 'auto';
+        });
+      }
+
+      // Update charts with real transaction data
+      function updateChartsWithRealData(transactions) {
+        if (!transactions || transactions.length === 0) {
+          return;
+        }
+        
+        showLoading();
+        
+        try {
+          // Get spending by category for expense chart
+          const categoryData = transactionService.getSpendingByCategory();
+          const categories = Object.keys(categoryData);
+          const amounts = Object.values(categoryData);
+          
+          // Update expense chart
+          if (expenseChart) {
+            expenseChart.data.labels = categories;
+            expenseChart.data.datasets[0].data = amounts;
+            expenseChart.update();
+          }
+          
+          // Get monthly data for trend chart
+          const monthlyData = getMonthlyData(transactions);
+          
+          // Update trend chart
+          if (trendChart) {
+            trendChart.data.labels = monthlyData.labels;
+            trendChart.data.datasets[0].data = monthlyData.income;
+            trendChart.data.datasets[1].data = monthlyData.expenses;
+            trendChart.update();
+          }
+          
+          // Update card values
+          updateCardValues(transactions);
+        } catch (error) {
+          console.error('Error updating charts:', error);
+        } finally {
+          hideLoading();
+        }
+      }
+      
+      // Get monthly data from transactions
+      function getMonthlyData(transactions) {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        // Get last 6 months
+        const labels = [];
+        for (let i = 5; i >= 0; i--) {
+          const month = (currentMonth - i + 12) % 12;
+          labels.push(monthNames[month]);
+        }
+        
+        // Initialize data arrays
+        const income = Array(6).fill(0);
+        const expenses = Array(6).fill(0);
+        
+        // Process transactions
+        transactions.forEach(transaction => {
+          const transactionDate = new Date(transaction.date);
+          const transactionMonth = transactionDate.getMonth();
+          const transactionYear = transactionDate.getFullYear();
+          
+          // Check if transaction is within the last 6 months
+          const monthsDiff = (currentYear - transactionYear) * 12 + (currentMonth - transactionMonth);
+          if (monthsDiff >= 0 && monthsDiff < 6) {
+            const index = 5 - monthsDiff;
+            const amount = parseFloat(transaction.amount);
+            
+            if (transaction.type === 'income') {
+              income[index] += amount;
+            } else {
+              expenses[index] += amount;
+            }
+          }
+        });
+        
+        return { labels, income, expenses };
+      }
+      
+      // Update card values based on transactions
+      function updateCardValues(transactions) {
+        try {
+          // Calculate total income
+          const totalIncome = transactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+          
+          // Calculate total expenses
+          const totalExpenses = transactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+          
+          // Calculate savings
+          const savings = totalIncome - totalExpenses;
+          const savingsPercentage = totalIncome > 0 ? Math.round((savings / totalIncome) * 100) : 0;
+          
+          // Update card values
+          document.querySelector('.income-card .text-2xl').textContent = `₹${totalIncome.toLocaleString()}`;
+          document.querySelector('.expense-card .text-2xl').textContent = `₹${totalExpenses.toLocaleString()}`;
+          document.querySelector('.savings-card .text-2xl').textContent = `₹${savings.toLocaleString()}`;
+          document.querySelector('.savings-card .text-sm').textContent = `${savingsPercentage}% of income`;
+        } catch (error) {
+          console.error('Error updating card values:', error);
+        }
+      }
+      
+      // Update charts based on selected date range
+      function updateCharts(range) {
+        showLoading();
+        
+        // Get transactions and update charts
+        const transactions = transactionService.getAllTransactions();
+        updateChartsWithRealData(transactions);
+        
+        // If no transactions available, use sample data
+        if (!transactions || transactions.length === 0) {
+          setTimeout(() => {
+            // Sample data for demonstration
+            const sampleData = {
+              monthly: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                income: [50000, 52000, 55000, 58000, 56000, 62000],
+                expenses: [42000, 43000, 47000, 44000, 48000, 45300],
+                categories: ['Food', 'Rent', 'Transport', 'Entertainment', 'Utilities'],
+                categoryValues: [45, 30, 15, 5, 5]
+              }
+            };
+            
+            const data = sampleData[range] || sampleData.monthly;
+            
+            // Update expense chart with sample data
+            if (expenseChart) {
+              expenseChart.data.labels = data.categories;
+              expenseChart.data.datasets[0].data = data.categoryValues;
+              expenseChart.update();
+            }
+            
+            // Update trend chart with sample data
+            if (trendChart) {
+              trendChart.data.labels = data.labels;
+              trendChart.data.datasets[0].data = data.income;
+              trendChart.data.datasets[1].data = data.expenses;
+              trendChart.update();
+            }
+            
+            // Update progress bars
+            document.querySelector('.progress-45').style.width = '45%';
+            document.querySelector('.progress-30').style.width = '30%';
+            document.querySelector('.progress-15').style.width = '15%';
+            document.querySelector('.progress-73').style.width = '73%';
+            
+            hideLoading();
+          }, 800);
+        }
+      }
+
+      // Dynamically update stat cards in real time
+      function updateStatCards(transactions) {
+        let income = 0, expenses = 0;
+        transactions.forEach(tx => {
+          const amt = Number(tx.amount);
+          if (tx.type === 'income') income += amt;
+          else expenses += Math.abs(amt);
+        });
+        const savings = income - expenses;
+        const savingsPerc = income > 0 ? Math.round((savings / income) * 100) : 0;
+        const fmt = v => '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        const incEl = document.getElementById('incomeValue'); if (incEl) incEl.textContent = fmt(income);
+        const expEl = document.getElementById('expenseValue'); if (expEl) expEl.textContent = fmt(expenses);
+        const savEl = document.getElementById('savingsValue'); if (savEl) savEl.textContent = fmt(savings);
+        const savPercEl = document.getElementById('savingsPercentageValue'); if (savPercEl) savPercEl.textContent = savingsPerc + '% of income';
+      }
+    </script>
+</body>
+</html>

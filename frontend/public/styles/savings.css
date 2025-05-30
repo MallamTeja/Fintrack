@@ -1,0 +1,68 @@
+/* Layout styles */
+.sidebar {
+  min-width: -webkit-fill-available;
+}
+
+/* Progress bar styles */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.on-track {
+  width: 75%;
+}
+
+.progress-fill.behind {
+  width: 45%;
+}
+
+.progress-fill.completed {
+  width: 100%;
+}
+
+.progress-fill.on-track {
+  background-color: #10b981;
+}
+
+.progress-fill.behind {
+  background-color: #fbbf24;
+}
+
+.progress-fill.completed {
+  background-color: #34d399;
+}
+
+/* Card styles */
+.goal-amount {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.goal-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.goal-progress {
+  margin-top: 1rem;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}

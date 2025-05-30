@@ -1,0 +1,148 @@
+:root {
+  /* Light theme */
+  --bg-light: #ffffff;
+  --text-light: #1a1a1a;
+  --card-bg-light: #ffffff;
+  --primary-light: #2563eb;
+  --primary-hover-light: #1d4ed8;
+  --border-light: #e2e8f0;
+
+  /* Dark theme */
+  --bg-dark: #1e293b;
+  --text-dark: #f8fafc;
+  --card-bg-dark: #1e293b;
+  --primary-dark: #4f46e5;
+  --primary-hover-dark: #4338ca;
+  --border-dark: #334155;
+}
+
+[data-theme="light"] {
+  --bg: var(--bg-light);
+  --text-color: var(--text-light);
+  --card-bg: var(--card-bg-light);
+  --primary: var(--primary-light);
+  --primary-hover: var(--primary-hover-light);
+  --border: var(--border-light);
+  background-color: rgb(243, 232, 176);
+  color: var(--text-light);
+}
+
+[data-theme="light"] nav a {
+  background-color: rgb(243, 232, 176);
+  color: white !important;
+}
+
+[data-theme="light"] nav a:hover:not(.active) {
+  background-color: rgb(243, 232, 176);
+  color: white !important;
+}
+
+[data-theme="light"] nav a.active {
+  background-color: var(--primary-hover-light);
+}
+
+[data-theme="light"] #profileButton {
+  background-color: white;
+  color: black;
+}
+
+[data-theme="light"] #profileButton:hover {
+  background-color: #f3f4f6;
+}
+
+[data-theme="dark"] {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] nav a {
+  background-color: var(--primary-dark);
+  color: white !important;
+}
+
+[data-theme="dark"] nav a:hover:not(.active) {
+  background-color: var(--primary-hover-dark);
+  color: white !important;
+}
+
+[data-theme="dark"] nav a.active {
+  background-color: var(--primary-hover-dark);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-color);
+  transition: var(--transition);
+}
+
+button,
+[type="button"],
+[type="submit"] {
+  background-color: var(--primary);
+}
+
+button:hover,
+[type="button"]:hover,
+[type="submit"]:hover {
+  background-color: var(--primary-hover);
+}
+
+nav a {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  margin: 0.25rem 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+nav a.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+nav a:hover:not(.active) {
+  background-color: var(--primary);
+  color: white;
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  nav a {
+    min-width: fit-content;
+    margin: 0 0.25rem;
+  }
+  nav a.active::after {
+    right: auto;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+  }
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-out forwards;
+  animation-delay: 0.3s;
+}

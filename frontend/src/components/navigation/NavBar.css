@@ -1,0 +1,326 @@
+/**
+ * Navigation Bar Styles
+ * Updated to match the design and theme colors from frontend/public/css/navbar.css (settings page)
+ */
+
+/* Main Navigation Container */
+.navbar {
+  background-color: var(--bg);
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 70px;
+}
+
+/* Logo Styling */
+.navbar-logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.navbar-logo a {
+  color: var(--primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Navigation Links */
+.navbar-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  position: relative;
+  margin: 0 0.5rem;
+}
+
+.navbar-links li a {
+  background-color: transparent;
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  margin: 0.25rem 0;
+  position: relative;
+}
+
+.navbar-links li a i {
+  font-size: 1.1rem;
+}
+
+/* Active link */
+.navbar-links li.active a {
+  background-color: var(--primary);
+  color: white !important;
+}
+
+.navbar-links li.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-hover);
+  border-radius: 0.5rem;
+}
+
+/* Hover effect */
+.navbar-links li a:hover:not(.active) {
+  background-color: var(--primary);
+  color: white !important;
+  transform: translateX(4px);
+}
+
+/* User Profile Section */
+.navbar-user {
+  display: flex;
+  align-items: center;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  color: white;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.user-dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: var(--card-bg);
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1001;
+  top: 40px;
+  color: var(--text-color);
+}
+
+.dropdown-content a {
+  color: var(--text-color);
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-content a:hover {
+  background-color: var(--primary-hover);
+  color: white;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #d93025;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #f5f5f5;
+}
+
+.user-profile:hover .dropdown-content {
+  display: block;
+}
+
+/* Auth Buttons */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.login-button, .register-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login-button {
+  color: var(--primary);
+  margin-right: 12px;
+}
+
+.login-button:hover {
+  background-color: rgba(37, 99, 235, 0.1);
+}
+
+.register-button {
+  background-color: var(--primary);
+  color: white;
+}
+
+.register-button:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Toggle */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--text-color);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+
+  .navbar-links li a span {
+    display: none;
+  }
+
+  .navbar-links li a i {
+    margin-right: 0;
+    font-size: 1.3rem;
+  }
+
+  .navbar-links li {
+    margin: 0 0.2rem;
+  }
+
+  .navbar-links li a {
+    padding: 1.5rem 0.7rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+    z-index: 1002;
+  }
+
+  .navbar-menu {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 70%;
+    height: 100vh;
+    background-color: var(--card-bg);
+    z-index: 1001;
+    transition: left 0.3s ease;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    padding-top: 70px;
+  }
+
+  .navbar-menu.active {
+    left: 0;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+
+  .navbar-links li {
+    margin: 0;
+    width: 100%;
+  }
+
+  .navbar-links li a {
+    padding: 1.2rem 2rem;
+    width: 100%;
+  }
+
+  .navbar-links li a span {
+    display: inline;
+  }
+
+  .navbar-links li.active::after {
+    width: 5px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    left: auto;
+    bottom: auto;
+    border-radius: 0;
+  }
+  
+  .user-profile .user-name {
+    display: none;
+  }
+  
+  .dropdown-content {
+    right: -80px;
+  }
+}
