@@ -290,54 +290,111 @@ class InsightsComponent {
    * Initialize charts
    */
   initializeCharts() {
-    // Initialize expense chart (doughnut)
-    chartManager.initDoughnutChart('expenseChart', {
-      data: {
-        labels: ['Food', 'Rent', 'Transport', 'Entertainment', 'Utilities'],
-        datasets: [{
-          data: [0, 0, 0, 0, 0],
-          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
-        }]
-      },
-      chartOptions: {
-        plugins: {
-          legend: {
-            position: 'right'
+    // Initialize Expense Categories Chart
+    if (this.elements.expenseChart) {
+      this.expenseChart = new Chart(this.elements.expenseChart, {
+        type: 'doughnut',
+        data: {
+          labels: ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Others'],
+          datasets: [{
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: [
+              '#EF4444', // red
+              '#F59E0B', // yellow
+              '#10B981', // green
+              '#3B82F6', // blue
+              '#8B5CF6', // purple
+              '#6B7280'  // gray
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 750, // Reduced animation duration
+            easing: 'easeInOutQuart'
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                color: 'var(--text-color)'
+              }
+            }
           }
         }
-      }
-    });
-    
-    // Initialize trend chart (bar)
-    chartManager.initBarChart('trendChart', {
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-          {
-            label: 'Income',
-            data: [0, 0, 0, 0, 0, 0],
-            backgroundColor: '#10b981'
+      });
+    }
+
+    // Initialize Income vs Expense Trend Chart
+    if (this.elements.trendChart) {
+      this.trendChart = new Chart(this.elements.trendChart, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Income',
+              data: [],
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fill: true
+            },
+            {
+              label: 'Expenses',
+              data: [],
+              borderColor: '#EF4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 750, // Reduced animation duration
+            easing: 'easeInOutQuart'
           },
-          {
-            label: 'Expenses',
-            data: [0, 0, 0, 0, 0, 0],
-            backgroundColor: '#ef4444'
-          }
-        ]
-      },
-      chartOptions: {
-        scales: {
-          x: {
-            stacked: false
+          interaction: {
+            intersect: false,
+            mode: 'index'
           },
-          y: {
-            stacked: false,
-            beginAtZero: true
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                color: 'var(--text-color)'
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: 'var(--text-color)'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              ticks: {
+                color: 'var(--text-color)',
+                callback: (value) => '₹' + value
+              }
+            }
           }
         }
-      }
-    });
-    
+      });
+    }
+
     // Subscribe charts to state changes
     this.subscribeChartsToState();
   }
@@ -346,22 +403,80 @@ class InsightsComponent {
    * Subscribe charts to state changes
    */
   subscribeChartsToState() {
-    // Create custom data transformer for expense chart based on date range
     const expenseChartTransformer = (transactions) => {
-      // Filter transactions based on date range
-      const filteredTransactions = this.filterTransactionsByDateRange(transactions);
+      const categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Others'];
+      const categoryTotals = categories.map(category => {
+        const total = transactions
+          .filter(t => t.type === 'expense' && t.category.toLowerCase() === category.toLowerCase())
+          .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        return total;
+      });
       
-      // Get spending by category data
-      return DataTransformers.spendingByCategory(filteredTransactions);
+      return {
+        labels: categories,
+        datasets: [{
+          data: categoryTotals,
+          backgroundColor: [
+            '#EF4444', // red
+            '#F59E0B', // yellow
+            '#10B981', // green
+            '#3B82F6', // blue
+            '#8B5CF6', // purple
+            '#6B7280'  // gray
+          ]
+        }]
+      };
     };
-    
-    // Create custom data transformer for trend chart based on date range
+
     const trendChartTransformer = (transactions) => {
-      // Filter transactions based on date range
-      const filteredTransactions = this.filterTransactionsByDateRange(transactions);
+      // Get last 6 months
+      const months = [];
+      const incomeData = [];
+      const expenseData = [];
       
-      // Get income vs expenses data
-      return DataTransformers.incomeVsExpenses(filteredTransactions);
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthYear = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+        months.push(monthYear);
+        
+        const monthTransactions = transactions.filter(t => {
+          const tDate = new Date(t.date);
+          return tDate.getMonth() === date.getMonth() && 
+                 tDate.getFullYear() === date.getFullYear();
+        });
+        
+        const income = monthTransactions
+          .filter(t => t.type === 'income')
+          .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+        const expense = monthTransactions
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + parseFloat(t.amount), 0);
+        
+        incomeData.push(income);
+        expenseData.push(expense);
+      }
+      
+      return {
+        labels: months,
+        datasets: [
+          {
+            label: 'Income',
+            data: incomeData,
+            borderColor: '#10B981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true
+          },
+          {
+            label: 'Expenses',
+            data: expenseData,
+            borderColor: '#EF4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true
+          }
+        ]
+      };
     };
     
     // Subscribe expense chart to transactions updates
