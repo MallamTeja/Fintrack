@@ -12,6 +12,8 @@
     <script src="js/websocketService.js"></script>
     <script type="module" src="js/components/navbar.js"></script>
     <script type="module" src="js/auth/logoutHandler.js"></script>
+    <!-- Theme management -->
+    <script src="js/theme.js"></script>
     <style>
     .progress-45 { width: 45%; }
     .progress-30 { width: 30%; }
@@ -299,7 +301,9 @@
               </svg>
               Expense Categories
             </h3>
-            <canvas id="expenseChart" height="200"></canvas>
+            <div class="relative h-[300px]">
+              <canvas id="expenseChart"></canvas>
+            </div>
           </div>
           <!-- Income vs Expense Trend -->
           <div class="card hover:scale-105 transition-transform">
@@ -309,7 +313,9 @@
               </svg>
               Income vs Expense Trend
             </h3>
-            <canvas id="trendChart" height="200"></canvas>
+            <div class="relative h-[300px]">
+              <canvas id="trendChart"></canvas>
+            </div>
           </div>
         </div>
 
@@ -347,27 +353,10 @@
     </div>
 
     <script>
-      // Theme toggle functionality
+      // Profile dropdown functionality
       document.addEventListener('DOMContentLoaded', () => {
-        const htmlElement = document.documentElement;
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
         const profileButton = document.getElementById('profileButton');
         const profileDropdown = document.getElementById('profileDropdown');
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        htmlElement.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme === 'dark');
-
-        // Theme toggle handler
-        themeToggle.addEventListener('click', () => {
-          const currentTheme = htmlElement.getAttribute('data-theme');
-          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-          htmlElement.setAttribute('data-theme', newTheme);
-          localStorage.setItem('theme', newTheme);
-          updateThemeIcon(newTheme === 'dark');
-        });
 
         // Profile dropdown toggle
         profileButton.addEventListener('click', (e) => {
@@ -383,377 +372,335 @@
           profileButton.setAttribute('aria-expanded', 'false');
         });
 
-        // Update theme icon
-        function updateThemeIcon(isDark) {
-          themeIcon.innerHTML = isDark ? 
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
-        }
+        // Initialize charts and load data
+        initializeCharts();
+        loadInsightsData();
+        setupWebSocket();
       });
 
-      // Theme Toggle
-      const htmlElement = document.documentElement;
-      const themeIcon = document.getElementById('themeIcon');
-      const themeToggle = document.getElementById('themeToggle');
-
-      // Theme toggle functionality
-      function updateThemeIcon() {
-        const isDark = htmlElement.getAttribute("data-theme") === "dark";
-        themeIcon.innerHTML = isDark ? 
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
-        
-        // Update text colors for headings and labels based on theme
-        const isLight = !isDark;
-        const headings = document.querySelectorAll('h3.text-base.font-semibold.mb-2');
-        headings.forEach(h => {
-          h.style.color = isLight ? 'black' : '#d1d5db';
-        });
-        const dateLabel = document.querySelector('label[for="dateFilter"]');
-        if (dateLabel) {
-          dateLabel.style.color = isLight ? 'black' : '#d1d5db';
-        }
-        
-        // Update chart colors
-        if (expenseChart && trendChart) {
-          updateChartsTheme();
-        }
+      // Function to format currency
+      function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-IN', {
+          style: 'currency',
+          currency: 'INR'
+        }).format(amount);
       }
 
-      // Add visual feedback for date filter
-      document.getElementById('dateFilter').addEventListener('change', function() {
-        this.classList.add('ring-2', 'ring-blue-500');
-        setTimeout(() => this.classList.remove('ring-2', 'ring-blue-500'), 500);
-      });
+      // Function to calculate financial summary
+      function calculateSummary(transactions) {
+        const summary = transactions.reduce((acc, transaction) => {
+          if (transaction.type === 'income') {
+            acc.totalIncome += transaction.amount;
+          } else {
+            acc.totalExpenses += transaction.amount;
+          }
+          return acc;
+        }, { totalIncome: 0, totalExpenses: 0 });
 
-      // Add loading state for custom date inputs
-      document.getElementById('customStart').addEventListener('change', function() {
-        if (this.value && document.getElementById('customEnd').value) {
-          showLoading();
-          setTimeout(hideLoading, 800);
-        }
-      });
+        summary.balance = summary.totalIncome - summary.totalExpenses;
+        summary.savingsRate = summary.totalIncome > 0 
+          ? ((summary.totalIncome - summary.totalExpenses) / summary.totalIncome * 100).toFixed(1)
+          : 0;
 
-      document.getElementById('customEnd').addEventListener('change', function() {
-        if (this.value && document.getElementById('customStart').value) {
-          showLoading();
-          setTimeout(hideLoading, 800);
-        }
-      });
+        return summary;
+      }
 
-      // Theme toggle event listener
-      themeToggle.addEventListener('click', () => {
-        const current = htmlElement.getAttribute("data-theme");
-        const newTheme = current === "dark" ? "light" : "dark";
-        htmlElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcon();
-      });
+      // Function to update dashboard stats
+      function updateInsightsStats(transactions) {
+        const summary = calculateSummary(transactions);
 
-      // Initialize charts on page load
-      window.addEventListener('DOMContentLoaded', () => {
-        initCharts();
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-          htmlElement.setAttribute("data-theme", savedTheme);
-          updateThemeIcon();
-        }
-      });
+        // Update main stats
+        document.getElementById('incomeValue').textContent = formatCurrency(summary.totalIncome);
+        document.getElementById('expenseValue').textContent = formatCurrency(summary.totalExpenses);
+        document.getElementById('savingsValue').textContent = formatCurrency(summary.balance);
+        document.getElementById('savingsPercentageValue').textContent = `${summary.savingsRate}% of income`;
 
-      // Initialize Charts
-      let expenseChart, trendChart;
-      
-      // Load transaction service
-      const transactionService = window.transactionService || {
-        getAllTransactions: () => [],
-        getSpendingByCategory: () => ({}),
-        subscribe: () => {}
-      };
+        // Update charts and categories
+        updateCharts(transactions);
+        updateTopSpendingCategories(transactions);
+      }
 
-      function initCharts() {
+      // Function to initialize charts
+      function initializeCharts() {
+        // Initialize expense categories chart
         const expenseCtx = document.getElementById('expenseChart').getContext('2d');
-        const trendCtx = document.getElementById('trendChart').getContext('2d');
-        
-        expenseChart = createExpenseChart(expenseCtx);
-        trendChart = createTrendChart(trendCtx);
-        
-        // Subscribe to transaction updates
-        transactionService.subscribe(transactions => {
-          updateStatCards(transactions);
-          updateChartsWithRealData(transactions);
-        });
-        
-        // Set initial data
-        updateCharts('monthly');
-      }
-
-      function createExpenseChart(ctx) {
-        return new Chart(ctx, {
+        window.expenseChart = new Chart(expenseCtx, {
           type: 'doughnut',
           data: {
             labels: [],
             datasets: [{
               data: [],
               backgroundColor: [
-                '#3b82f6',
-                '#ef4444',
-                '#10b981',
-                '#f59e0b',
-                '#8b5cf6',
-                '#6366f1',
-                '#ec4899',
-                '#14b8a6',
-                '#f97316',
-                '#a855f7'
-              ]
+                '#EF4444',
+                '#3B82F6',
+                '#F59E0B',
+                '#8B5CF6',
+                '#10B981'
+              ],
+              borderWidth: 1
             }]
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: {
-                position: 'bottom'
+                position: 'right'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const value = context.raw;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                  }
+                }
               }
             }
           }
         });
-      }
 
-      function createTrendChart(ctx) {
-        return new Chart(ctx, {
+        // Initialize trend chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        window.trendChart = new Chart(trendCtx, {
           type: 'line',
           data: {
             labels: [],
-            datasets: [{
-              label: 'Income',
-              data: [],
-              borderColor: '#10b981',
-              tension: 0.4
-            }, {
-              label: 'Expenses',
-              data: [],
-              borderColor: '#ef4444',
-              tension: 0.4
-            }]
+            datasets: [
+              {
+                label: 'Income',
+                data: [],
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4
+              },
+              {
+                label: 'Expenses',
+                data: [],
+                borderColor: '#EF4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                fill: true,
+                tension: 0.4
+              }
+            ]
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: {
                 position: 'top'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: ${formatCurrency(context.raw)}`;
+                  }
+                }
               }
             },
             scales: {
               y: {
-                beginAtZero: true
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return formatCurrency(value);
+                  }
+                }
               }
             }
           }
         });
       }
 
-      // Hide loading state
-      function hideLoading() {
-        document.getElementById('loadingState').classList.add('hidden');
-        document.querySelectorAll('.chart-container').forEach(container => {
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
-        });
-      }
-
-      // Show loading state
-      function showLoading() {
-        document.getElementById('loadingState').classList.remove('hidden');
-        document.querySelectorAll('.chart-container').forEach(container => {
-          container.style.opacity = '0.5';
-          container.style.pointerEvents = 'none';
-        });
-      }
-
-      // Hide loading state
-      function hideLoading() {
-        document.getElementById('loadingState').classList.add('hidden');
-        document.querySelectorAll('.chart-container').forEach(container => {
-          container.style.opacity = '1';
-          container.style.pointerEvents = 'auto';
-        });
-      }
-
-      // Update charts with real transaction data
-      function updateChartsWithRealData(transactions) {
+      // Function to update charts
+      function updateCharts(transactions) {
         if (!transactions || transactions.length === 0) {
+          console.log('No transactions data available');
           return;
         }
-        
-        showLoading();
-        
+
         try {
-          // Get spending by category for expense chart
-          const categoryData = transactionService.getSpendingByCategory();
-          const categories = Object.keys(categoryData);
-          const amounts = Object.values(categoryData);
-          
-          // Update expense chart
-          if (expenseChart) {
-            expenseChart.data.labels = categories;
-            expenseChart.data.datasets[0].data = amounts;
-            expenseChart.update();
+          // Process transactions for expense categories chart
+          const categoryData = {};
+          transactions.forEach(transaction => {
+            if (transaction.type === 'expense') {
+              const category = transaction.category || 'Other';
+              const amount = Math.abs(parseFloat(transaction.amount));
+              
+              if (!isNaN(amount)) {
+                if (!categoryData[category]) {
+                  categoryData[category] = 0;
+                }
+                categoryData[category] += amount;
+              }
+            }
+          });
+
+          // Sort categories by amount and get top 5
+          const sortedCategories = Object.entries(categoryData)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+          // Update expense categories chart
+          if (window.expenseChart) {
+            window.expenseChart.data.labels = sortedCategories.map(([category]) => category);
+            window.expenseChart.data.datasets[0].data = sortedCategories.map(([_, amount]) => amount);
+            window.expenseChart.update();
           }
+
+          // Process transactions for trend chart
+          const trendData = {
+            income: {},
+            expenses: {}
+          };
+
+          // Sort transactions by date
+          const sortedTransactions = [...transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
           
-          // Get monthly data for trend chart
-          const monthlyData = getMonthlyData(transactions);
-          
-          // Update trend chart
-          if (trendChart) {
-            trendChart.data.labels = monthlyData.labels;
-            trendChart.data.datasets[0].data = monthlyData.income;
-            trendChart.data.datasets[1].data = monthlyData.expenses;
-            trendChart.update();
-          }
-          
-          // Update card values
-          updateCardValues(transactions);
-        } catch (error) {
-          console.error('Error updating charts:', error);
-        } finally {
-          hideLoading();
-        }
-      }
-      
-      // Get monthly data from transactions
-      function getMonthlyData(transactions) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
-        
-        // Get last 6 months
-        const labels = [];
-        for (let i = 5; i >= 0; i--) {
-          const month = (currentMonth - i + 12) % 12;
-          labels.push(monthNames[month]);
-        }
-        
-        // Initialize data arrays
-        const income = Array(6).fill(0);
-        const expenses = Array(6).fill(0);
-        
-        // Process transactions
-        transactions.forEach(transaction => {
-          const transactionDate = new Date(transaction.date);
-          const transactionMonth = transactionDate.getMonth();
-          const transactionYear = transactionDate.getFullYear();
-          
-          // Check if transaction is within the last 6 months
-          const monthsDiff = (currentYear - transactionYear) * 12 + (currentMonth - transactionMonth);
-          if (monthsDiff >= 0 && monthsDiff < 6) {
-            const index = 5 - monthsDiff;
+          sortedTransactions.forEach(transaction => {
+            const date = new Date(transaction.date).toLocaleDateString();
             const amount = parseFloat(transaction.amount);
             
-            if (transaction.type === 'income') {
-              income[index] += amount;
-            } else {
-              expenses[index] += amount;
-            }
-          }
-        });
-        
-        return { labels, income, expenses };
-      }
-      
-      // Update card values based on transactions
-      function updateCardValues(transactions) {
-        try {
-          // Calculate total income
-          const totalIncome = transactions
-            .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-          
-          // Calculate total expenses
-          const totalExpenses = transactions
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-          
-          // Calculate savings
-          const savings = totalIncome - totalExpenses;
-          const savingsPercentage = totalIncome > 0 ? Math.round((savings / totalIncome) * 100) : 0;
-          
-          // Update card values
-          document.querySelector('.income-card .text-2xl').textContent = `₹${totalIncome.toLocaleString()}`;
-          document.querySelector('.expense-card .text-2xl').textContent = `₹${totalExpenses.toLocaleString()}`;
-          document.querySelector('.savings-card .text-2xl').textContent = `₹${savings.toLocaleString()}`;
-          document.querySelector('.savings-card .text-sm').textContent = `${savingsPercentage}% of income`;
-        } catch (error) {
-          console.error('Error updating card values:', error);
-        }
-      }
-      
-      // Update charts based on selected date range
-      function updateCharts(range) {
-        showLoading();
-        
-        // Get transactions and update charts
-        const transactions = transactionService.getAllTransactions();
-        updateChartsWithRealData(transactions);
-        
-        // If no transactions available, use sample data
-        if (!transactions || transactions.length === 0) {
-          setTimeout(() => {
-            // Sample data for demonstration
-            const sampleData = {
-              monthly: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                income: [50000, 52000, 55000, 58000, 56000, 62000],
-                expenses: [42000, 43000, 47000, 44000, 48000, 45300],
-                categories: ['Food', 'Rent', 'Transport', 'Entertainment', 'Utilities'],
-                categoryValues: [45, 30, 15, 5, 5]
+            if (!isNaN(amount)) {
+              if (transaction.type === 'income') {
+                if (!trendData.income[date]) {
+                  trendData.income[date] = 0;
+                }
+                trendData.income[date] += amount;
+              } else {
+                if (!trendData.expenses[date]) {
+                  trendData.expenses[date] = 0;
+                }
+                trendData.expenses[date] += Math.abs(amount);
               }
-            };
-            
-            const data = sampleData[range] || sampleData.monthly;
-            
-            // Update expense chart with sample data
-            if (expenseChart) {
-              expenseChart.data.labels = data.categories;
-              expenseChart.data.datasets[0].data = data.categoryValues;
-              expenseChart.update();
             }
-            
-            // Update trend chart with sample data
-            if (trendChart) {
-              trendChart.data.labels = data.labels;
-              trendChart.data.datasets[0].data = data.income;
-              trendChart.data.datasets[1].data = data.expenses;
-              trendChart.update();
-            }
-            
-            // Update progress bars
-            document.querySelector('.progress-45').style.width = '45%';
-            document.querySelector('.progress-30').style.width = '30%';
-            document.querySelector('.progress-15').style.width = '15%';
-            document.querySelector('.progress-73').style.width = '73%';
-            
-            hideLoading();
-          }, 800);
+          });
+
+          // Get all unique dates
+          const allDates = [...new Set([
+            ...Object.keys(trendData.income),
+            ...Object.keys(trendData.expenses)
+          ])].sort();
+
+          // Update trend chart
+          if (window.trendChart) {
+            window.trendChart.data.labels = allDates;
+            window.trendChart.data.datasets[0].data = allDates.map(date => trendData.income[date] || 0);
+            window.trendChart.data.datasets[1].data = allDates.map(date => trendData.expenses[date] || 0);
+            window.trendChart.update();
+          }
+        } catch (error) {
+          console.error('Error updating charts:', error);
         }
       }
 
-      // Dynamically update stat cards in real time
-      function updateStatCards(transactions) {
-        let income = 0, expenses = 0;
-        transactions.forEach(tx => {
-          const amt = Number(tx.amount);
-          if (tx.type === 'income') income += amt;
-          else expenses += Math.abs(amt);
+      // Function to update top spending categories
+      function updateTopSpendingCategories(transactions) {
+        const container = document.querySelector('.space-y-4');
+        if (!container) return;
+
+        // Process transactions for categories
+        const categoryData = {};
+        transactions.forEach(transaction => {
+          if (transaction.type === 'expense') {
+            const category = transaction.category || 'Other';
+            const amount = Math.abs(parseFloat(transaction.amount));
+            
+            if (!isNaN(amount)) {
+              if (!categoryData[category]) {
+                categoryData[category] = 0;
+              }
+              categoryData[category] += amount;
+            }
+          }
         });
-        const savings = income - expenses;
-        const savingsPerc = income > 0 ? Math.round((savings / income) * 100) : 0;
-        const fmt = v => '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 0 });
-        const incEl = document.getElementById('incomeValue'); if (incEl) incEl.textContent = fmt(income);
-        const expEl = document.getElementById('expenseValue'); if (expEl) expEl.textContent = fmt(expenses);
-        const savEl = document.getElementById('savingsValue'); if (savEl) savEl.textContent = fmt(savings);
-        const savPercEl = document.getElementById('savingsPercentageValue'); if (savPercEl) savPercEl.textContent = savingsPerc + '% of income';
+
+        // Sort categories by amount and get top 5
+        const sortedCategories = Object.entries(categoryData)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+
+        container.innerHTML = sortedCategories.map(([category, amount], index) => {
+          const percentage = ((amount / sortedCategories.reduce((sum, [_, val]) => sum + val, 0)) * 100).toFixed(1);
+          return `
+            <div class="flex items-center">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentage}%"></div>
+              </div>
+              <span class="ml-4 min-w-[100px]">${category} (${percentage}%)</span>
+            </div>
+          `;
+        }).join('');
       }
+
+      // Function to load insights data
+      async function loadInsightsData() {
+        try {
+          const response = await fetch('/api/transactions', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          if (response.ok) {
+            const transactions = await response.json();
+            console.log('Loaded transactions:', transactions);
+            updateInsightsStats(transactions);
+          } else {
+            console.error('Failed to load insights data:', response.status);
+            showToast('Failed to load insights data', 'error');
+          }
+        } catch (error) {
+          console.error('Error loading insights data:', error);
+          showToast('Error loading insights data', 'error');
+        }
+      }
+
+      // Set up WebSocket connection for real-time updates
+      function setupWebSocket() {
+        const ws = new WebSocket(`ws://${window.location.host}/ws`);
+        
+        ws.onmessage = function(event) {
+          const data = JSON.parse(event.data);
+          console.log('WebSocket message received:', data);
+          if (data.type === 'transaction_update') {
+            loadInsightsData();
+          }
+        };
+
+        ws.onerror = function(error) {
+          console.error('WebSocket error:', error);
+          setTimeout(setupWebSocket, 5000);
+        };
+
+        ws.onclose = function() {
+          console.log('WebSocket connection closed');
+          setTimeout(setupWebSocket, 5000);
+        };
+      }
+
+      // Add visual feedback for date filter
+      document.getElementById('dateFilter').addEventListener('change', function() {
+        this.classList.add('ring-2', 'ring-blue-500');
+        setTimeout(() => this.classList.remove('ring-2', 'ring-blue-500'), 500);
+        loadInsightsData(); // Reload data when filter changes
+      });
+
+      // Add loading state for custom date inputs
+      document.getElementById('customStart').addEventListener('change', function() {
+        if (this.value && document.getElementById('customEnd').value) {
+          loadInsightsData(); // Reload data when date range changes
+        }
+      });
+
+      document.getElementById('customEnd').addEventListener('change', function() {
+        if (this.value && document.getElementById('customStart').value) {
+          loadInsightsData(); // Reload data when date range changes
+        }
+      });
     </script>
 </body>
 </html>

@@ -646,7 +646,6 @@ class ChartsUtility {
     // Update charts colors
     this.updateTheme();
   }
-  }
 }
 
 // Initialize when document is loaded
@@ -672,3 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 });
+
+// Export the class
+export { ChartsUtility };

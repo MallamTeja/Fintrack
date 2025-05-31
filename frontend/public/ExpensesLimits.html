@@ -6,6 +6,7 @@
   <title>FinTrack - Expenses Limits</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/theme.js"></script>
   <style>
     :root {
       /* Light theme */
@@ -628,49 +629,8 @@
   </div>
 
   <script>
-    const htmlElement = document.documentElement;
-    const themeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    const themeToggle = document.getElementById('themeToggle');
     const profileButton = document.getElementById('profileButton');
     const profileDropdown = document.getElementById('profileDropdown');
-
-    // Function to update theme icon based on current theme
-    function updateThemeIcon() {
-      const isDark = htmlElement.getAttribute("data-theme") === "dark";
-      const themeIconElement = document.getElementById('themeIcon');
-      if (!themeIconElement) return;
-      themeIconElement.innerHTML = isDark ? 
-        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
-        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
-    }
-
-    // Load theme from localStorage or system preference
-    function loadTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        htmlElement.setAttribute('data-theme', savedTheme);
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        htmlElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      }
-      updateThemeIcon();
-    }
-
-    // Save theme to localStorage
-    function saveTheme(theme) {
-      localStorage.setItem('theme', theme);
-    }
-
-    // Toggle theme and save preference
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const current = htmlElement.getAttribute("data-theme");
-        const newTheme = current === "dark" ? "light" : "dark";
-        htmlElement.setAttribute("data-theme", newTheme);
-        saveTheme(newTheme);
-        updateThemeIcon();
-      });
-    }
 
     // Profile dropdown toggle
     if (profileButton && profileDropdown) {
@@ -700,9 +660,6 @@
         }
       });
     });
-
-    // Initialize theme on page load
-    loadTheme();
   </script>
 
   <!-- Initialize ExpensesLimits -->
@@ -711,49 +668,6 @@
     
     document.addEventListener('DOMContentLoaded', () => {
       const expenseLimits = new ExpensesLimits('limitsContainer');
-
-      // Theme toggle functionality
-      const htmlElement = document.documentElement;
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = document.getElementById('themeIcon');
-      const profileButton = document.getElementById('profileButton');
-      const profileDropdown = document.getElementById('profileDropdown');
-
-      // Load saved theme
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      htmlElement.setAttribute('data-theme', savedTheme);
-      updateThemeIcon(savedTheme === 'dark');
-
-      // Theme toggle handler
-      themeToggle?.addEventListener('click', () => {
-        const currentTheme = htmlElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        htmlElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme === 'dark');
-      });
-
-      // Profile dropdown toggle
-      profileButton?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
-        profileDropdown.classList.toggle('hidden', isExpanded);
-        profileButton.setAttribute('aria-expanded', !isExpanded);
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener('click', () => {
-        profileDropdown?.classList.add('hidden');
-        profileButton?.setAttribute('aria-expanded', 'false');
-      });
-
-      // Update theme icon function
-      function updateThemeIcon(isDark) {
-        if (!themeIcon) return;
-        themeIcon.innerHTML = isDark ? 
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
-          '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
-      }
     });
   </script>
 </body>
