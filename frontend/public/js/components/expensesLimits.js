@@ -1,7 +1,14 @@
 import { store } from '../state/index.js';
+import { UserProfile } from './userProfile.js';
 
 class ExpensesLimits {
   constructor(containerId) {
+    // Initialize UserProfile
+    new UserProfile();
+    
+    // Initialize theme
+    this.initializeTheme();
+    
     this.container = document.getElementById(containerId);
     this.noLimitsMessage = document.getElementById('noLimitsMessage');
     this.limitModal = document.getElementById('limitModal');
@@ -11,19 +18,46 @@ class ExpensesLimits {
     this.limitIdField = document.getElementById('limitId');
     this.categorySelect = document.getElementById('category');
     this.otherCategoryField = document.getElementById('otherCategoryField');
-    this.fromDateField = document.getElementById('fromDate');
-    this.toDateField = document.getElementById('toDate');
+    this.dateField = document.getElementById('date');
     this.currentBudgetId = null;
 
-    // Set default dates (current month)
+    // Set default date (today)
     const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
-    this.fromDateField.valueAsDate = firstDay;
-    this.toDateField.valueAsDate = lastDay;
+    this.dateField.valueAsDate = today;
 
     this.init();
+
+    // Make the class instance available globally for the quick add buttons
+    window.expenseLimits = this;
+  }
+
+  initializeTheme() {
+    const htmlElement = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    this.updateThemeIcon(savedTheme === 'dark');
+
+    // Theme toggle handler
+    themeToggle?.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      this.updateThemeIcon(newTheme === 'dark');
+    });
+  }
+
+  updateThemeIcon(isDark) {
+    const themeIcon = document.getElementById('themeIcon');
+    if (!themeIcon) return;
+    
+    themeIcon.innerHTML = isDark ? 
+      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
   }
 
   init() {
@@ -180,13 +214,9 @@ class ExpensesLimits {
     document.getElementById('modalTitle').textContent = 'Add New Expense Limit';
     this.otherCategoryField.classList.add('hidden');
     
-    // Set default dates (current month)
+    // Set default date (today)
     const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
-    this.fromDateField.valueAsDate = firstDay;
-    this.toDateField.valueAsDate = lastDay;
+    this.dateField.valueAsDate = today;
     
     this.limitModal.classList.remove('hidden');
     document.getElementById('amount').focus();
@@ -208,13 +238,11 @@ class ExpensesLimits {
     
     document.getElementById('amount').value = budget.limit;
     
-    // Set dates if available, otherwise use current month
-    if (budget.from_date) {
-      this.fromDateField.value = new Date(budget.from_date).toISOString().split('T')[0];
-    }
-    
-    if (budget.to_date) {
-      this.toDateField.value = new Date(budget.to_date).toISOString().split('T')[0];
+    // Set date if available, otherwise use today
+    if (budget.date) {
+      this.dateField.value = new Date(budget.date).toISOString().split('T')[0];
+    } else {
+      this.dateField.valueAsDate = new Date();
     }
     
     if (budget.description) {
@@ -244,8 +272,7 @@ class ExpensesLimits {
     let category = this.categorySelect.value;
     if (category === 'other') category = document.getElementById('customCategory').value.trim();
     const limitVal = parseFloat(document.getElementById('amount').value);
-    const fromDate = this.fromDateField.value;
-    const toDate = this.toDateField.value;
+    const date = this.dateField.value;
     const description = document.getElementById('description').value.trim();
     
     if (!category || isNaN(limitVal) || limitVal <= 0) {
@@ -253,16 +280,15 @@ class ExpensesLimits {
       return;
     }
     
-    if (!fromDate || !toDate) {
-      alert('Please provide valid date range.');
+    if (!date) {
+      alert('Please provide a valid date.');
       return;
     }
     
     const budgetData = {
       category,
       limit: limitVal,
-      from_date: fromDate,
-      to_date: toDate,
+      date: date,
       description
     };
     
@@ -275,8 +301,31 @@ class ExpensesLimits {
     
     this.hideModal();
   }
+
+  quickAddLimit(category) {
+    this.limitForm.reset();
+    this.limitIdField.value = '';
+    document.getElementById('modalTitle').textContent = 'Add New Expense Limit';
+    
+    // Set the category
+    this.categorySelect.value = category;
+    this.otherCategoryField.classList.add('hidden');
+    
+    // Set default date (today)
+    const today = new Date();
+    this.dateField.valueAsDate = today;
+    
+    // Set default amount based on category
+    const defaultAmounts = {
+      food: 5000,
+      shopping: 8000,
+      entertainment: 3000
+    };
+    document.getElementById('amount').value = defaultAmounts[category] || 0;
+    
+    this.limitModal.classList.remove('hidden');
+    document.getElementById('amount').focus();
+  }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  new ExpensesLimits('limitsContainer');
-});
+export { ExpensesLimits };

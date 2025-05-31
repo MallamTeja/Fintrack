@@ -288,7 +288,8 @@
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({ email, password })
                 });
@@ -296,31 +297,24 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.message || data.error || 'Login failed');
+                    throw new Error(data.error || 'Login failed');
                 }
 
                 if (data.success) {
                     hideLoading();
-                    showSuccess('Login successful!');
                     
                     // Store token and user data
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('userData', JSON.stringify(data.user));
-                    localStorage.setItem('theme', 'light');
                     
                     // Redirect to dashboard
-                    setTimeout(() => {
-                        window.location.href = '/dashboard.html';
-                    }, 1000);
+                    window.location.href = '/dashboard.html';
                 } else {
-                    hideLoading();
-                    emailError.textContent = data.message || data.error || 'Login failed';
-                    emailError.style.display = 'block';
-                    emailInput.setAttribute('aria-invalid', 'true');
+                    throw new Error(data.error || 'Login failed');
                 }
             } catch (error) {
                 hideLoading();
-                emailError.textContent = error.message || 'Login failed';
+                emailError.textContent = error.message || 'Login failed. Please try again.';
                 emailError.style.display = 'block';
                 emailInput.setAttribute('aria-invalid', 'true');
             }

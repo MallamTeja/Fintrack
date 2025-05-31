@@ -1,0 +1,127 @@
+<!-- User Menu Dropdown -->
+<div class="user-menu">
+    <div class="user-dropdown">
+        <button type="button" class="user-button" id="userMenuButton" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-user-circle"></i>
+            <span id="username">Loading...</span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-content" id="userDropdown" role="menu" aria-labelledby="userMenuButton">
+            <a href="/profile.html" role="menuitem"><i class="fas fa-user"></i> Profile</a>
+            <a href="/settings.html" role="menuitem"><i class="fas fa-cog"></i> Settings</a>
+            <a href="#" id="logoutButton" role="menuitem"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+</div>
+
+<!-- Shared Navigation Styles -->
+<style>
+    .user-menu {
+        position: fixed;
+        top: 1rem;
+        right: 2rem;
+        z-index: 1000;
+    }
+
+    .user-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .user-button {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border, #e5e7eb);
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text, #2b2d42);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        min-width: 150px;
+        justify-content: space-between;
+    }
+
+    .user-button:hover {
+        background: var(--bg, #f8f9fa);
+    }
+
+    .user-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.3);
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 0.5rem);
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border, #e5e7eb);
+        border-radius: 0.5rem;
+        min-width: 200px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 1000;
+    }
+
+    .dropdown-content.show {
+        display: block;
+        animation: dropdownFade 0.2s ease;
+    }
+
+    @keyframes dropdownFade {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dropdown-content a {
+        color: var(--text, #2b2d42);
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+    .dropdown-content a:hover {
+        background: var(--bg, #f8f9fa);
+    }
+
+    .dropdown-content a:first-child {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+    }
+
+    .dropdown-content a:last-child {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+    }
+
+    .dropdown-content a i {
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Ensure icons are properly sized */
+    .user-button i {
+        font-size: 1rem;
+    }
+
+    #username {
+        margin: 0 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+    }
+</style> 
