@@ -585,44 +585,140 @@
         .header {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--card-bg-rgb), 0.9);
         }
 
         .header h1 {
             font-size: 2.25rem !important;
             font-weight: 600;
             color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header h1::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 2rem;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         #themeToggle {
             background-color: var(--card-bg);
-            border-color: var(--border);
+            border: 2px solid var(--border);
             color: var(--text-color);
+            padding: 0.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #themeToggle:hover {
             background-color: var(--bg);
             transform: scale(1.05);
+            border-color: var(--primary);
         }
 
         #profileButton {
             background-color: var(--card-bg);
             border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
         #profileButton:hover {
             background-color: var(--bg);
+            border-color: var(--primary);
+        }
+
+        .profile-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .profile-name {
+            font-weight: 500;
+            color: var(--text-color);
         }
 
         #profileDropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 0.5rem;
             background-color: var(--card-bg);
             border: 1px solid var(--border);
-            transition: all 0.3s ease;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            min-width: 12rem;
+            transform-origin: top right;
+            transition: all 0.2s ease;
         }
 
-        #profileDropdown button:hover {
+        #profileDropdown.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .profile-dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-dropdown-item:hover {
             background-color: var(--bg);
+        }
+
+        .profile-dropdown-item i {
+            width: 1.25rem;
+            text-align: center;
+        }
+
+        .profile-email {
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
         }
     </style>
 </head>
@@ -679,9 +775,9 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->
-        <div class="flex items-center px-8 py-6 shadow-md sticky top-0 z-50 bg-opacity-90 backdrop-blur-md">
-            <h1 class="text-4xl font-bold text-blue-500 flex-1">Add Transaction</h1>
-            <div class="flex items-center gap-2">
+        <div class="header">
+            <h1>Add Transaction</h1>
+            <div class="header-actions">
                 <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105" type="button" aria-label="Toggle theme">
                     <svg id="themeIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
@@ -689,14 +785,15 @@
                 </button>
                 <div class="relative">
                     <button id="profileButton" class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600" aria-expanded="false" aria-haspopup="true">
-                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
-                        <span class="font-medium text-black dark:text-gray-200">User</span>
+                        <div class="profile-avatar">U</div>
+                        <span class="profile-name">User</span>
                     </button>
-                    <div id="profileDropdown" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
-                        <div class="py-1" role="menu" aria-orientation="vertical">
-                            <div id="profileEmail" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">user@example.com</div>
-                            <button id="logoutButton" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600" role="menuitem">Logout</button>
-                        </div>
+                    <div id="profileDropdown" class="hidden">
+                        <div class="profile-email">user@example.com</div>
+                        <button id="logoutButton" class="profile-dropdown-item w-full text-left">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
                     </div>
                 </div>
             </div>
