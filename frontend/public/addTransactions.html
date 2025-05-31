@@ -7,43 +7,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-hover: #3b56d9;
-            --secondary: #3f37c9;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --text: #2b2d42;
-            --text-secondary: #6b7280;
-            --input-bg: #ffffff;
-            --input-border: #d1d5db;
-            --card-bg: #ffffff;
-            --bg: #f8f9fa;
-            --border: #e5e7eb;
-            --border-color: #e5e7eb;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --transition: all 0.3s ease;
+            /* Light theme */
+            --bg-light: #ffffff;
+            --text-light: #1a1a1a;
+            --card-bg-light: #ffffff;
+            --primary-light: #2563eb;
+            --primary-hover-light: #1d4ed8;
+            --border-light: #e2e8f0;
+            --success-light: #10B981;
+            --danger-light: #EF4444;
+            
+            /* Dark theme */
+            --bg-dark: #1e293b;
+            --text-dark: #f8fafc; 
+            --card-bg-dark: #1e293b;
+            --primary-dark: #4f46e5;
+            --primary-hover-dark: #4338ca;
+            --border-dark: #334155;
+            --success-dark: #10B981;
+            --danger-dark: #EF4444;
+        }
+
+        [data-theme="light"] {
+            --bg: var(--bg-light);
+            --text-color: var(--text-light);
+            --card-bg: var(--card-bg-light);
+            --primary: var(--primary-light);
+            --primary-hover: var(--primary-hover-light);
+            --border: var(--border-light);
+            --success: var(--success-light);
+            --danger: var(--danger-light);
         }
 
         [data-theme="dark"] {
-            --primary: #7c9eff;
-            --primary-hover: #6c8eff;
-            --secondary: #6c8eff;
-            --success: #4ade80;
-            --danger: #f87171;
-            --warning: #fbbf24;
-            --info: #60a5fa;
-            --text: #e5e7eb;
-            --text-secondary: #9ca3af;
-            --input-bg: #374151;
-            --input-border: #4b5563;
-            --card-bg: #1f2937;
-            --bg: #111827;
-            --border: #374151;
-            --border-color: #374151;
+            --bg: var(--bg-dark);
+            --text-color: var(--text-dark);
+            --card-bg: var(--card-bg-dark);
+            --primary: var(--primary-dark);
+            --primary-hover: var(--primary-hover-dark);
+            --border: var(--border-dark);
+            --success: var(--success-dark);
+            --danger: var(--danger-dark);
         }
 
         * {
@@ -56,9 +60,11 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-color);
             line-height: 1.5;
             display: flex;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
         }
 
         /* Sidebar Styles */
@@ -101,7 +107,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem 1rem;
-            color: var(--text);
+            color: var(--text-color);
             text-decoration: none;
             border-radius: 0.5rem;
             transition: var(--transition);
@@ -116,24 +122,32 @@
         /* Main Content Styles */
         .main-content {
             margin-left: 250px;
-            padding: 2rem;
+            padding: 0;
             width: calc(100% - 250px);
+            min-height: 100vh;
+            background-color: var(--bg);
+            transition: background-color 0.3s ease;
+        }
+
+        .content-wrapper {
+            padding: 2rem;
         }
 
         .page-header {
             margin-bottom: 2rem;
+            padding: 0 2rem;
         }
 
         .page-title {
             font-size: 2.25rem !important;
             font-weight: 600;
             margin-bottom: 0.75rem;
-            color: var(--text);
+            color: var(--text-color);
         }
 
         .page-description {
             font-size: 1.2rem !important;
-            color: var(--text-secondary);
+            color: var(--text-color);
         }
 
         /* Tab Navigation */
@@ -148,7 +162,7 @@
             padding: 1rem 2rem;
             background: none;
             border: none;
-            color: var(--text);
+            color: var(--text-color);
             font-weight: 500;
             cursor: pointer;
             position: relative;
@@ -184,17 +198,17 @@
             display: block;
             margin-bottom: 0.75rem;
             font-weight: 500;
-            color: var(--text);
+            color: var(--text-color);
             font-size: 1.2rem !important;
         }
 
         .form-control {
             width: 100%;
             padding: 1rem;
-            border: 1px solid var(--input-border);
+            border: 1px solid var(--border);
             border-radius: 0.5rem;
-            background: var(--input-bg);
-            color: var(--text);
+            background: var(--card-bg);
+            color: var(--text-color);
             transition: var(--transition);
             font-size: 1.1rem !important;
         }
@@ -216,8 +230,8 @@
             padding: 1rem;
             border: 1px solid var(--border);
             border-radius: 0.5rem;
-            background: var(--input-bg);
-            color: var(--text);
+            background: var(--card-bg);
+            color: var(--text-color);
             cursor: pointer;
             transition: var(--transition);
             display: flex;
@@ -246,7 +260,7 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-secondary);
+            color: var(--text-color);
             font-size: 1.2rem !important;
         }
 
@@ -263,41 +277,189 @@
             display: block;
         }
 
+        /* Modern styling for transactions list */
+        .transactions-list {
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .transaction-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .transaction-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-item:hover::before {
+            opacity: 1;
+        }
+
+        .transaction-info {
+            flex: 1;
+            padding-right: 1rem;
+        }
+
+        .transaction-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transaction-category {
+            color: var(--text-color);
+            font-size: 0.95rem;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transaction-date {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-align: right;
+        }
+
+        .transaction-amount.income {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .transaction-amount.expense {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .transaction-item:hover .transaction-amount {
+            transform: scale(1.05);
+        }
+
+        /* Modern search filters */
         .search-filters {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .search-input {
             flex: 1;
             min-width: 200px;
+            padding: 0.875rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            background: var(--bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .filter-select {
             min-width: 150px;
+            padding: 0.875rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            background: var(--bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            cursor: pointer;
         }
 
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Modern no transactions message */
         .no-transactions {
             text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
+            padding: 4rem 2rem;
+            color: var(--text-color);
+            background: var(--card-bg);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .no-transactions i {
-            font-size: 4rem !important;
-            margin-bottom: 1rem;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
             opacity: 0.5;
+            color: var(--text-color);
         }
 
         .no-transactions h3 {
-            font-size: 1.5rem !important;
-            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            font-weight: 600;
         }
 
         .no-transactions p {
-            font-size: 1.2rem !important;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
         /* Buttons */
@@ -323,7 +485,7 @@
         .btn-secondary {
             background: transparent;
             border: 1px solid var(--border);
-            color: var(--text);
+            color: var(--text-color);
         }
 
         .btn-secondary:hover {
@@ -354,9 +516,120 @@
                 width: 100%;
             }
         }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: white;
+            color: #333;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+            max-width: 350px;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10B981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #EF4444;
+        }
+
+        .toast i {
+            font-size: 20px;
+        }
+
+        .toast.success i {
+            color: #10B981;
+        }
+
+        .toast.error i {
+            color: #EF4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Add these styles for the header */
+        .header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 2.25rem !important;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        #themeToggle {
+            background-color: var(--card-bg);
+            border-color: var(--border);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        #themeToggle:hover {
+            background-color: var(--bg);
+            transform: scale(1.05);
+        }
+
+        #profileButton {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        #profileButton:hover {
+            background-color: var(--bg);
+        }
+
+        #profileDropdown {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        #profileDropdown button:hover {
+            background-color: var(--bg);
+        }
     </style>
 </head>
 <body>
+    <!-- Add Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="#" class="logo">
@@ -405,95 +678,120 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Manage Transactions</h1>
-            <p class="page-description">Add new transactions and view your financial history</p>
-        </div>
-
-        <div class="tab-navigation">
-            <button class="tab-button active" data-tab="add-transaction">Add Transaction</button>
-            <button class="tab-button" data-tab="recent-transactions">View Recent Transactions</button>
-        </div>
-
-        <!-- Add Transaction Form -->
-        <div class="form-section" id="add-transaction">
-            <div class="form-group">
-                <label class="form-label">Transaction Type</label>
-                <div class="transaction-type">
-                    <button type="button" class="type-btn active" data-type="income">
-                        <i class="fas fa-arrow-down"></i> Income
+        <!-- Header -->
+        <div class="flex items-center px-8 py-6 shadow-md sticky top-0 z-50 bg-opacity-90 backdrop-blur-md">
+            <h1 class="text-4xl font-bold text-blue-500 flex-1">Add Transaction</h1>
+            <div class="flex items-center gap-2">
+                <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105" type="button" aria-label="Toggle theme">
+                    <svg id="themeIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                <div class="relative">
+                    <button id="profileButton" class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600" aria-expanded="false" aria-haspopup="true">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">U</div>
+                        <span class="font-medium text-black dark:text-gray-200">User</span>
                     </button>
-                    <button type="button" class="type-btn" data-type="expense">
-                        <i class="fas fa-arrow-up"></i> Expense
-                    </button>
+                    <div id="profileDropdown" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
+                        <div class="py-1" role="menu" aria-orientation="vertical">
+                            <div id="profileEmail" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">user@example.com</div>
+                            <button id="logoutButton" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600" role="menuitem">Logout</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Amount (₹)</label>
-                <div class="amount-input-group">
-                    <span class="currency-symbol">₹</span>
-                    <input type="number" class="form-control amount-input" placeholder="0.00">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Date</label>
-                <input type="date" class="form-control" value="2025-05-30">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Category</label>
-                <select class="form-control">
-                    <option value="">Select category</option>
-                    <option value="salary">Salary</option>
-                    <option value="food">Food</option>
-                    <option value="transport">Transport</option>
-                    <option value="shopping">Shopping</option>
-                    <option value="bills">Bills</option>
-                    <option value="entertainment">Entertainment</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" placeholder="What's this transaction for?"></textarea>
-            </div>
-
-            <div class="form-actions">
-                <button type="reset" class="btn btn-secondary">Reset</button>
-                <button type="submit" class="btn btn-primary">Add Transaction</button>
-            </div>
         </div>
 
-        <!-- Transaction History -->
-        <div class="transaction-history" id="recent-transactions">
-            <div class="search-filters">
-                <input type="text" class="form-control search-input" placeholder="Search transactions...">
-                <select class="form-control filter-select">
-                    <option value="all">All Types</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                </select>
-                <select class="form-control filter-select">
-                    <option value="all">All Categories</option>
-                    <option value="salary">Salary</option>
-                    <option value="food">Food</option>
-                    <option value="transport">Transport</option>
-                    <option value="shopping">Shopping</option>
-                </select>
-                <select class="form-control filter-select">
-                    <option value="all">All Time</option>
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                </select>
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h1 class="page-title">Manage Transactions</h1>
+                <p class="page-description">Add new transactions and view your financial history</p>
             </div>
 
-            <div class="no-transactions">
-                <i class="fas fa-receipt"></i>
-                <h3>No Transactions Found</h3>
-                <p>Start adding transactions to see them here</p>
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="add-transaction">Add Transaction</button>
+                <button class="tab-button" data-tab="recent-transactions">View Recent Transactions</button>
+            </div>
+
+            <!-- Add Transaction Form -->
+            <div class="form-section" id="add-transaction">
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label class="form-label">Transaction Type</label>
+                        <div class="transaction-type">
+                            <button type="button" class="type-btn active" data-type="income">
+                                <i class="fas fa-arrow-down"></i> Income
+                            </button>
+                            <button type="button" class="type-btn" data-type="expense">
+                                <i class="fas fa-arrow-up"></i> Expense
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Amount (₹)</label>
+                        <div class="amount-input-group">
+                            <span class="currency-symbol">₹</span>
+                            <input type="number" class="form-control amount-input" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" value="2025-05-30" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-control" required>
+                            <option value="salary" selected>Salary</option>
+                            <option value="food">Food</option>
+                            <option value="transport">Transport</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="bills">Bills</option>
+                            <option value="entertainment">Entertainment</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" placeholder="What's this transaction for?"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-secondary">Reset</button>
+                        <button type="submit" class="btn btn-primary">Add Transaction</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-history" id="recent-transactions">
+                <div class="search-filters">
+                    <input type="text" class="search-input" placeholder="Search transactions...">
+                    <select class="filter-select">
+                        <option value="all">All Types</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="salary">Salary</option>
+                        <option value="food">Food</option>
+                        <option value="transport">Transport</option>
+                        <option value="shopping">Shopping</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+
+                <div id="transactionsList" class="transactions-list">
+                    <!-- Transactions will be loaded here -->
+                </div>
             </div>
         </div>
     </div>
@@ -529,6 +827,208 @@
                 typeButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
             });
+        });
+
+        // Toast Notification Function
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            toast.innerHTML = `
+                <i class="${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Function to format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+            }).format(amount);
+        }
+
+        // Function to format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // Function to load transactions
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/api/transactions', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (response.ok) {
+                    const transactions = await response.json();
+                    displayTransactions(transactions);
+                } else {
+                    showToast('Failed to load transactions', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                showToast('Error loading transactions', 'error');
+            }
+        }
+
+        // Function to display transactions
+        function displayTransactions(transactions) {
+            const transactionsList = document.getElementById('transactionsList');
+            
+            if (!transactions || transactions.length === 0) {
+                transactionsList.innerHTML = `
+                    <div class="no-transactions">
+                        <i class="fas fa-receipt"></i>
+                        <h3>No Transactions Yet</h3>
+                        <p>Start adding your transactions to see them here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            transactionsList.innerHTML = transactions.map(transaction => `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div class="transaction-title">
+                            ${transaction.category || 'No category'}
+                        </div>
+                        <div class="transaction-category">
+                            ${transaction.description || 'No description'}
+                        </div>
+                        <div class="transaction-date">
+                            ${formatDate(transaction.date)}
+                        </div>
+                    </div>
+                    <div class="transaction-amount ${transaction.type === 'income' ? 'income' : 'expense'}">
+                        ${transaction.type === 'income' ? '+' : '-'} ${formatCurrency(transaction.amount)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load transactions when the page loads
+        document.addEventListener('DOMContentLoaded', loadTransactions);
+
+        // Update form submission handler to reload transactions after adding
+        document.getElementById('transactionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const type = document.querySelector('.type-btn.active').dataset.type;
+            const amount = document.querySelector('.amount-input').value;
+            const date = document.querySelector('input[type="date"]').value;
+            const category = document.querySelector('select').value;
+            const description = document.querySelector('textarea').value || '';
+
+            if (!amount || !date || !category) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        type,
+                        amount: parseFloat(amount),
+                        date,
+                        category,
+                        description: description.trim()
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Transaction added successfully!', 'success');
+                    this.reset();
+                    document.querySelector('.type-btn[data-type="income"]').classList.add('active');
+                    document.querySelector('.type-btn[data-type="expense"]').classList.remove('active');
+                    document.querySelector('select').value = 'salary';
+                    
+                    // Reload transactions after adding new one
+                    loadTransactions();
+                } else {
+                    const error = await response.json();
+                    showToast(error.message || 'Failed to add transaction', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Add search and filter functionality
+        const searchInput = document.querySelector('.search-input');
+        const filterSelects = document.querySelectorAll('.filter-select');
+
+        searchInput.addEventListener('input', loadTransactions);
+        filterSelects.forEach(select => {
+            select.addEventListener('change', loadTransactions);
+        });
+
+        // Add theme toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlElement = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const profileButton = document.getElementById('profileButton');
+            const profileDropdown = document.getElementById('profileDropdown');
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme === 'dark');
+
+            // Theme toggle handler
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = htmlElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                htmlElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme === 'dark');
+            });
+
+            // Profile dropdown toggle
+            profileButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
+                profileDropdown.classList.toggle('hidden', isExpanded);
+                profileButton.setAttribute('aria-expanded', !isExpanded);
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                profileDropdown.classList.add('hidden');
+                profileButton.setAttribute('aria-expanded', 'false');
+            });
+
+            // Update theme icon
+            function updateThemeIcon(isDark) {
+                themeIcon.innerHTML = isDark ? 
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>' :
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+            }
         });
     </script>
 </body>
