@@ -1,0 +1,54 @@
+.user-menu-avatar {
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+  background-color: var(--primary-color, #1976d2);
+  color: white;
+}
+
+.user-menu-avatar:hover {
+  transform: scale(1.1);
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: var(--text-primary);
+  transition: background-color 0.2s ease-in-out;
+  min-width: 180px;
+}
+
+.user-menu-item:hover {
+  background-color: var(--hover-bg);
+}
+
+.user-menu-item .MuiListItemIcon-root {
+  min-width: 40px;
+}
+
+.user-menu-item i {
+  font-size: 1.2rem;
+}
+
+.user-menu-divider {
+  margin: 4px 0;
+  background-color: var(--divider-color);
+}
+
+.logout-button {
+  color: var(--error-color);
+}
+
+.logout-button:hover {
+  background-color: var(--error-hover-bg);
+}
+
+/* CSS Variables */
+:root {
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --divider-color: rgba(0, 0, 0, 0.12);
+  --error-color: #d32f2f;
+  --error-hover-bg: rgba(211, 47, 47, 0.04);
+  --primary-color: #1976d2;
+} 
