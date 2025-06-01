@@ -225,19 +225,56 @@
       overflow: hidden;
     }
 
-    .limit-card:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: linear-gradient(90deg, #3b82f6, #4f46e5);
+    /* Update grid card styles for better theme support */
+    .grid .bg-white {
+      background-color: var(--card-bg) !important;
+      color: var(--text-color) !important;
+      border-color: var(--border) !important;
+      transition: all 0.3s ease !important;
     }
 
-    .limit-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    [data-theme="light"] .grid .bg-white {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+      color: #1a1a1a !important;
+    }
+
+    [data-theme="dark"] .grid .bg-white {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+
+    /* Card hover effects */
+    .grid > div:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Progress bar theme adjustments */
+    [data-theme="light"] .progress-bar {
+      background-color: #e5e7eb;
+    }
+
+    [data-theme="dark"] .progress-bar {
+      background-color: #334155;
+    }
+
+    /* Text color adjustments */
+    [data-theme="light"] .text-gray-600 {
+      color: #4b5563 !important;
+    }
+
+    [data-theme="dark"] .text-gray-600 {
+      color: #9ca3af !important;
+    }
+
+    [data-theme="light"] .text-gray-400 {
+      color: #9ca3af !important;
+    }
+
+    [data-theme="dark"] .text-gray-400 {
+      color: #d1d5db !important;
     }
 
     /* Modal Animation */
@@ -444,66 +481,63 @@
       <div class="bg-white dark:bg-[#0f172a] rounded-xl shadow-lg p-6 transform transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl border border-gray-200 dark:border-[#1e293b]">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-semibold text-blue-500">Food</h3>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-900">
+            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+          </div>
         </div>
         <div class="mb-4">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-gray-600 dark:text-gray-400">Spent:</span>
-            <span class="text-gray-900 dark:text-gray-100">₹2,000 / ₹5,000</span>
+            <span class="font-medium">$350 / $500</span>
           </div>
-          <div class="h-2 bg-gray-100 dark:bg-[#1e293b] rounded-full overflow-hidden">
-            <div class="h-full bg-blue-500 rounded-full" style="width: 40%"></div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-blue-500" style="width: 70%"></div>
           </div>
         </div>
-        <button onclick="window.expenseLimits.quickAddLimit('food')" class="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Adjust Limit
-        </button>
       </div>
 
       <!-- Shopping Category Card -->
       <div class="bg-white dark:bg-[#0f172a] rounded-xl shadow-lg p-6 transform transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl border border-gray-200 dark:border-[#1e293b]">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold text-purple-500">Shopping</h3>
+          <h3 class="text-xl font-semibold text-green-500">Shopping</h3>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 dark:bg-green-900">
+            <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+          </div>
         </div>
         <div class="mb-4">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-gray-600 dark:text-gray-400">Spent:</span>
-            <span class="text-gray-900 dark:text-gray-100">₹3,000 / ₹8,000</span>
+            <span class="font-medium">$200 / $300</span>
           </div>
-          <div class="h-2 bg-gray-100 dark:bg-[#1e293b] rounded-full overflow-hidden">
-            <div class="h-full bg-purple-500 rounded-full" style="width: 37.5%"></div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-green-500" style="width: 66%"></div>
           </div>
         </div>
-        <button onclick="window.expenseLimits.quickAddLimit('shopping')" class="w-full py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Adjust Limit
-        </button>
       </div>
 
       <!-- Entertainment Category Card -->
       <div class="bg-white dark:bg-[#0f172a] rounded-xl shadow-lg p-6 transform transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl border border-gray-200 dark:border-[#1e293b]">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold text-green-500">Entertainment</h3>
+          <h3 class="text-xl font-semibold text-purple-500">Entertainment</h3>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center bg-purple-100 dark:bg-purple-900">
+            <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+          </div>
         </div>
         <div class="mb-4">
           <div class="flex justify-between text-sm mb-1">
             <span class="text-gray-600 dark:text-gray-400">Spent:</span>
-            <span class="text-gray-900 dark:text-gray-100">₹1,500 / ₹3,000</span>
+            <span class="font-medium">$150 / $200</span>
           </div>
-          <div class="h-2 bg-gray-100 dark:bg-[#1e293b] rounded-full overflow-hidden">
-            <div class="h-full bg-green-500 rounded-full" style="width: 50%"></div>
+          <div class="progress-bar">
+            <div class="progress-fill bg-purple-500" style="width: 75%"></div>
           </div>
         </div>
-        <button onclick="window.expenseLimits.quickAddLimit('entertainment')" class="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Adjust Limit
-        </button>
       </div>
     </div>
 
