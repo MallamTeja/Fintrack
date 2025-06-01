@@ -7,7 +7,7 @@ A modern financial tracking application with a clean, responsive user interface.
 - User Authentication (Login/Register)
 - Modern UI with Light/Dark theme support
 - Responsive design
-- Password strength validation
+- Password strength validationh
 - Form validation
 - Secure API endpoints
 
