@@ -5,8 +5,10 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "build": "cd backend && npm install && cd ../frontend && npm install",
-    "dev": "nodemon backend/server.js",
+    "server": "nodemon backend/server.js",
+    "client": "cd frontend && npm start",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
     "vercel-build": "npm run build"
   },
   "dependencies": {
@@ -24,7 +26,9 @@
     "ws": "^8.18.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.9",
+    "vercel": "^42.3.0"
   },
   "engines": {
     "node": ">=14.0.0"
