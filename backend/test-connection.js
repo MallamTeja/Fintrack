@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const monfdn_uri = require('./config/mongodb');
 
 const testConnection = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(monfdn_uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
