@@ -1,4 +1,4 @@
-# Fintrack
+# Fintracknew
 
 A modern financial tracking application with a clean, responsive user interface.
 
@@ -22,8 +22,8 @@ A modern financial tracking application with a clean, responsive user interface.
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/fintrack.git
-cd fintrack
+git clone https://github.com/Karthik-177/fintracknew.git
+cd fintracknew
 ```
 
 2. Install dependencies:
@@ -101,4 +101,4 @@ fintrack/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
