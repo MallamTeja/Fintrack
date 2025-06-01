@@ -4,13 +4,6 @@
     {
       "src": "backend/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
     }
   ],
   "routes": [
@@ -20,32 +13,13 @@
     },
     {
       "src": "/(.*)",
-      "dest": "frontend/build/$1"
-    },
-    {
-      "src": "^/static/(.*)",
-      "dest": "frontend/public/static/$1"
-    },
-    {
-      "src": "^/favicon.ico",
-      "dest": "frontend/public/favicon.ico"
-    },
-    {
-      "src": "^/manifest.json",
-      "dest": "frontend/public/manifest.json"
-    },
-    {
-      "src": "^/(.*).(js|css|png|jpg|jpeg|gif|ico|json|svg)$",
-      "dest": "frontend/public/$1.$2"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/public/index.html"
+      "dest": "backend/server.js"
     }
   ],
   "env": {
     "NODE_ENV": "production",
-    "mongodb_uri": "mongodb+srv://tejamallam:9392256662@finathondatabase.4w5rhcy.mongodb.net/",
-    "jwt_secret": "9392256662"
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_SECRET": "@jwt_secret",
+    "FRONTEND_URL": "https://fintrack-app.vercel.app"
   }
 }
