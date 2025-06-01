@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinTrack - Add Transactions</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             /* Light theme */
@@ -633,11 +634,11 @@
             }
         }
 
-        /* Add these styles for the header */
+        /* Header Styles */
         .header {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -645,26 +646,13 @@
             top: 0;
             z-index: 50;
             backdrop-filter: blur(8px);
-            background-color: rgba(var(--card-bg-rgb), 0.9);
         }
 
         .header h1 {
-            font-size: 2.25rem !important;
+            font-size: 1.5rem;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--text-color);
             margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header h1::before {
-            content: '';
-            display: inline-block;
-            width: 4px;
-            height: 2rem;
-            background: var(--primary);
-            border-radius: 2px;
         }
 
         .header-actions {
@@ -674,11 +662,10 @@
         }
 
         #themeToggle {
-            background-color: var(--card-bg);
-            border: 2px solid var(--border);
+            background: none;
+            border: none;
             color: var(--text-color);
             padding: 0.5rem;
-            border-radius: 9999px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -687,32 +674,33 @@
         }
 
         #themeToggle:hover {
-            background-color: var(--bg);
-            transform: scale(1.05);
-            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        #themeToggle svg {
+            width: 1.5rem;
+            height: 1.5rem;
         }
 
         #profileButton {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            background: none;
+            border: none;
+            padding: 0.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         #profileButton:hover {
-            background-color: var(--bg);
-            border-color: var(--primary);
+            transform: scale(1.05);
         }
 
         .profile-avatar {
             width: 2rem;
             height: 2rem;
-            border-radius: 9999px;
+            border-radius: 50%;
             background: var(--primary);
             color: white;
             display: flex;
@@ -733,8 +721,8 @@
             margin-top: 0.5rem;
             background-color: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 12rem;
             transform-origin: top right;
             transition: all 0.2s ease;
@@ -936,55 +924,58 @@
         }
     </style>
 </head>
-<body>
+<body class="transition-all duration-300 flex min-h-screen">
     <!-- Add Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="#" class="logo">
-            <i class="fas fa-wallet"></i>
-            FinTrack
-        </a>
-        <ul class="nav-links">
-            <li class="nav-item">
-                <a href="dashboard.html" class="nav-link">
-                    <i class="fas fa-home"></i>
-                    Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="addTransactions.html" class="nav-link active">
-                    <i class="fas fa-plus"></i>
-                    Add Transaction
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="insights.html" class="nav-link">
-                    <i class="fas fa-chart-line"></i>
-                    Insights
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="savings.html" class="nav-link">
-                    <i class="fas fa-piggy-bank"></i>
-                    Savings Goals
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="budget.html" class="nav-link">
-                    <i class="fas fa-coins"></i>
-                    Budget Limits
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="settings.html" class="nav-link">
-                    <i class="fas fa-cog"></i>
-                    Settings
-                </a>
-            </li>
-        </ul>
-    </div>
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md">
+        <div class="flex flex-col">
+            <div class="flex items-center">
+                <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
+            </div>
+            <p class="text-xs text-blue-500">track your money</p>
+        </div>
+        <nav class="flex flex-col gap-2">
+            <a href="dashboard.html" data-page="dashboard" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Dashboard
+            </a>
+            <a href="addTransactions.html" data-page="addTransactions" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md bg-blue-500 text-white" title="Add Transactions">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Add Transaction
+            </a>
+            <a href="insights.html" data-page="insights" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Insights
+            </a>
+            <a href="savingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                Savings Goals
+            </a>
+            <a href="expensesLimits.html" data-page="expensesLimits" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Expenses Limits
+            </a>
+            <a href="settings.html" data-page="settings" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Settings
+            </a>
+        </nav>
+    </aside>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -992,13 +983,13 @@
         <div class="header">
             <h1>Add Transaction</h1>
             <div class="header-actions">
-                <button id="themeToggle" class="p-2 rounded-full border-2 border-gray-700 dark:border-gray-300 transition hover:scale-105" type="button" aria-label="Toggle theme">
-                    <svg id="themeIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button id="themeToggle" type="button" aria-label="Toggle theme">
+                    <svg id="themeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                     </svg>
                 </button>
                 <div class="relative">
-                    <button id="profileButton" class="flex items-center gap-2 px-3 py-1 rounded-full transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600" aria-expanded="false" aria-haspopup="true">
+                    <button id="profileButton" aria-expanded="false" aria-haspopup="true">
                         <div class="profile-avatar">U</div>
                         <span class="profile-name">User</span>
                     </button>

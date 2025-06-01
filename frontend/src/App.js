@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import Dashboard from './components/Dashboard';
 import Transactions from './components/Transactions';
 import Budget from './components/Budget';
+import Insights from './components/Insights';
+import Settings from './components/Settings';
 import NavBar from './components/NavBar';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -44,26 +46,35 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token');
-        if (token) {
-          // Simulated user data - replace with actual API call
-          setCurrentUser({
-            id: '1',
-            name: 'John Doe',
-            email: 'johndoe@example.com',
-          });
+        if (!token) {
+          setLoading(false);
+          return;
         }
+
+        const response = await fetch('/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const userData = await response.json();
+        setCurrentUser(userData);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Error fetching user data:', error);
         localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchUserData();
   }, []);
 
   if (loading) {
@@ -97,7 +108,7 @@ function App() {
                 path="/dashboard"
                 element={
                   <PrivateRoute>
-                    <Dashboard />
+                    <Dashboard currentUser={currentUser} />
                   </PrivateRoute>
                 }
               />
@@ -105,7 +116,7 @@ function App() {
                 path="/transactions"
                 element={
                   <PrivateRoute>
-                    <Transactions />
+                    <Transactions currentUser={currentUser} />
                   </PrivateRoute>
                 }
               />
@@ -113,14 +124,30 @@ function App() {
                 path="/budget"
                 element={
                   <PrivateRoute>
-                    <Budget />
+                    <Budget currentUser={currentUser} />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/insights"
+                element={
+                  <PrivateRoute>
+                    <Insights currentUser={currentUser} />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <PrivateRoute>
+                    <Settings currentUser={currentUser} />
                   </PrivateRoute>
                 }
               />
               
               {/* Public routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login setCurrentUser={setCurrentUser} />} />
+              <Route path="/register" element={<Register setCurrentUser={setCurrentUser} />} />
             </Routes>
           </Box>
         </Box>

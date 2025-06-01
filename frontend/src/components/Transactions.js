@@ -72,12 +72,25 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="xs" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          maxWidth: '400px',
+          margin: '16px'
+        }
+      }}
+    >
+      <DialogTitle sx={{ pb: 1, fontSize: '1.1rem' }}>
         {transaction ? 'Edit Transaction' : 'Add New Transaction'}
       </DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+      <DialogContent sx={{ pb: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Date"
@@ -85,7 +98,14 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
               onChange={(newValue) => {
                 setFormData({ ...formData, date: newValue });
               }}
-              renderInput={(params) => <TextField {...params} fullWidth />}
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  fullWidth 
+                  size="small"
+                  sx={{ '& .MuiInputBase-root': { height: '36px' } }}
+                />
+              )}
             />
           </LocalizationProvider>
           
@@ -94,6 +114,8 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
             value={formData.description}
             onChange={handleChange('description')}
             fullWidth
+            size="small"
+            sx={{ '& .MuiInputBase-root': { height: '36px' } }}
           />
           
           <TextField
@@ -102,6 +124,8 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
             value={formData.amount}
             onChange={handleChange('amount')}
             fullWidth
+            size="small"
+            sx={{ '& .MuiInputBase-root': { height: '36px' } }}
           />
           
           <TextField
@@ -110,6 +134,8 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
             value={formData.category}
             onChange={handleChange('category')}
             fullWidth
+            size="small"
+            sx={{ '& .MuiInputBase-root': { height: '36px' } }}
           >
             {categories.map((category) => (
               <MenuItem key={category} value={category}>
@@ -124,15 +150,30 @@ const TransactionDialog = ({ open, handleClose, transaction, handleSave }) => {
             value={formData.type}
             onChange={handleChange('type')}
             fullWidth
+            size="small"
+            sx={{ '& .MuiInputBase-root': { height: '36px' } }}
           >
             <MenuItem value="income">Income</MenuItem>
             <MenuItem value="expense">Expense</MenuItem>
           </TextField>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
+      <DialogActions sx={{ px: 2, pb: 2 }}>
+        <Button 
+          onClick={handleClose}
+          variant="outlined"
+          size="small"
+          sx={{ minWidth: '80px' }}
+        >
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleSubmit} 
+          variant="contained" 
+          color="primary"
+          size="small"
+          sx={{ minWidth: '80px' }}
+        >
           Save
         </Button>
       </DialogActions>
