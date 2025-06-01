@@ -1,0 +1,41 @@
+.user-welcome {
+  padding: 1rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.welcome-icon {
+  font-size: 2rem;
+  animation: wave 1.5s infinite;
+}
+
+.welcome-text h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.last-login {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+@keyframes wave {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+} 

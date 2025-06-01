@@ -1,104 +1,116 @@
-# Fintracknew
+# FinTrack - Personal Finance Manager
 
-A modern financial tracking application with a clean, responsive user interface.
+A modern web application for managing personal finances, built with React, Node.js, and MongoDB.
 
 ## Features
 
-- User Authentication (Login/Register)
-- Modern UI with Light/Dark theme support
-- Responsive design
-- Password strength validationh
-- Form validation
-- Secure API endpoints
+- User authentication and authorization
+- Dashboard with financial overview
+- Transaction management
+- Budget tracking
+- Financial goals
+- Reports and analytics
+- Real-time notifications
 
-## Tech Stack
+## Prerequisites
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js, Express.js
-- Database: MongoDB
-- Authentication: JWT
-
-## Getting Started
-
-1. Clone the repository:
-```bash
-git clone https://github.com/Karthik-177/fintracknew.git
-cd fintracknew
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env` file in the root directory with the following variables:
-```
-MONGODB_URI=your_mongodb_connection_string
-PORT=5000
-JWT_SECRET=your_jwt_secret
-```
-
-4. Start the application:
-```bash
-node start-app.js
-```
-
-5. Open your browser and navigate to `http://localhost:5000`
-
-## Deployment on Vercel
-
-This project can be deployed on Vercel with the following setup:
-
-- The backend API is deployed as serverless functions from `backend/server.js`.
-- The frontend is served as static files from the `frontend/public` directory.
-- The `vercel.json` file configures the builds and routes for Vercel.
-
-### Steps to deploy:
-
-1. Set the following environment variables in your Vercel dashboard for the project:
-   - `MONGODB_URI`: Your MongoDB connection string.
-   - `FRONTEND_URL`: The URL of your deployed frontend (e.g., `https://your-project.vercel.app`).
-   - `NODE_ENV`: Set to `production`.
-   - `JWT_SECRET`: Your JWT secret key.
-
-2. Deploy the project using either:
-   - Vercel CLI:
-     ```bash
-     vercel
-     ```
-   - Git integration: Push your code to a Git repository connected to Vercel.
-
-3. Vercel will build and deploy the backend as serverless functions and serve the frontend as static files.
-
-4. After deployment, your API will be accessible under `/api` routes, and the frontend will be served at the root URL.
-
-### Notes:
-
-- The backend server is configured to work as a serverless function and does not listen on a specific port.
-- WebSocket support may require additional configuration as serverless functions have limitations.
+- Node.js (v14 or higher)
+- MongoDB
+- npm or yarn
 
 ## Project Structure
 
 ```
 fintrack/
-├── public/           # Static files
-│   ├── login.html    # Login page
-│   ├── register.html # Registration page
-│   └── dashboard.html# Main dashboard
-├── config/          # Configuration files
-├── models/          # Database models
-├── server.js        # Express server
-└── package.json     # Project dependencies
+├── frontend/          # React frontend application
+├── backend/           # Node.js backend server
+└── README.md
+```
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the backend directory with the following variables:
+   ```
+   PORT=5000
+   MONGODB_URI=mongodb://localhost:27017/fintrack
+   JWT_SECRET=your_jwt_secret
+   ```
+
+4. Start the backend server:
+   ```bash
+   npm run dev
+   ```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the frontend directory with the following variables:
+   ```
+   REACT_APP_API_URL=http://localhost:5000
+   ```
+
+4. Start the frontend development server:
+   ```bash
+   npm start
+   ```
+
+## Running the Application
+
+1. Start MongoDB service
+2. Start the backend server (from backend directory):
+   ```bash
+   npm run dev
+   ```
+3. Start the frontend development server (from frontend directory):
+   ```bash
+   npm start
+   ```
+
+The application will be available at `http://localhost:3000`
+
+## Testing
+
+### Backend Tests
+```bash
+cd backend
+npm test
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
 ```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
