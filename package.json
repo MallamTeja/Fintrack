@@ -1,14 +1,15 @@
 {
   "name": "fintrack",
   "version": "1.0.0",
+  "private": true,
   "description": "Personal Finance Management Application",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "cd backend && npm start",
     "server": "nodemon backend/server.js",
     "client": "cd frontend && npm start",
     "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
     "vercel-build": "npm run build"
   },
   "dependencies": {
@@ -23,10 +24,10 @@
     "http-proxy-middleware": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.1",
-    "ws": "^8.18.1"
+    "ws": "^8.18.1",
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
     "nodemon": "^3.1.9",
     "vercel": "^42.3.0"
   },

@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    lastLoginTime: {
+        type: Date,
+        default: Date.now
+    },
     preferences: {
         theme: {
             type: String,
