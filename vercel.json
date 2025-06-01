@@ -45,7 +45,7 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret"
+    "mongodb_uri": "***REMOVED***",
+    "jwt_secret": "***REMOVED***"
   }
 }
