@@ -45,7 +45,7 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret"
+    "mongodb_uri": "mongodb+srv://tejamallam:9392256662@finathondatabase.4w5rhcy.mongodb.net/",
+    "jwt_secret": "9392256662"
   }
 }
