@@ -149,8 +149,9 @@ app.use((req, res) => {
 });
 
 // Connect to MongoDB and start HTTP and WebSocket servers
-connectDB()
-    .then(() => {
+const startServer = async () => {
+    try {
+        await connectDB();
         const PORT = process.env.PORT || 5000;
         const mode = process.env.NODE_ENV || 'development';
 
@@ -165,11 +166,16 @@ connectDB()
             console.log(`Server running in ${mode} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
         });
-    })
-    .catch(err => {
+    } catch (err) {
         console.error('Failed to connect to database:', err);
         process.exit(1);
-    });
+    }
+};
+
+// Only start the server if this file is run directly
+if (require.main === module) {
+    startServer();
+}
 
 // Export the Express app for Vercel serverless function
 module.exports = app;
