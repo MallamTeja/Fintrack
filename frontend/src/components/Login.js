@@ -36,21 +36,32 @@ const Login = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        // Here you would typically make an API call to your backend
-        // For now, we'll simulate a successful login
-        const response = {
-          token: 'mock-jwt-token',
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: values.email,
+        setError(''); // Clear any previous errors
+        
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        };
+          body: JSON.stringify(values),
+        });
 
-        localStorage.setItem('token', response.token);
-        navigate('/dashboard');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Login failed' }));
+          throw new Error(errorData.error || 'Login failed');
+        }
+
+        const data = await response.json();
+        
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          navigate('/dashboard');
+        } else {
+          throw new Error('Invalid response from server');
+        }
       } catch (err) {
-        setError('Invalid email or password');
+        console.error('Login error:', err);
+        setError(err.message || 'Invalid email or password');
       }
     },
   });
