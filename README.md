@@ -1,6 +1,6 @@
-# FinTrack 💸 – Personal Finance Manager
+# FinTrack – Personal Finance Manager
 
-> A smart, full-stack personal finance tracking application built using the MERN stack. Track your income, expenses, insights, and goals – all in one place.
+FinTrack is a full-stack personal finance tracking application built using the MERN stack. It enables users to manage income, expenses, financial insights, and budgeting all from a clean, intuitive interface.
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
@@ -8,34 +8,33 @@
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![NPM](https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 
 ---
 
-## 📊 Overview
+## Overview
 
-**FinTrack** helps users track and manage their income, expenses, and financial goals. It features a modern UI with insights, graphs, filters, and categorization – ideal for budgeting and understanding spending habits.
+FinTrack offers a reliable solution for tracking personal finances. It provides a customizable dashboard, transaction management, filter options, categorized records, and data insights. The frontend is built with modern web technologies, while the backend ensures data persistence and secure API handling.
 
-### 🌐 Live Demo
+### Live Demo
 
-👉 [View on Vercel](https://fintrack-five-pink.vercel.app)
-
----
-
-## 🚀 Features
-
-- 📈 Dashboard with financial overview
-- 💸 Add income & expenses with custom categories
-- 📅 Filter transactions by type, date, and category
-- 📊 AI-generated financial insights (WIP)
-- 📤 Export data for reports
-- 💻 Modern UI with Tailwind CSS
-- 🔒 Secure backend using Express & MongoDB
+[View Application](https://fintrack-five-pink.vercel.app)
 
 ---
 
-## 📂 Folder Structure
+## Features
+
+- Financial overview dashboard
+- Add and view income/expenses
+- Filter by category, date, and type
+- Default and custom transaction categories
+- Quick amount input buttons
+- Clean dark UI with responsive design
+- User authentication (in development)
+- AI-powered financial insights (in development)
+
+---
+
+## Folder Structure
 
 ```
 Fintrack/
@@ -58,101 +57,101 @@ Fintrack/
 │   ├── styles.css
 │   ├── tailwind.config.js
 │   └── package.json
-├── vercel.json
 └── README.md
 ```
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
-### 🖥️ Frontend
-- **React.js**
-- **Tailwind CSS**
-- **HTML5 & CSS3**
-- **Vanilla JavaScript**
+### Frontend
 
-### 🛠 Backend
-- **Node.js**
-- **Express.js**
-- **MongoDB (Mongoose)**
+- HTML5
+- CSS3
+- Tailwind CSS
+- JavaScript
+- React (planned enhancement)
 
-### ☁ Deployment
-- **Vercel** (Frontend)
-- **Render** or **Railway** (Optional backend deployment)
+### Backend
+
+- Node.js
+- Express.js
+- MongoDB (via Mongoose)
+
+### Deployment
+
+- Frontend: Vercel
+- Backend: Local or cloud deployment (e.g., Render, Railway)
 
 ---
 
-## ⚙️ Setup Instructions
+## Installation and Setup
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/MallamTeja/Fintrack.git
-cd Fintrack
-```
+### Backend
 
-### 2. Backend Setup
 ```bash
 cd backend
 npm install
+```
 
-# Create a .env file with:
-# MONGO_URI=your_mongo_connection_string
-# PORT=5000
+Create a `.env` file in the `backend/` directory with the following:
 
+```
+PORT=5000
+MONGO_URI=your_mongodb_connection_uri
+```
+
+Start the server:
+
+```bash
 npm start
 ```
 
-### 3. Frontend Setup
+### Frontend
+
 ```bash
-cd ../frontend
+cd frontend
 npm install
 npm run dev
 ```
 
-> 🔄 Backend runs on `http://localhost:5000`  
-> 🌐 Frontend runs on `http://localhost:3000`
-
 ---
 
-## 📌 Libraries & Tools Used
+## Libraries and Tools Used
 
 ```
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-![NPM](https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 ```
 
 ---
 
-## 🧑‍💻 Author
+## Author
 
-- 👨‍💻 **Teja Mallam** – [@MallamTeja](https://github.com/MallamTeja)
-- 📫 tejamallam1233@gmail.com
+**Teja Mallam**  
+[GitHub Profile](https://github.com/MallamTeja)  
+Contact: tejamallam1233@gmail.com
 
 ---
 
-## 🤝 Contributing
+## Contributing
+
+Contributions are welcome. To contribute:
 
 1. Fork the repository
-2. Create your branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -m 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Open a pull request 🎉
+2. Create a new branch (`git checkout -b feature-name`)
+3. Make your changes
+4. Commit and push (`git commit -m "Add feature"` and `git push origin feature-name`)
+5. Open a pull request
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-⭐ If you like this project, consider giving it a star on GitHub!
+This project is licensed under the MIT License.
