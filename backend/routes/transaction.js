@@ -1,10 +1,22 @@
+/**
+ * Transaction Routes Module
+ * Handles CRUD operations for financial transactions
+ * Includes real-time updates via WebSocket
+ */
+
 const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
 const { broadcastToUser } = require('../websocketManager');
 
-// Get all transactions for authenticated user
+/**
+ * Get all transactions for authenticated user
+ * GET /api/transactions
+ * @route GET /api/transactions
+ * @requires auth - JWT authentication middleware
+ * @returns {Array} List of user's transactions sorted by date
+ */
 router.get('/', auth, async (req, res) => {
     try {
         const transactions = await Transaction.find({ user: req.user._id }).sort({ date: -1 });
@@ -15,7 +27,18 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// Add new transaction
+/**
+ * Add new transaction
+ * POST /api/transactions
+ * @route POST /api/transactions
+ * @requires auth - JWT authentication middleware
+ * @param {string} type - Transaction type ('income' or 'expense')
+ * @param {string} category - Transaction category
+ * @param {number} amount - Transaction amount
+ * @param {string} [description] - Optional transaction description
+ * @param {Date} [date] - Optional transaction date
+ * @returns {Object} Created transaction
+ */
 router.post('/', auth, async (req, res) => {
     try {
         console.log('Transaction POST route: req.user:', req.user);
@@ -69,7 +92,19 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// Update transaction
+/**
+ * Update existing transaction
+ * PATCH /api/transactions/:id
+ * @route PATCH /api/transactions/:id
+ * @requires auth - JWT authentication middleware
+ * @param {string} id - Transaction ID
+ * @param {string} type - Transaction type ('income' or 'expense')
+ * @param {string} category - Transaction category
+ * @param {number} amount - Transaction amount
+ * @param {string} [description] - Optional transaction description
+ * @param {Date} [date] - Optional transaction date
+ * @returns {Object} Updated transaction
+ */
 router.patch('/:id', auth, async (req, res) => {
     try {
         const { type, category, amount, description, date } = req.body;
@@ -130,7 +165,14 @@ router.patch('/:id', auth, async (req, res) => {
     }
 });
 
-// Delete transaction
+/**
+ * Delete transaction
+ * DELETE /api/transactions/:id
+ * @route DELETE /api/transactions/:id
+ * @requires auth - JWT authentication middleware
+ * @param {string} id - Transaction ID
+ * @returns {Object} Success message
+ */
 router.delete('/:id', auth, async (req, res) => {
     try {
         // Find existing transaction

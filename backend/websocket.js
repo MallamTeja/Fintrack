@@ -1,3 +1,9 @@
+/**
+ * WebSocket Server Implementation
+ * This module implements a WebSocket server with authentication, heartbeat mechanism,
+ * and broadcasting capabilities for real-time communication.
+ */
+
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 const config = require('config');
@@ -9,23 +15,39 @@ dotenv.config();
 // Get JWT secret from config or environment variable
 const JWT_SECRET = process.env.JWT_SECRET || config.get('jwtSecret');
 
+/**
+ * WebSocketServer Class
+ * Manages WebSocket connections, authentication, and message handling
+ */
 class WebSocketServer {
+    /**
+     * Constructor - Initializes WebSocket server and client tracking
+     * @param {Object} server - HTTP server instance
+     */
     constructor(server) {
         this.wss = new WebSocket.Server({ server });
-        this.clients = new Map();
+        this.clients = new Map(); // Maps WebSocket connections to user IDs
 
         this.wss.on('connection', (ws, req) => {
             this.handleConnection(ws, req);
         });
     }
 
+    /**
+     * Handles new WebSocket connections
+     * Sets up event listeners for messages, pong responses, and connection closure
+     * @param {Object} ws - WebSocket connection
+     * @param {Object} req - HTTP request object
+     */
     handleConnection(ws, req) {
         ws.isAlive = true;
 
+        // Handle pong responses for heartbeat mechanism
         ws.on('pong', () => {
             ws.isAlive = true;
         });
 
+        // Handle incoming messages
         ws.on('message', async (message) => {
             try {
                 const data = JSON.parse(message);
@@ -60,12 +82,16 @@ class WebSocketServer {
             }
         });
 
+        // Clean up when connection closes
         ws.on('close', () => {
             this.clients.delete(ws);
         });
     }
 
-    // Broadcast to all connected clients
+    /**
+     * Broadcasts a message to all connected clients
+     * @param {Object} data - Data to broadcast
+     */
     broadcast(data) {
         this.wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
@@ -74,7 +100,11 @@ class WebSocketServer {
         });
     }
 
-    // Broadcast to specific user
+    /**
+     * Broadcasts a message to a specific user
+     * @param {string} userId - ID of the user to broadcast to
+     * @param {Object} data - Data to broadcast
+     */
     broadcastToUser(userId, data) {
         this.wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN && this.clients.get(client) === userId) {
@@ -83,7 +113,10 @@ class WebSocketServer {
         });
     }
 
-    // Start heartbeat to check for stale connections
+    /**
+     * Starts the heartbeat mechanism to detect and clean up stale connections
+     * Checks connection health every 30 seconds by default
+     */
     startHeartbeat() {
         setInterval(() => {
             this.wss.clients.forEach((ws) => {
