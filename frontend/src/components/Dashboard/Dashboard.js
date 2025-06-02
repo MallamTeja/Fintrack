@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState('income');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -103,6 +104,20 @@ const Dashboard = () => {
         </div>
         
         <div className="dashboard-sidebar">
+          <div className="transaction-type-selector">
+            <button 
+              className={`type-button ${selectedType === 'income' ? 'active' : ''}`}
+              onClick={() => setSelectedType('income')}
+            >
+              Income
+            </button>
+            <button 
+              className={`type-button ${selectedType === 'expense' ? 'active' : ''}`}
+              onClick={() => setSelectedType('expense')}
+            >
+              Expenses
+            </button>
+          </div>
           <TransactionList
             transactions={transactions}
             onEdit={(transaction) => {
@@ -111,6 +126,7 @@ const Dashboard = () => {
             onDelete={(id) => {
               // Handle delete
             }}
+            type={selectedType}
           />
         </div>
       </div>

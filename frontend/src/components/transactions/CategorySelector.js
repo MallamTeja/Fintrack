@@ -1,32 +1,29 @@
 import React from 'react';
 import { 
-  FaMoneyBillWave, FaCreditCard, FaChartLine, FaPiggyBank, 
-  FaBriefcase, FaStore, FaUtensils, FaHeartbeat, 
-  FaFilm, FaShoppingBag, FaFileInvoiceDollar, FaCar 
+  FaMoneyBillWave, FaChartLine, FaBriefcase, 
+  FaUtensils, FaHeartbeat, FaFilm, 
+  FaFileInvoiceDollar, FaShoppingBag
 } from 'react-icons/fa';
 
 const categoryIcons = {
   // Income categories
   'Salary': <FaMoneyBillWave />,
-  'Credits': <FaCreditCard />,
   'Passive Income': <FaChartLine />,
   'Profits from Stocks': <FaChartLine />,
-  'Investments': <FaPiggyBank />,
-  'Business Income': <FaBriefcase />,
+  'Freelancing': <FaBriefcase />,
   
   // Expense categories
   'Food': <FaUtensils />,
   'Medical': <FaHeartbeat />,
   'Entertainment': <FaFilm />,
-  'Shopping': <FaShoppingBag />,
   'Bills': <FaFileInvoiceDollar />,
-  'Transportation': <FaCar />
+  'Other Debits': <FaShoppingBag />
 };
 
 const CategorySelector = ({ type, selectedCategory, onSelect }) => {
   const categories = type === 'income' 
-    ? ['Salary', 'Credits', 'Passive Income', 'Profits from Stocks', 'Investments', 'Business Income']
-    : ['Food', 'Medical', 'Entertainment', 'Shopping', 'Bills', 'Transportation'];
+    ? ['Salary', 'Passive Income', 'Profits from Stocks', 'Freelancing']
+    : ['Food', 'Medical', 'Entertainment', 'Bills', 'Other Debits'];
 
   return (
     <div className="category-selector">
