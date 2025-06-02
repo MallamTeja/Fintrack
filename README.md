@@ -1,6 +1,6 @@
 # FinTrack – Personal Finance Manager
 
-FinTrack is a full-stack personal finance tracking application built using the MERN stack. It enables users to manage income, expenses, financial insights, and budgeting all from a clean, intuitive interface.
+FinTrack is a full-stack personal finance tracking application built using the MERN stack. It enables users to manage income, expenses, financial insights, and budgeting through a clean, intuitive interface.
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
@@ -11,26 +11,34 @@ FinTrack is a full-stack personal finance tracking application built using the M
 
 ---
 
+## Deployed Link
+
+Access the application here:  
+**https://fintrack-five-pink.vercel.app**
+
+---
+
 ## Overview
 
-FinTrack offers a reliable solution for tracking personal finances. It provides a customizable dashboard, transaction management, filter options, categorized records, and data insights. The frontend is built with modern web technologies, while the backend ensures data persistence and secure API handling.
+FinTrack provides a reliable and minimal solution for tracking personal finances. It features:
 
-### Live Demo
-
-[View Application](https://fintrack-five-pink.vercel.app)
+- A customizable dashboard
+- Transaction management
+- Filter options (by category, type, date)
+- Categorized record-keeping
+- Data insights and analysis
 
 ---
 
 ## Features
 
-- Financial overview dashboard
-- Add and view income/expenses
-- Filter by category, date, and type
-- Default and custom transaction categories
-- Quick amount input buttons
-- Clean dark UI with responsive design
-- User authentication (in development)
-- AI-powered financial insights (in development)
+- View financial summaries on a modern dashboard
+- Add, edit, and view income or expense transactions
+- Use default and custom categories
+- Filter data by type, category, and date
+- Quick amount input buttons (₹100, ₹500, ₹1000, ₹5000)
+- Dark-themed responsive UI
+- AI insights and user authentication (planned)
 
 ---
 
@@ -70,18 +78,18 @@ Fintrack/
 - CSS3
 - Tailwind CSS
 - JavaScript
-- React (planned enhancement)
+- React (planned)
 
 ### Backend
 
 - Node.js
 - Express.js
-- MongoDB (via Mongoose)
+- MongoDB (Mongoose)
 
 ### Deployment
 
 - Frontend: Vercel
-- Backend: Local or cloud deployment (e.g., Render, Railway)
+- Backend: Local/Cloud Deployment
 
 ---
 
@@ -94,14 +102,14 @@ cd backend
 npm install
 ```
 
-Create a `.env` file in the `backend/` directory with the following:
+Create a `.env` file with:
 
 ```
 PORT=5000
-MONGO_URI=your_mongodb_connection_uri
+MONGO_URI=your_mongodb_connection_string
 ```
 
-Start the server:
+Start backend server:
 
 ```bash
 npm start
@@ -119,7 +127,7 @@ npm run dev
 
 ## Libraries and Tools Used
 
-```
+```markdown
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
@@ -135,20 +143,22 @@ npm run dev
 ## Author
 
 **Teja Mallam**  
-[GitHub Profile](https://github.com/MallamTeja)  
-Contact: tejamallam1233@gmail.com
+[GitHub](https://github.com/MallamTeja)  
+[LinkedIn](https://www.linkedin.com/in/tejamallam)  
+**Email:** tejamallam1233@gmail.com
 
 ---
 
 ## Contributing
 
-Contributions are welcome. To contribute:
+Contributions are welcome. Please follow these steps:
 
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature-name`)
 3. Make your changes
-4. Commit and push (`git commit -m "Add feature"` and `git push origin feature-name`)
-5. Open a pull request
+4. Commit (`git commit -m "Add feature"`)
+5. Push (`git push origin feature-name`)
+6. Open a pull request
 
 ---
 
