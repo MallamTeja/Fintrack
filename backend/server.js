@@ -1,198 +1,126 @@
 /**
- * FinTrack Backend Server
- * This is the main server file that sets up the Express application, middleware,
- * routes, and handles server initialization.
+ * FinTrack Server
+ * 
+ * Main server file for the FinTrack application. Handles HTTP requests,
+ * WebSocket connections, and database operations.
+ * 
+ * Features:
+ * - Express server setup
+ * - Middleware configuration
+ * - API route handling
+ * - WebSocket integration
+ * - Database connection
+ * - Error handling
  */
 
-// Import required dependencies
-const dotenv = require('dotenv');
-const path = require('path');
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const compression = require('compression');
-
-// Configure environment variables
-const dotenvPath = path.resolve(__dirname, '../.env');
-dotenv.config({ path: dotenvPath });
-
-console.log('Environment variables loaded. MONGODB_URI:', process.env.MONGODB_URI);
-
-// Import database connection and models
-const { connectDB } = require('./db');
-const User = require('./models/User');
-const Transaction = require('./models/Transaction');
-const SavingsGoal = require('./models/SavingsGoal');
-const Budget = require('./models/Budget');
-
-// Import route handlers
-const authRoutes = require('./routes/auth');
-const transactionRoutes = require('./routes/transaction');
-const budgetRoutes = require('./routes/budget');
-const savingsRoutes = require('./routes/savings');
-
-// Import WebSocket related modules
+const rateLimit = require('express-rate-limit');
 const http = require('http');
-const { initializeWebSocketServer } = require('./websocketManager');
+const config = require('./config');
+const websocketManager = require('./websocketManager');
 
-// Initialize Express application
+// Create Express application
 const app = express();
 
-// Security and Performance Middleware Configuration
-// Note: Helmet is temporarily disabled for troubleshooting
-app.use(compression());
-
 /**
- * Rate Limiting Configuration
- * Limits each IP to 100 requests per 15-minute window to prevent abuse
+ * Middleware Configuration
+ * 
+ * Sets up security and performance middleware:
+ * - CORS for cross-origin requests
+ * - Helmet for security headers
+ * - Compression for response size
+ * - Rate limiting for API protection
+ * - JSON and URL-encoded body parsing
  */
+app.use(cors());
+app.use(helmet());
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting configuration
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api/', limiter);
+app.use(limiter);
 
 /**
- * CORS Configuration
- * Configures Cross-Origin Resource Sharing based on environment
- * Production: Allows specific domains
- * Development: Allows localhost
+ * API Routes Configuration
+ * 
+ * Sets up route handlers for:
+ * - Authentication
+ * - Transactions
+ * - Budgets
+ * - Savings goals
  */
-const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? [process.env.FRONTEND_URL, 'https://fintrack-app.vercel.app', 'https://fintrack-git-main-mallamteja-projects.vercel.app']
-        : ['http://localhost:5000', 'http://localhost:3000'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range']
-};
-app.use(cors(corsOptions));
-
-// Body parsing middleware with size limits
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
-// Serve static files from the frontend public directory
-app.use(express.static(path.join(__dirname, '../frontend/public')));
-
-// API Route Registration
-app.use('/api/auth', authRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/budgets', budgetRoutes);
-app.use('/api/savings-goals', savingsRoutes);
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/transactions', require('./routes/transactions'));
+app.use('/api/budgets', require('./routes/budgets'));
+app.use('/api/savings', require('./routes/savings'));
 
 /**
- * API Documentation Route
- * Provides information about available API endpoints and their methods
+ * Error Handling Middleware
+ * 
+ * Handles different types of errors:
+ * - 404 Not Found
+ * - 500 Server Error
+ * - Validation errors
+ * - Authentication errors
  */
-app.get('/api', (req, res) => {
-    res.json({
-        name: 'FinTrack API',
-        version: '1.0.0',
-        endpoints: {
-            auth: {
-                register: 'POST /api/auth/register',
-                login: 'POST /api/auth/login',
-                me: 'GET /api/auth/me',
-                preferences: 'PUT /api/auth/preferences'
-            },
-            transactions: {
-                list: 'GET /api/transactions',
-                create: 'POST /api/transactions',
-                update: 'PUT /api/transactions/:id',
-                delete: 'DELETE /api/transactions/:id'
-            },
-            budgets: {
-                list: 'GET /api/budgets',
-                create: 'POST /api/budgets',
-                update: 'PUT /api/budgets/:id',
-                delete: 'DELETE /api/budgets/:id'
-            },
-            savingsGoals: {
-                list: 'GET /api/savings-goals',
-                create: 'POST /api/savings-goals',
-                update: 'PUT /api/savings-goals/:id',
-                delete: 'DELETE /api/savings-goals/:id'
-            }
-        }
+app.use((req, res, next) => {
+    res.status(404).json({
+        error: 'Not Found',
+        message: 'The requested resource was not found'
     });
 });
 
-/**
- * HTML File Routes
- * Serves HTML files for different pages of the application
- */
-const htmlFiles = ['insights', 'dashboard', 'login', 'register', 'settings'];
-htmlFiles.forEach(file => {
-    app.get(`/${file}.html`, (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/public', `${file}.html`));
-    });
-});
-
-// Root route handler - redirects to login page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/public', 'login.html'));
-});
-
-/**
- * Global Error Handling Middleware
- * Handles all uncaught errors and provides appropriate error responses
- */
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
-    
-    res.status(statusCode).json({
-        error: message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    res.status(err.status || 500).json({
+        error: err.name || 'Server Error',
+        message: err.message || 'An unexpected error occurred'
     });
 });
 
 /**
- * 404 Error Handler
- * Handles requests to undefined routes
+ * Server Initialization
+ * 
+ * Sets up and starts the server:
+ * 1. Connects to MongoDB
+ * 2. Creates HTTP server
+ * 3. Initializes WebSocket server
+ * 4. Starts listening on configured port
  */
-app.use((req, res) => {
-    res.status(404).json({
-        error: 'Route not found'
-    });
-});
-
-/**
- * Server Initialization Function
- * Connects to MongoDB and starts HTTP and WebSocket servers
- */
-const startServer = async () => {
+async function startServer() {
     try {
-        await connectDB();
-        const PORT = process.env.PORT || 5000;
-        const mode = process.env.NODE_ENV || 'development';
+        // Connect to MongoDB
+        await mongoose.connect(config.mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('Connected to MongoDB');
 
-        // Create HTTP server from Express app
+        // Create HTTP server
         const server = http.createServer(app);
 
-        // Initialize WebSocket server with HTTP server
-        initializeWebSocketServer(server);
+        // Initialize WebSocket server
+        websocketManager.initializeWebSocketServer(server);
 
-        // Start listening on the HTTP server
-        server.listen(PORT, () => {
-            console.log(`Server running in ${mode} mode on port ${PORT}`);
-            console.log(`API URL: http://localhost:${PORT}/api`);
+        // Start listening
+        const port = config.port || 3000;
+        server.listen(port, () => {
+            console.log(`Server running on port ${port}`);
         });
-    } catch (err) {
-        console.error('Failed to connect to database:', err);
+    } catch (error) {
+        console.error('Failed to start server:', error);
         process.exit(1);
     }
-};
-
-// Start server only if this file is run directly
-if (require.main === module) {
-    startServer();
 }
 
-// Export the Express app for Vercel serverless function
-module.exports = app;
+// Start the server
+startServer();

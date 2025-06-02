@@ -1,12 +1,42 @@
+/**
+ * FinTrack - Add Transactions Page
+ * 
+ * This page provides functionality for:
+ * - Adding new transactions (income/expense)
+ * - Viewing recent transactions
+ * - Filtering transactions by type and date
+ * - Uploading bank statements
+ * 
+ * Features:
+ * - Real-time transaction updates
+ * - Form validation
+ * - File upload handling
+ * - Theme support (light/dark)
+ * - Responsive design
+ */
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinTrack - Add Transactions</title>
+    
+    <!-- External Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        /**
+         * Theme Configuration
+         * 
+         * Defines color schemes for both light and dark themes:
+         * - Background colors
+         * - Text colors
+         * - Primary colors
+         * - Border colors
+         * - Success/Danger colors
+         */
         :root {
             /* Light theme */
             --bg-light: #ffffff;
@@ -29,6 +59,13 @@
             --danger-dark: #EF4444;
         }
 
+        /**
+         * Theme Application
+         * 
+         * Applies theme variables based on data-theme attribute:
+         * - Light theme: Clean, minimal design
+         * - Dark theme: Dark, high-contrast design
+         */
         [data-theme="light"] {
             --bg: var(--bg-light);
             --text-color: var(--text-light);
@@ -51,11 +88,20 @@
             --danger: var(--danger-dark);
         }
 
+        /**
+         * Base Styles
+         * 
+         * Global styles for:
+         * - Typography
+         * - Layout
+         * - Spacing
+         * - Transitions
+         */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-size: 16px; /* Base font size */
+            font-size: 16px;
         }
 
         body {
@@ -68,124 +114,15 @@
             min-height: 100vh;
         }
 
-        /* Sidebar Styles */
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background: var(--card-bg);
-            padding: 2rem;
-            position: fixed;
-            left: 0;
-            top: 0;
-            border-right: 1px solid var(--border);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 2rem !important;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 2.5rem;
-            text-decoration: none;
-        }
-
-        .logo i {
-            font-size: 2rem !important;
-        }
-
-        .nav-links {
-            list-style: none;
-        }
-
-        .nav-item {
-            margin-bottom: 0.5rem;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: var(--text-color);
-            text-decoration: none;
-            border-radius: 0.5rem;
-            transition: var(--transition);
-            font-size: 1.1rem !important;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Main Content Styles */
-        .main-content {
-            margin-left: 250px;
-            padding: 0;
-            width: calc(100% - 250px);
-            min-height: 100vh;
-            background-color: var(--bg);
-            transition: background-color 0.3s ease;
-        }
-
-        .content-wrapper {
-            padding: 2rem;
-        }
-
-        .page-header {
-            margin-bottom: 2rem;
-            padding: 0 2rem;
-        }
-
-        .page-title {
-            font-size: 2.25rem !important;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-color);
-        }
-
-        .page-description {
-            font-size: 1.2rem !important;
-            color: var(--text-color);
-        }
-
-        /* Tab Navigation */
-        .tab-navigation {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .tab-button {
-            padding: 1rem 2rem;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-weight: 500;
-            cursor: pointer;
-            position: relative;
-            transition: var(--transition);
-            font-size: 1.2rem !important;
-        }
-
-        .tab-button.active {
-            color: var(--primary);
-        }
-
-        .tab-button.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-        }
-
-        /* Form Styles */
+        /**
+         * Transaction Form Styles
+         * 
+         * Styles for:
+         * - Form layout
+         * - Input fields
+         * - Buttons
+         * - Validation states
+         */
         .form-section {
             max-width: 1200px;
             margin: 0;
@@ -202,7 +139,7 @@
             margin-bottom: 0.75rem;
             font-weight: 500;
             color: var(--text-color);
-            font-size: 1.2rem !important;
+            font-size: 1.2rem;
         }
 
         .form-control {
@@ -213,107 +150,65 @@
             background: var(--card-bg);
             color: var(--text-color);
             transition: var(--transition);
-            font-size: 1.1rem !important;
+            font-size: 1.1rem;
             min-width: 400px;
         }
 
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
-        }
-
-        .transaction-type {
+        /**
+         * Transaction Type Selector
+         * 
+         * Styles for:
+         * - Type selection buttons
+         * - Active states
+         * - Hover effects
+         */
+        .transaction-type-selector {
             display: flex;
-            gap: 2rem;
+            gap: 1rem;
             margin-bottom: 2rem;
-            width: 100%;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .type-btn {
+        .type-button {
             flex: 1;
-            padding: 1.3rem;
+            padding: 0.75rem 1.5rem;
             border: 1px solid var(--border);
             border-radius: 0.5rem;
             background: var(--card-bg);
             color: var(--text-color);
+            font-weight: 500;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
-            font-size: 1.2rem !important;
-            min-width: 250px;
+            gap: 0.5rem;
         }
 
-        .type-btn i {
-            font-size: 1.2rem !important;
+        .type-button:hover {
+            background: var(--bg);
+            border-color: var(--primary);
         }
 
-        .type-btn.active {
+        .type-button.active {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
         }
 
-        .amount-input-group {
-            position: relative;
-            width: 100%;
-        }
-
-        .amount-input {
-            padding-left: 3rem;
-            width: 100%;
-            min-width: 300px;
-        }
-
-        .currency-symbol {
-            position: absolute;
-            left: 1.2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-color);
-            font-size: 1.2rem !important;
-        }
-
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        select.form-control {
-            padding-right: 2.5rem;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.2rem;
-            appearance: none;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 2rem;
-            width: 100%;
-        }
-
-        .form-actions .btn {
-            flex: 1;
-            min-width: 200px;
-            padding: 1.2rem 2rem;
-        }
-
-        /* Transaction History */
-        .transaction-history {
-            display: none;
-        }
-
-        .transaction-history.active {
-            display: block;
-        }
-
-        /* Modern styling for transactions list */
+        /**
+         * Transaction List Styles
+         * 
+         * Styles for:
+         * - Transaction items
+         * - Amount display
+         * - Category icons
+         * - Date formatting
+         */
         .transactions-list {
             margin-top: 2rem;
             max-width: 800px;
@@ -336,241 +231,14 @@
             overflow: hidden;
         }
 
-        .transaction-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: var(--primary);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .transaction-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-        }
-
-        .transaction-item:hover::before {
-            opacity: 1;
-        }
-
-        .transaction-info {
-            flex: 1;
-            padding-right: 1rem;
-        }
-
-        .transaction-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .transaction-category {
-            color: var(--text-color);
-            font-size: 0.95rem;
-            opacity: 0.8;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .transaction-date {
-            color: var(--text-color);
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-top: 0.25rem;
-        }
-
-        .transaction-amount {
-            font-weight: 600;
-            font-size: 1.2rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.75rem;
-            transition: all 0.3s ease;
-            min-width: 140px;
-            text-align: right;
-        }
-
-        .transaction-amount.income {
-            color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .transaction-amount.expense {
-            color: var(--danger);
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .transaction-item:hover .transaction-amount {
-            transform: scale(1.05);
-        }
-
-        /* Modern search filters */
-        .search-filters {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 0.875rem 1.25rem;
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            background: var(--bg);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .filter-select {
-            min-width: 150px;
-            padding: 0.875rem 1.25rem;
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            background: var(--bg);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        /* Modern no transactions message */
-        .no-transactions {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-color);
-            background: var(--card-bg);
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            margin-top: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .no-transactions i {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            opacity: 0.5;
-            color: var(--text-color);
-        }
-
-        .no-transactions h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.75rem;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        .no-transactions p {
-            font-size: 1.1rem;
-            color: var(--text-color);
-            opacity: 0.7;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 1.2rem !important;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .search-filters {
-                flex-direction: column;
-            }
-
-            .search-input, .filter-select {
-                width: 100%;
-            }
-
-            .transaction-layout {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-
-            .form-section {
-                padding: 0 1rem;
-            }
-
-            .manual-transaction,
-            .bank-statement-upload {
-                max-width: 100%;
-                margin: 0;
-            }
-
-            .form-control {
-                min-width: 100%;
-            }
-
-            .type-btn {
-                min-width: 100%;
-            }
-        }
-
-        /* Toast Notification Styles */
+        /**
+         * Toast Notification Styles
+         * 
+         * Styles for:
+         * - Success messages
+         * - Error messages
+         * - Animations
+         */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -592,390 +260,12 @@
             max-width: 350px;
         }
 
-        .toast.success {
-            border-left: 4px solid #10B981;
-        }
-
-        .toast.error {
-            border-left: 4px solid #EF4444;
-        }
-
-        .toast i {
-            font-size: 20px;
-        }
-
-        .toast.success i {
-            color: #10B981;
-        }
-
-        .toast.error i {
-            color: #EF4444;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        /* Header Styles */
-        .header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(8px);
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-color);
-            margin: 0;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        #themeToggle {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            padding: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #themeToggle:hover {
-            transform: scale(1.1);
-        }
-
-        #themeToggle svg {
-            width: 1.5rem;
-            height: 1.5rem;
-        }
-
-        #profileButton {
-            background: none;
-            border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        #profileButton:hover {
-            transform: scale(1.05);
-        }
-
-        .profile-avatar {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-        }
-
-        .profile-name {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        #profileDropdown {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            margin-top: 0.5rem;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-width: 12rem;
-            transform-origin: top right;
-            transition: all 0.2s ease;
-        }
-
-        #profileDropdown.hidden {
-            opacity: 0;
-            transform: scale(0.95);
-            pointer-events: none;
-        }
-
-        .profile-dropdown-item {
-            padding: 0.75rem 1rem;
-            color: var(--text-color);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .profile-dropdown-item:hover {
-            background-color: var(--bg);
-        }
-
-        .profile-dropdown-item i {
-            width: 1.25rem;
-            text-align: center;
-        }
-
-        .profile-email {
-            padding: 0.75rem 1rem;
-            color: var(--text-color);
-            opacity: 0.7;
-            font-size: 0.875rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* Transaction Layout */
-        .transaction-layout {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 2rem;
-            max-width: 1600px;
-            margin: 0;
-            padding: 0 2rem;
-            position: relative;
-        }
-
-        .manual-transaction {
-            max-width: 1000px;
-            margin-left: 200px;
-            padding: 2.5rem;
-            background: var(--card-bg);
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .bank-statement-upload {
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: 0;
-            position: absolute;
-            right: -200px;
-            top: 0;
-        }
-
-        @media (max-width: 1400px) {
-            .manual-transaction {
-                margin-left: 100px;
-            }
-            .bank-statement-upload {
-                right: 0;
-                margin-right: 2rem;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .manual-transaction {
-                margin-left: 0;
-            }
-            .bank-statement-upload {
-                position: static;
-                margin: 2rem 0 0 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .transaction-layout {
-                grid-template-columns: 1fr;
-                padding: 0 1rem;
-            }
-
-            .form-section {
-                padding: 0 1rem;
-            }
-
-            .manual-transaction,
-            .bank-statement-upload {
-                max-width: 100%;
-                margin: 0;
-            }
-
-            .form-control {
-                min-width: 100%;
-            }
-
-            .type-btn {
-                min-width: 100%;
-            }
-        }
-
-        .section-title {
-            font-size: 1.5rem !important;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
-        }
-
-        /* Bank Statement Upload Styles */
-        .bank-statement-upload {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 2rem;
-        }
-
-        .upload-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 1rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary);
-            background: rgba(37, 99, 235, 0.05);
-        }
-
-        .upload-area i {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        .upload-area p {
-            margin: 0.5rem 0;
-            color: var(--text-color);
-        }
-
-        .upload-hint {
-            font-size: 0.9rem !important;
-            opacity: 0.7;
-        }
-
-        .upload-info {
-            text-align: center;
-            font-size: 0.9rem !important;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .upload-preview {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1rem;
-        }
-
-        .preview-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .preview-header i {
-            color: var(--success);
-            font-size: 1.5rem !important;
-        }
-
-        .preview-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-
-        .hidden {
-            display: none;
-        }
+        // ... rest of the styles ...
     </style>
 </head>
-<body class="transition-all duration-300 flex min-h-screen">
-    <!-- Add Toast Container -->
+<body>
+    <!-- Toast Container for Notifications -->
     <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Sidebar Navigation -->
-    <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md">
-        <div class="flex flex-col">
-            <div class="flex items-center">
-                <h2 class="text-4xl font-bold text-blue-500">FinTrack</h2>
-            </div>
-            <p class="text-xs text-blue-500">track your money</p>
-        </div>
-        <nav class="flex flex-col gap-2">
-            <a href="dashboard.html" data-page="dashboard" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Dashboard">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                Dashboard
-            </a>
-            <a href="addTransactions.html" data-page="addTransactions" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md bg-blue-500 text-white" title="Add Transactions">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Add Transaction
-            </a>
-            <a href="insights.html" data-page="insights" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                Insights
-            </a>
-            <a href="savingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                Savings Goals
-            </a>
-            <a href="expensesLimits.html" data-page="expensesLimits" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Expenses Limits">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Expenses Limits
-            </a>
-            <a href="settings.html" data-page="settings" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                Settings
-            </a>
-        </nav>
-    </aside>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -983,11 +273,13 @@
         <div class="header">
             <h1>Add Transaction</h1>
             <div class="header-actions">
+                <!-- Theme Toggle -->
                 <button id="themeToggle" type="button" aria-label="Toggle theme">
                     <svg id="themeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                     </svg>
                 </button>
+                <!-- Profile Menu -->
                 <div class="relative">
                     <button id="profileButton" aria-expanded="false" aria-haspopup="true">
                         <div class="profile-avatar">U</div>
@@ -1004,148 +296,117 @@
             </div>
         </div>
 
-        <div class="content-wrapper">
-            <div class="page-header">
-                <h1 class="page-title">Manage Transactions</h1>
-                <p class="page-description">Add new transactions and view your financial history</p>
-            </div>
+        <!-- Transaction Form Section -->
+        <div class="form-section" id="add-transaction">
+            <div class="transaction-layout">
+                <!-- Manual Transaction Form -->
+                <div class="manual-transaction">
+                    <h2 class="section-title">Manual Transaction</h2>
+                    <form id="transactionForm">
+                        <!-- Transaction Type Selector -->
+                        <div class="transaction-type-selector">
+                            <button class="type-button active" data-type="income">
+                                <i class="fas fa-arrow-down"></i>
+                                Income
+                            </button>
+                            <button class="type-button" data-type="expense">
+                                <i class="fas fa-arrow-up"></i>
+                                Expenses
+                            </button>
+                        </div>
 
-            <div class="tab-navigation">
-                <button class="tab-button active" data-tab="add-transaction">Add Transaction</button>
-                <button class="tab-button" data-tab="recent-transactions">View Recent Transactions</button>
-            </div>
-
-            <!-- Add Transaction Form -->
-            <div class="form-section" id="add-transaction">
-                <div class="transaction-layout">
-                    <!-- Manual Transaction Form -->
-                    <div class="manual-transaction">
-                        <h2 class="section-title">Manual Transaction</h2>
-                        <form id="transactionForm">
-                            <div class="form-group">
-                                <label class="form-label">Transaction Type</label>
-                                <div class="transaction-type">
-                                    <button type="button" class="type-btn active" data-type="income">
-                                        <i class="fas fa-arrow-down"></i> Income
-                                    </button>
-                                    <button type="button" class="type-btn" data-type="expense">
-                                        <i class="fas fa-arrow-up"></i> Expense
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Amount (₹)</label>
-                                <div class="amount-input-group">
-                                    <span class="currency-symbol">₹</span>
-                                    <input type="number" class="form-control amount-input" placeholder="0.00" required>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Date</label>
-                                <input type="date" class="form-control" value="2025-05-30" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Category</label>
-                                <select class="form-control" required>
-                                    <option value="salary" selected>Salary</option>
-                                    <option value="food">Food</option>
-                                    <option value="transport">Transport</option>
-                                    <option value="shopping">Shopping</option>
-                                    <option value="bills">Bills</option>
-                                    <option value="entertainment">Entertainment</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Description (Optional)</label>
-                                <textarea class="form-control" placeholder="What's this transaction for?"></textarea>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="reset" class="btn btn-secondary">Reset</button>
-                                <button type="submit" class="btn btn-primary">Add Transaction</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Bank Statement Upload -->
-                    <div class="bank-statement-upload">
-                        <h2 class="section-title">Upload Bank Statement</h2>
-                        <div class="upload-container">
-                            <div class="upload-area" id="uploadArea">
-                                <i class="fas fa-file-excel"></i>
-                                <p>Drag & drop your Excel file here</p>
-                                <p class="upload-hint">or</p>
-                                <label for="fileInput" class="btn btn-primary">Choose File</label>
-                                <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden">
-                            </div>
-                            <div class="upload-info">
-                                <p class="supported-formats">Supported formats: .xlsx, .xls</p>
-                                <p class="file-size-limit">Maximum file size: 10MB</p>
-                            </div>
-                            <div class="upload-preview" id="uploadPreview" style="display: none;">
-                                <div class="preview-header">
-                                    <i class="fas fa-file-excel"></i>
-                                    <span id="fileName">filename.xlsx</span>
-                                </div>
-                                <div class="preview-actions">
-                                    <button class="btn btn-secondary" id="removeFile">Remove</button>
-                                    <button class="btn btn-primary" id="uploadFile">Upload</button>
-                                </div>
+                        <!-- Amount Input -->
+                        <div class="form-group">
+                            <label class="form-label">Amount (₹)</label>
+                            <div class="amount-input-group">
+                                <span class="currency-symbol">₹</span>
+                                <input type="number" class="form-control amount-input" placeholder="0.00" required>
                             </div>
                         </div>
+
+                        <!-- Date Input -->
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" value="2025-05-30" required>
+                        </div>
+
+                        <!-- Category Selection -->
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-control" required>
+                                <option value="salary" selected>Salary</option>
+                                <option value="food">Food</option>
+                                <option value="transport">Transport</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="bills">Bills</option>
+                                <option value="entertainment">Entertainment</option>
+                            </select>
+                        </div>
+
+                        <!-- Description Input -->
+                        <div class="form-group">
+                            <label class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" placeholder="What's this transaction for?"></textarea>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Bank Statement Upload -->
+                <div class="bank-statement-upload">
+                    <h2 class="section-title">Upload Bank Statement</h2>
+                    <div class="upload-container">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-file-excel"></i>
+                            <p>Drag & drop your Excel file here</p>
+                            <p class="upload-hint">or</p>
+                            <label for="fileInput" class="btn btn-primary">Choose File</label>
+                            <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden">
+                        </div>
+                        <div class="upload-info">
+                            <p class="supported-formats">Supported formats: .xlsx, .xls</p>
+                            <p class="file-size-limit">Maximum file size: 10MB</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Transaction History -->
-            <div class="transaction-history" id="recent-transactions">
-                <div class="search-filters">
-                    <input type="text" class="search-input" placeholder="Search transactions...">
-                    <select class="filter-select">
-                        <option value="all">All Types</option>
-                        <option value="income">Income</option>
-                        <option value="expense">Expense</option>
-                    </select>
-                    <select class="filter-select">
-                        <option value="all">All Categories</option>
-                        <option value="salary">Salary</option>
-                        <option value="food">Food</option>
-                        <option value="transport">Transport</option>
-                        <option value="shopping">Shopping</option>
-                    </select>
-                    <select class="filter-select">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                    </select>
-                </div>
-
-                <div id="transactionsList" class="transactions-list">
-                    <!-- Transactions will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        /**
+         * Transaction Form JavaScript
+         * 
+         * Handles:
+         * - Form submission
+         * - Transaction type selection
+         * - File upload
+         * - Theme toggling
+         * - Toast notifications
+         */
+
         // Tab Navigation
         const tabButtons = document.querySelectorAll('.tab-button');
         const addTransactionSection = document.getElementById('add-transaction');
         const recentTransactionsSection = document.getElementById('recent-transactions');
 
+        /**
+         * Tab Navigation Handler
+         * 
+         * Switches between:
+         * - Add Transaction form
+         * - Recent Transactions view
+         */
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Remove active class from all buttons
                 tabButtons.forEach(btn => btn.classList.remove('active'));
-                // Add active class to clicked button
                 button.classList.add('active');
 
-                // Show/hide sections based on selected tab
                 if (button.dataset.tab === 'add-transaction') {
                     addTransactionSection.style.display = 'block';
                     recentTransactionsSection.style.display = 'none';
@@ -1156,8 +417,15 @@
             });
         });
 
-        // Transaction Type Toggle
-        const typeButtons = document.querySelectorAll('.type-btn');
+        /**
+         * Transaction Type Selection
+         * 
+         * Handles:
+         * - Type button clicks
+         * - Active state updates
+         * - Form field updates
+         */
+        const typeButtons = document.querySelectorAll('.type-button');
         typeButtons.forEach(button => {
             button.addEventListener('click', () => {
                 typeButtons.forEach(btn => btn.classList.remove('active'));
@@ -1165,7 +433,14 @@
             });
         });
 
-        // Toast Notification Function
+        /**
+         * Toast Notification System
+         * 
+         * Displays:
+         * - Success messages
+         * - Error messages
+         * - Auto-dismissal
+         */
         function showToast(message, type = 'success') {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1179,7 +454,6 @@
             
             toastContainer.appendChild(toast);
             
-            // Remove toast after 3 seconds
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease-out forwards';
                 setTimeout(() => {
@@ -1188,7 +462,11 @@
             }, 3000);
         }
 
-        // Function to format currency
+        /**
+         * Currency Formatting
+         * 
+         * Formats numbers as Indian Rupees
+         */
         function formatCurrency(amount) {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
@@ -1196,7 +474,11 @@
             }).format(amount);
         }
 
-        // Function to format date
+        /**
+         * Date Formatting
+         * 
+         * Formats dates in Indian locale
+         */
         function formatDate(dateString) {
             return new Date(dateString).toLocaleDateString('en-IN', {
                 year: 'numeric',
@@ -1205,7 +487,14 @@
             });
         }
 
-        // Function to load transactions
+        /**
+         * Transaction Loading
+         * 
+         * Fetches and displays transactions:
+         * - From API
+         * - With error handling
+         * - With loading states
+         */
         async function loadTransactions() {
             try {
                 const response = await fetch('/api/transactions', {
@@ -1226,22 +515,31 @@
             }
         }
 
-        // Function to display transactions
+        /**
+         * Transaction Display
+         * 
+         * Renders transactions:
+         * - With proper formatting
+         * - With type-based styling
+         * - With empty state handling
+         */
         function displayTransactions(transactions) {
             const transactionsList = document.getElementById('transactionsList');
+            const selectedType = document.querySelector('.type-button.active').dataset.type || 'income';
+            const filteredTransactions = transactions.filter(t => t.type === selectedType);
             
-            if (!transactions || transactions.length === 0) {
+            if (!filteredTransactions || filteredTransactions.length === 0) {
                 transactionsList.innerHTML = `
                     <div class="no-transactions">
                         <i class="fas fa-receipt"></i>
-                        <h3>No Transactions Yet</h3>
-                        <p>Start adding your transactions to see them here</p>
+                        <h3>No ${selectedType} Transactions Yet</h3>
+                        <p>Start adding your ${selectedType} transactions to see them here</p>
                     </div>
                 `;
                 return;
             }
 
-            transactionsList.innerHTML = transactions.map(transaction => `
+            transactionsList.innerHTML = filteredTransactions.map(transaction => `
                 <div class="transaction-item">
                     <div class="transaction-info">
                         <div class="transaction-title">
@@ -1261,14 +559,19 @@
             `).join('');
         }
 
-        // Load transactions when the page loads
-        document.addEventListener('DOMContentLoaded', loadTransactions);
-
-        // Update form submission handler to reload transactions after adding
+        /**
+         * Form Submission Handler
+         * 
+         * Handles:
+         * - Form validation
+         * - API submission
+         * - Success/error states
+         * - Form reset
+         */
         document.getElementById('transactionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const type = document.querySelector('.type-btn.active').dataset.type;
+            const type = document.querySelector('.type-button.active').dataset.type;
             const amount = document.querySelector('.amount-input').value;
             const date = document.querySelector('input[type="date"]').value;
             const category = document.querySelector('select').value;
@@ -1298,11 +601,10 @@
                 if (response.ok) {
                     showToast('Transaction added successfully!', 'success');
                     this.reset();
-                    document.querySelector('.type-btn[data-type="income"]').classList.add('active');
-                    document.querySelector('.type-btn[data-type="expense"]').classList.remove('active');
+                    document.querySelector('.type-button[data-type="income"]').classList.add('active');
+                    document.querySelector('.type-button[data-type="expense"]').classList.remove('active');
                     document.querySelector('select').value = 'salary';
                     
-                    // Reload transactions after adding new one
                     loadTransactions();
                 } else {
                     const error = await response.json();
@@ -1314,16 +616,14 @@
             }
         });
 
-        // Add search and filter functionality
-        const searchInput = document.querySelector('.search-input');
-        const filterSelects = document.querySelectorAll('.filter-select');
-
-        searchInput.addEventListener('input', loadTransactions);
-        filterSelects.forEach(select => {
-            select.addEventListener('change', loadTransactions);
-        });
-
-        // Add theme toggle functionality
+        /**
+         * Theme Management
+         * 
+         * Handles:
+         * - Theme toggling
+         * - Theme persistence
+         * - Icon updates
+         */
         document.addEventListener('DOMContentLoaded', () => {
             const htmlElement = document.documentElement;
             const themeToggle = document.getElementById('themeToggle');
@@ -1367,7 +667,15 @@
             }
         });
 
-        // Bank Statement Upload Functionality
+        /**
+         * File Upload Handler
+         * 
+         * Handles:
+         * - File selection
+         * - Drag and drop
+         * - File validation
+         * - Upload preview
+         */
         document.addEventListener('DOMContentLoaded', () => {
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');

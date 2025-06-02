@@ -4,6 +4,43 @@
   gap: 1rem;
 }
 
+.transaction-type-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.type-button {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  background: white;
+  color: #4a90e2;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-button:hover {
+  background: #f0f7ff;
+}
+
+.type-button.active {
+  background: #4a90e2;
+  color: white;
+}
+
+.no-transactions {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .transaction-item {
   display: flex;
   align-items: center;

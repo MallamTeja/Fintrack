@@ -1,7 +1,18 @@
 /**
  * WebSocket Server Implementation
- * This module implements a WebSocket server with authentication, heartbeat mechanism,
- * and broadcasting capabilities for real-time communication.
+ * 
+ * This module implements a WebSocket server with the following features:
+ * - Real-time bidirectional communication
+ * - Authentication using JWT tokens
+ * - Heartbeat mechanism for connection health monitoring
+ * - Broadcasting capabilities for real-time updates
+ * - Client tracking and management
+ * 
+ * The server handles:
+ * - New connections and authentication
+ * - Message routing and broadcasting
+ * - Connection health monitoring
+ * - Error handling and logging
  */
 
 const WebSocket = require('ws');
@@ -17,12 +28,20 @@ const JWT_SECRET = process.env.JWT_SECRET || config.get('jwtSecret');
 
 /**
  * WebSocketServer Class
- * Manages WebSocket connections, authentication, and message handling
+ * 
+ * Manages WebSocket connections, authentication, and message handling.
+ * Implements a singleton pattern for global access to the WebSocket server.
  */
 class WebSocketServer {
     /**
      * Constructor - Initializes WebSocket server and client tracking
-     * @param {Object} server - HTTP server instance
+     * 
+     * @param {Object} server - HTTP server instance to attach WebSocket server to
+     * 
+     * Initializes:
+     * - WebSocket server instance
+     * - Client tracking Map
+     * - Connection event handler
      */
     constructor(server) {
         this.wss = new WebSocket.Server({ server });
@@ -35,8 +54,14 @@ class WebSocketServer {
 
     /**
      * Handles new WebSocket connections
-     * Sets up event listeners for messages, pong responses, and connection closure
-     * @param {Object} ws - WebSocket connection
+     * 
+     * Sets up:
+     * - Connection health monitoring
+     * - Message handling
+     * - Authentication
+     * - Error handling
+     * 
+     * @param {Object} ws - WebSocket connection instance
      * @param {Object} req - HTTP request object
      */
     handleConnection(ws, req) {
@@ -90,7 +115,12 @@ class WebSocketServer {
 
     /**
      * Broadcasts a message to all connected clients
+     * 
      * @param {Object} data - Data to broadcast
+     * 
+     * Sends the message to all connected clients that:
+     * - Have an open connection
+     * - Are authenticated
      */
     broadcast(data) {
         this.wss.clients.forEach((client) => {
@@ -102,8 +132,11 @@ class WebSocketServer {
 
     /**
      * Broadcasts a message to a specific user
+     * 
      * @param {string} userId - ID of the user to broadcast to
      * @param {Object} data - Data to broadcast
+     * 
+     * Sends the message to all connections belonging to the specified user
      */
     broadcastToUser(userId, data) {
         this.wss.clients.forEach((client) => {
@@ -114,8 +147,14 @@ class WebSocketServer {
     }
 
     /**
-     * Starts the heartbeat mechanism to detect and clean up stale connections
-     * Checks connection health every 30 seconds by default
+     * Starts the heartbeat mechanism
+     * 
+     * Periodically checks connection health and cleans up stale connections:
+     * - Sends ping to each client
+     * - Terminates connections that don't respond
+     * - Updates connection health status
+     * 
+     * Default interval: 30 seconds
      */
     startHeartbeat() {
         setInterval(() => {
