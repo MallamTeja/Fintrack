@@ -1,116 +1,158 @@
-# FinTrack - Personal Finance Manager
+# FinTrack 💸 – Personal Finance Manager
 
-A modern web application for managing personal finances, built with React, Node.js, and MongoDB.
+> A smart, full-stack personal finance tracking application built using the MERN stack. Track your income, expenses, insights, and goals – all in one place.
 
-## Features
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![NPM](https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=npm&logoColor=white)
 
-- User authentication and authorization
-- Dashboard with financial overview
-- Transaction management
-- Budget tracking
-- Financial goals
-- Reports and analytics
-- Real-time notifications
+---
 
-## Prerequisites
+## 📊 Overview
 
-- Node.js (v14 or higher)
-- MongoDB
-- npm or yarn
+**FinTrack** helps users track and manage their income, expenses, and financial goals. It features a modern UI with insights, graphs, filters, and categorization – ideal for budgeting and understanding spending habits.
 
-## Project Structure
+### 🌐 Live Demo
+
+👉 [View on Vercel](https://fintrack-five-pink.vercel.app)
+
+---
+
+## 🚀 Features
+
+- 📈 Dashboard with financial overview
+- 💸 Add income & expenses with custom categories
+- 📅 Filter transactions by type, date, and category
+- 📊 AI-generated financial insights (WIP)
+- 📤 Export data for reports
+- 💻 Modern UI with Tailwind CSS
+- 🔒 Secure backend using Express & MongoDB
+
+---
+
+## 📂 Folder Structure
 
 ```
-fintrack/
-├── frontend/          # React frontend application
-├── backend/           # Node.js backend server
+Fintrack/
+├── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── .env
+│   ├── server.js
+│   ├── test-connection.js
+│   └── package.json
+├── frontend/
+│   ├── index.html
+│   ├── dashboard.html
+│   ├── login.html
+│   ├── script.js
+│   ├── login.js
+│   ├── auth.js
+│   ├── styles.css
+│   ├── tailwind.config.js
+│   └── package.json
+├── vercel.json
 └── README.md
 ```
 
-## Setup Instructions
+---
 
-### Backend Setup
+## 🧰 Tech Stack
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+### 🖥️ Frontend
+- **React.js**
+- **Tailwind CSS**
+- **HTML5 & CSS3**
+- **Vanilla JavaScript**
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### 🛠 Backend
+- **Node.js**
+- **Express.js**
+- **MongoDB (Mongoose)**
 
-3. Create a `.env` file in the backend directory with the following variables:
-   ```
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/fintrack
-   JWT_SECRET=your_jwt_secret
-   ```
+### ☁ Deployment
+- **Vercel** (Frontend)
+- **Render** or **Railway** (Optional backend deployment)
 
-4. Start the backend server:
-   ```bash
-   npm run dev
-   ```
+---
 
-### Frontend Setup
+## ⚙️ Setup Instructions
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/MallamTeja/Fintrack.git
+cd Fintrack
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the frontend directory with the following variables:
-   ```
-   REACT_APP_API_URL=http://localhost:5000
-   ```
-
-4. Start the frontend development server:
-   ```bash
-   npm start
-   ```
-
-## Running the Application
-
-1. Start MongoDB service
-2. Start the backend server (from backend directory):
-   ```bash
-   npm run dev
-   ```
-3. Start the frontend development server (from frontend directory):
-   ```bash
-   npm start
-   ```
-
-The application will be available at `http://localhost:3000`
-
-## Testing
-
-### Backend Tests
+### 2. Backend Setup
 ```bash
 cd backend
-npm test
+npm install
+
+# Create a .env file with:
+# MONGO_URI=your_mongo_connection_string
+# PORT=5000
+
+npm start
 ```
 
-### Frontend Tests
+### 3. Frontend Setup
 ```bash
-cd frontend
-npm test
+cd ../frontend
+npm install
+npm run dev
 ```
 
-## Contributing
+> 🔄 Backend runs on `http://localhost:5000`  
+> 🌐 Frontend runs on `http://localhost:3000`
+
+---
+
+## 📌 Libraries & Tools Used
+
+```
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![NPM](https://img.shields.io/badge/NPM-CB3837?style=for-the-badge&logo=npm&logoColor=white)
+```
+
+---
+
+## 🧑‍💻 Author
+
+- 👨‍💻 **Teja Mallam** – [@MallamTeja](https://github.com/MallamTeja)
+- 📫 tejamallam1233@gmail.com
+
+---
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+2. Create your branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Open a pull request 🎉
 
-## License
+---
 
-This project is licensed under the MIT License.
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+⭐ If you like this project, consider giving it a star on GitHub!
