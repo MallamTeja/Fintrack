@@ -1,10 +1,22 @@
+/**
+ * Savings Goals Routes Module
+ * Handles CRUD operations for user savings goals
+ * Includes real-time updates via WebSocket
+ */
+
 const express = require('express');
 const router = express.Router();
 const { SavingsGoal } = require('../db');
 const auth = require('../middleware/auth');
 const { broadcastEvent, broadcastToUser } = require('../websocketManager');
 
-// Get all savings goals
+/**
+ * Get all savings goals for authenticated user
+ * GET /api/savings-goals
+ * @route GET /api/savings-goals
+ * @requires auth - JWT authentication middleware
+ * @returns {Array} List of savings goals sorted by due date
+ */
 router.get('/', auth, async (req, res) => {
     try {
         const goals = await SavingsGoal.find({ user_id: req.user._id })
@@ -15,16 +27,24 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// Create new savings goal
+/**
+ * Create new savings goal
+ * POST /api/savings-goals
+ * @route POST /api/savings-goals
+ * @requires auth - JWT authentication middleware
+ * @param {Object} goal - Savings goal data
+ * @returns {Object} Created savings goal
+ */
 router.post('/', auth, async (req, res) => {
     try {
+        // Create new savings goal with user ID
         const goal = new SavingsGoal({
             ...req.body,
             user_id: req.user._id
         });
         await goal.save();
         
-        // Emit WebSocket event for real-time updates
+        // Broadcast goal creation events
         broadcastEvent('savingsGoal:added', goal);
         broadcastToUser(req.user._id.toString(), 'savingsGoal:added', goal);
         
@@ -34,9 +54,18 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// Update savings goal
+/**
+ * Update existing savings goal
+ * PATCH /api/savings-goals/:id
+ * @route PATCH /api/savings-goals/:id
+ * @requires auth - JWT authentication middleware
+ * @param {string} id - Savings goal ID
+ * @param {Object} updates - Updated savings goal data
+ * @returns {Object} Updated savings goal
+ */
 router.patch('/:id', auth, async (req, res) => {
     try {
+        // Find and update savings goal
         const goal = await SavingsGoal.findOneAndUpdate(
             { _id: req.params.id, user_id: req.user._id },
             req.body,
@@ -46,7 +75,7 @@ router.patch('/:id', auth, async (req, res) => {
             return res.status(404).json({ error: 'Goal not found' });
         }
         
-        // Emit WebSocket event for real-time updates
+        // Broadcast goal update events
         broadcastEvent('savingsGoal:updated', goal);
         broadcastToUser(req.user._id.toString(), 'savingsGoal:updated', goal);
         
@@ -56,9 +85,17 @@ router.patch('/:id', auth, async (req, res) => {
     }
 });
 
-// Delete savings goal
+/**
+ * Delete savings goal
+ * DELETE /api/savings-goals/:id
+ * @route DELETE /api/savings-goals/:id
+ * @requires auth - JWT authentication middleware
+ * @param {string} id - Savings goal ID
+ * @returns {Object} Deleted savings goal
+ */
 router.delete('/:id', auth, async (req, res) => {
     try {
+        // Find and delete savings goal
         const goal = await SavingsGoal.findOneAndDelete({
             _id: req.params.id,
             user_id: req.user._id
@@ -67,7 +104,7 @@ router.delete('/:id', auth, async (req, res) => {
             return res.status(404).json({ error: 'Goal not found' });
         }
         
-        // Emit WebSocket event for real-time updates
+        // Broadcast goal deletion events
         broadcastEvent('savingsGoal:deleted', goal);
         broadcastToUser(req.user._id.toString(), 'savingsGoal:deleted', goal);
         
@@ -77,9 +114,18 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
+/**
+ * Bulk create/update savings goals
+ * POST /api/savings-goals/bulk
+ * @route POST /api/savings-goals/bulk
+ * @requires auth - JWT authentication middleware
+ * @param {Array} goals - Array of savings goals to create or update
+ * @returns {Array} Array of created/updated savings goals
+ */
 router.post('/bulk', auth, async (req, res) => {
     try {
         const goals = req.body;
+        // Validate request body
         if (!Array.isArray(goals)) {
             return res.status(400).json({ error: 'Request body must be an array of savings goals' });
         }
@@ -87,6 +133,7 @@ router.post('/bulk', auth, async (req, res) => {
         const userId = req.user._id;
         const savedGoals = [];
 
+        // Process each goal in the array
         for (const goalData of goals) {
             if (goalData._id) {
                 // Update existing goal
@@ -109,7 +156,7 @@ router.post('/bulk', auth, async (req, res) => {
             }
         }
 
-        // Emit WebSocket event for real-time updates
+        // Broadcast update events for all processed goals
         for (const goal of savedGoals) {
             broadcastEvent('savingsGoal:updated', goal);
             broadcastToUser(userId.toString(), 'savingsGoal:updated', goal);
