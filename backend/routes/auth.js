@@ -1,7 +1,7 @@
 /**
  * Authentication Routes Module
  * Handles user registration, login, logout, and user preferences management
- * Implements JWT-based authentication and password hashing
+ * Implements JWT-based authentication and password hashing with improved security
  */
 
 const express = require('express');
@@ -10,223 +10,214 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const bcrypt = require('bcryptjs');
 const auth = require('../middleware/auth');
+const { asyncHandler, AppError } = require('../utils/errorHandler');
+const { validationRules, checkValidationResult } = require('../utils/validation');
 const User = require('../models/User');
 
 /**
  * Register a new user
- * POST /api/auth/register
  * @route POST /api/auth/register
- * @param {string} name - User's full name
- * @param {string} email - User's email address
- * @param {string} password - User's password (min 6 characters)
- * @returns {Object} JWT token and user data
+ * @access Public
  */
-router.post('/register', async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        
-        // Validate required fields
-        if (!name || !email || !password) {
-            return res.status(400).json({ 
-                error: 'Please provide all required fields'
-            });
-        }
-
-        // Validate password length
-        if (password.length < 6) {
-            return res.status(400).json({
-                error: 'Password must be at least 6 characters long'
-            });
-        }
-
-        // Check for existing user
-        let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).json({ error: 'User already exists with this email' });
-        }
-
-        // Hash password with bcrypt
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create new user instance
-        user = new User({
-            name,
-            email,
-            password: hashedPassword
-        });
-
-        await user.save();
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id },
-            config.get('jwtSecret'),
-            { expiresIn: '24h' }
-        );
-
-        // Return success response with token and user data
-        res.status(201).json({ 
-            success: true,
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                preferences: user.preferences
-            }
-        });
-    } catch (error) {
-        console.error('Registration error:', error);
-        
-        // Handle validation errors
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map(val => val.message);
-            return res.status(400).json({ error: messages.join(', ') });
-        }
-        
-        // Handle duplicate email error
-        if (error.code === 11000) {
-            return res.status(400).json({ error: 'Email already in use' });
-        }
-        
-        res.status(500).json({ error: 'Registration failed. Please try again.' });
+router.post('/register', [
+    ...validationRules.userRegistration,
+    checkValidationResult
+], asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body;
+    
+    // Check for existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new AppError('User already exists with this email', 409);
     }
-});
+    
+    // Hash password with bcrypt
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    // Create new user instance
+    const user = new User({
+        name,
+        email,
+        password: hashedPassword
+    });
+    
+    await user.save();
+    
+    // Generate JWT token
+    const token = jwt.sign(
+        { userId: user._id },
+        config.get('jwtSecret'),
+        { expiresIn: '24h' }
+    );
+    
+    // Return success response with token and user data
+    res.status(201).json({ 
+        success: true,
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            preferences: user.preferences
+        }
+    });
+}));
 
 /**
  * User login
- * POST /api/auth/login
  * @route POST /api/auth/login
- * @param {string} email - User's email address
- * @param {string} password - User's password
- * @returns {Object} JWT token and user data
+ * @access Public
  */
-router.post('/login', async (req, res) => {
-    try {
-        console.log('Login request received:', req.body);
-        const { email, password } = req.body;
-
-        // Validate required fields
-        if (!email || !password) {
-            console.log('Missing email or password');
-            return res.status(400).json({ 
-                error: 'Please provide both email and password' 
-            });
-        }
-
-        // Find user by email
-        const user = await User.findOne({ email });
-        if (!user) {
-            console.log('User not found:', email);
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Verify password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            console.log('Password mismatch for user:', email);
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Update last login timestamp
-        user.lastLoginTime = new Date();
-        await user.save();
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user._id },
-            config.get('jwtSecret'),
-            { expiresIn: '24h' }
-        );
-
-        console.log('Login successful for user:', email);
-
-        // Return success response with token and user data
-        res.json({ 
-            success: true,
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                lastLoginTime: user.lastLoginTime,
-                preferences: user.preferences
-            }
-        });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ error: 'Login failed. Please try again.' });
+router.post('/login', [
+    ...validationRules.userLogin,
+    checkValidationResult
+], asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new AppError('Invalid credentials', 401);
     }
-});
+    
+    // Verify password using the model method
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+        throw new AppError('Invalid credentials', 401);
+    }
+    
+    // Update last login timestamp
+    user.lastLoginTime = new Date();
+    await user.save();
+    
+    // Generate JWT token
+    const token = jwt.sign(
+        { userId: user._id },
+        config.get('jwtSecret'),
+        { expiresIn: '24h' }
+    );
+    
+    // Return success response with token and user data
+    res.json({ 
+        success: true,
+        token,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            lastLoginTime: user.lastLoginTime,
+            preferences: user.preferences
+        }
+    });
+}));
 
 /**
  * User logout
- * POST /api/auth/logout
  * @route POST /api/auth/logout
- * @requires auth - JWT authentication middleware
- * @returns {Object} Success message
+ * @access Private
  */
 router.post('/logout', auth, (req, res) => {
     // Since JWT is stateless, logout is handled client-side
     // Token blacklist could be implemented here if needed
-    res.json({ success: true, message: 'Logged out successfully' });
+    res.json({ 
+        success: true, 
+        message: 'Logged out successfully' 
+    });
 });
 
 /**
  * Get current user data
- * GET /api/auth/me
  * @route GET /api/auth/me
- * @requires auth - JWT authentication middleware
- * @returns {Object} User data (excluding password)
+ * @access Private
  */
-router.get('/me', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId).select('-password');
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.json(user);
-    } catch (error) {
-        console.error('Get user error:', error);
-        res.status(500).json({ error: 'Error fetching user data' });
+router.get('/me', auth, asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+        throw new AppError('User not found', 404);
     }
-});
+    
+    res.json({
+        success: true,
+        data: user
+    });
+}));
 
 /**
  * Update user preferences
- * PUT /api/auth/preferences
  * @route PUT /api/auth/preferences
- * @requires auth - JWT authentication middleware
- * @param {string} theme - User's preferred theme
- * @param {string} currency - User's preferred currency
- * @param {boolean} notifications - User's notification preferences
- * @returns {Object} Updated user preferences
+ * @access Private
  */
-router.put('/preferences', auth, async (req, res) => {
-    try {
-        const { theme, currency, notifications } = req.body;
-        const user = await User.findById(req.user.userId);
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Update preferences if provided
-        if (theme) user.preferences.theme = theme;
-        if (currency) user.preferences.currency = currency;
-        if (notifications !== undefined) user.preferences.notifications = notifications;
-
-        await user.save();
-
-        res.json({
-            success: true,
-            preferences: user.preferences
-        });
-    } catch (error) {
-        console.error('Update preferences error:', error);
-        res.status(500).json({ error: 'Error updating preferences' });
+router.put('/preferences', auth, asyncHandler(async (req, res) => {
+    const { theme, currency, notifications } = req.body;
+    
+    // Validate theme if provided
+    if (theme && !['light', 'dark'].includes(theme)) {
+        throw new AppError('Theme must be either light or dark', 400);
     }
-});
+    
+    // Validate currency if provided
+    if (currency && typeof currency !== 'string') {
+        throw new AppError('Currency must be a string', 400);
+    }
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+    
+    // Update preferences if provided
+    if (theme) user.preferences.theme = theme;
+    if (currency) user.preferences.currency = currency;
+    if (notifications !== undefined) user.preferences.notifications = Boolean(notifications);
+    
+    await user.save();
+    
+    res.json({
+        success: true,
+        data: {
+            preferences: user.preferences
+        }
+    });
+}));
+
+/**
+ * Change password
+ * @route PUT /api/auth/change-password
+ * @access Private
+ */
+router.put('/change-password', auth, asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+        throw new AppError('Current password and new password are required', 400);
+    }
+    
+    if (newPassword.length < 6) {
+        throw new AppError('New password must be at least 6 characters long', 400);
+    }
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+    
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+        throw new AppError('Current password is incorrect', 400);
+    }
+    
+    // Hash new password
+    const salt = await bcrypt.genSalt(12);
+    user.password = await bcrypt.hash(newPassword, salt);
+    
+    await user.save();
+    
+    res.json({
+        success: true,
+        message: 'Password changed successfully'
+    });
+}));
 
 module.exports = router;
