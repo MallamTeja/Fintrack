@@ -24,6 +24,7 @@ const config = require('./config');
 const websocketManager = require('./websocketManager');
 const { globalErrorHandler } = require('./utils/errorHandler');
 const logger = require('./utils/logger');
+const sanitizeInput = require('./middleware/sanitize');
 
 // Create Express application
 const app = express();
@@ -52,6 +53,9 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization middleware
+app.use(sanitizeInput);
 
 // Rate limiting configuration
 const limiter = rateLimit({
