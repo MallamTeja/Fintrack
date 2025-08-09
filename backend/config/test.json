@@ -1,0 +1,21 @@
+{
+  "jwtSecret": "test-jwt-secret-key-for-testing-only",
+  "mongoURI": "mongodb://localhost:27017/fintrack-test",
+  "port": 5001,
+  "websocket": {
+    "heartbeatInterval": 30000,
+    "reconnectInterval": 5000
+  },
+  "database": {
+    "maxPoolSize": 5,
+    "serverSelectionTimeoutMS": 5000,
+    "socketTimeoutMS": 45000
+  },
+  "jwt": {
+    "expiresIn": "24h",
+    "algorithm": "HS256"
+  },
+  "server": {
+    "corsOrigin": ["http://localhost:3000"]
+  }
+}
