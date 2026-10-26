@@ -23,7 +23,6 @@ Expect an acknowledgement within 72 hours. Only `main` is supported.
 
 ## Known gaps
 
-- Content-Security-Policy is disabled because the pages use inline scripts.
 - Access and refresh tokens are kept in `localStorage`.
 
 ## Past incident

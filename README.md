@@ -13,10 +13,11 @@ and track savings goals.
 
 | Layer | Tech |
 |---|---|
-| Frontend | Static HTML + Tailwind + vanilla JS / Chart.js (`frontend/public`) |
+| Frontend | React 18 + Vite, plain CSS design tokens, hand-built SVG charts (`frontend/`) |
 | API | Node 22, Express (`backend/`), deployed as one Vercel function |
 | Auth | Supabase Auth (email + password, JWT access and refresh tokens) |
 | Database | Supabase Postgres with Row Level Security (`supabase/migrations`) |
+| Live updates | Supabase Realtime (websocket) pushes row changes to open tabs |
 | CI | GitHub Actions: tests against a local Supabase, CodeQL, gitleaks, npm audit, Dependabot |
 
 ## How it works
@@ -47,7 +48,11 @@ npx supabase status -o env    # shows API_URL and ANON_KEY
 cd backend
 cp .env.example .env          # put API_URL into SUPABASE_URL and ANON_KEY into SUPABASE_ANON_KEY
 npm install
-npm run dev                   # http://localhost:5000
+npm run dev                   # API on http://localhost:5000
+
+cd ../frontend
+npm install
+npm run dev                   # app on http://localhost:5173 (proxies /api to :5000)
 ```
 
 ### Environment variables
@@ -116,18 +121,23 @@ backend/
   src/routes/            auth, transactions, budgets, savings
   src/validate.js        input validation
   tests/                 unit + integration (Jest, Supertest)
-frontend/public/         pages, scripts and styles (js/api.js adds the token to every API call)
+api/index.js             Vercel function entry (re-exports the Express app)
+frontend/src/            React app: pages, components, lib (API client, realtime), styles/tokens.css
 supabase/
   config.toml            local stack settings
   migrations/            schema, RLS policies, grants
 ```
 
+## Design
+
+"Editorial ledger": warm paper, ink text, one ledger-green accent for money in and brick for money out, Fraunces + Instrument Sans,
+tabular figures for every amount. Every colour is an OKLCH token in `frontend/src/styles/tokens.css` with its WCAG contrast ratio
+noted, in light and dark. Built against the [Hallmark](https://github.com/Nutlope/hallmark) anti-slop rules.
+
 ## Known gaps
 
-- The Savings Goals and Settings pages have no page logic yet (their scripts never existed).
-- "Upload statement" on the Add Transaction page has no backend.
-- Pages use inline scripts, so Content-Security-Policy is off.
 - Tokens live in `localStorage`.
+- No bank-statement import yet.
 
 See [SECURITY.md](SECURITY.md) for the security model and [CONTRIBUTING.md](CONTRIBUTING.md) to help.
 
