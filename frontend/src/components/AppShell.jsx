@@ -7,7 +7,7 @@ import { startRealtime } from '../lib/realtime.js';
 import './AppShell.css';
 
 const NAV = [
-  { to: '/', label: 'Overview', short: 'Overview', icon: 'overview', end: true },
+  { to: '/', label: 'Dashboard', short: 'Dashboard', icon: 'dashboard', end: true, also: '/dashboard' },
   { to: '/transactions', label: 'Transactions', short: 'Ledger', icon: 'ledger' },
   { to: '/budgets', label: 'Budgets', short: 'Budgets', icon: 'budget' },
   { to: '/savings', label: 'Savings', short: 'Savings', icon: 'savings' },
@@ -98,6 +98,9 @@ export default function AppShell() {
     return startRealtime(token, setLive);
   }, [token]);
 
+  // /dashboard is an alias of /, so the Dashboard link stays current on either address.
+  const linkTo = (n) => (n.also && pathname === n.also ? n.also : n.to);
+
   useEffect(() => {
     window.scrollTo?.(0, 0);
   }, [pathname]);
@@ -112,7 +115,7 @@ export default function AppShell() {
         <Wordmark />
         <nav className="rail__nav" aria-label="Sections">
           {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className="rail__link">
+            <NavLink key={n.to} to={linkTo(n)} end={n.end} className="rail__link">
               <Icon name={n.icon} />
               {n.label}
             </NavLink>
@@ -138,7 +141,7 @@ export default function AppShell() {
 
       <nav className="tabbar" aria-label="Sections">
         {NAV.map((n) => (
-          <NavLink key={n.to} to={n.to} end={n.end} className="tabbar__link">
+          <NavLink key={n.to} to={linkTo(n)} end={n.end} className="tabbar__link">
             <Icon name={n.icon} size={22} />
             <span>{n.short}</span>
           </NavLink>

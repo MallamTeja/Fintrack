@@ -48,7 +48,7 @@ export function NotFound() {
       <h1 className="notfound__title">This page is not in the ledger.</h1>
       <p className="muted">The address may be mistyped, or the page has moved.</p>
       <Link to="/" className="btn btn--primary">
-        Back to overview
+        Back to dashboard
       </Link>
     </main>
   );

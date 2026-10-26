@@ -102,6 +102,14 @@
   --color-warn-bar: oklch(62% 0.125 75);
   --color-warn-soft: oklch(94% 0.04 85);
 
+  /* Sequential single-hue scale for the daily spending heatmap: brick mixed into paper, light to dark.
+     Declared per theme so the mix resolves against that theme's brick and paper. */
+  --color-heat-0: var(--color-paper-3);
+  --color-heat-1: color-mix(in oklch, var(--color-out) 28%, var(--color-paper-2));
+  --color-heat-2: color-mix(in oklch, var(--color-out) 45%, var(--color-paper-2));
+  --color-heat-3: color-mix(in oklch, var(--color-out) 70%, var(--color-paper-2));
+  --color-heat-4: var(--color-out);
+
   --color-focus: oklch(44% 0.09 155);
   --color-scrim: oklch(23% 0.015 70 / 0.38);
   --shadow-pop: 0 1px 0 oklch(23% 0.015 70 / 0.04), 0 12px 32px -12px oklch(23% 0.015 70 / 0.22);
@@ -131,6 +139,11 @@
   --color-warn: oklch(80% 0.12 80);
   --color-warn-bar: oklch(76% 0.12 78);
   --color-warn-soft: oklch(27% 0.04 80);
+  --color-heat-0: var(--color-paper-3);
+  --color-heat-1: color-mix(in oklch, var(--color-out) 25%, var(--color-paper-2));
+  --color-heat-2: color-mix(in oklch, var(--color-out) 48%, var(--color-paper-2));
+  --color-heat-3: color-mix(in oklch, var(--color-out) 72%, var(--color-paper-2));
+  --color-heat-4: var(--color-out);
   --color-focus: oklch(72% 0.1 155);
   --color-scrim: oklch(10% 0.01 65 / 0.6);
   --shadow-pop: 0 0 0 1px oklch(31% 0.012 65), 0 16px 40px -16px oklch(8% 0.01 65 / 0.7);

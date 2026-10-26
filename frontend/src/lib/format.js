@@ -33,9 +33,19 @@ export function formatMoney(amount, currency = 'INR', opts) {
   return n < 0 ? `−${s}` : s;
 }
 
-/** Compact label for chart axes, e.g. "₹1.2L" or "$12K". */
+/**
+ * Compact label for chart axes, e.g. "₹1.2L", "₹50K" or "$12K".
+ * INR is spelled out by hand: the en-IN compact form writes thousands as "T", which reads as trillion.
+ */
 export function formatCompact(amount, currency = 'INR') {
   const c = normaliseCurrency(currency);
+  if (c === 'INR') {
+    const n = Number(amount) || 0;
+    const a = Math.abs(n);
+    const [div, unit] = a >= 1e7 ? [1e7, 'Cr'] : a >= 1e5 ? [1e5, 'L'] : a >= 1e3 ? [1e3, 'K'] : [1, ''];
+    const v = div === 1 ? Math.round(a) : Math.round((a / div) * 10) / 10;
+    return `${n < 0 ? '−' : ''}₹${String(v)}${unit}`;
+  }
   return new Intl.NumberFormat(LOCALE[c], {
     style: 'currency',
     currency: c,

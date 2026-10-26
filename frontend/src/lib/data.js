@@ -21,6 +21,21 @@ export async function fetchTransactions(params, signal) {
   return { rows, pagination };
 }
 
+/**
+ * Every transaction in a date range, 500 per request, following pagination.totalPages.
+ * Stops after maxPages; truncated tells the caller the figures may be incomplete.
+ */
+export async function fetchAllTransactions({ startDate, endDate, limit = 500, maxPages = 10 }, signal) {
+  const first = await fetchTransactions({ startDate, endDate, limit, page: 1 }, signal);
+  const totalPages = Math.max(1, Number(first.pagination.totalPages) || 1);
+  const last = Math.min(totalPages, maxPages);
+  const rest = await Promise.all(
+    Array.from({ length: last - 1 }, (_, i) => fetchTransactions({ startDate, endDate, limit, page: i + 2 }, signal))
+  );
+  const rows = [first, ...rest].flatMap((r) => r.rows);
+  return { rows, truncated: totalPages > maxPages };
+}
+
 export async function fetchSummary(params, signal) {
   const body = await get(`/transactions/stats/summary${toQuery(params)}`, { signal });
   const d = unwrap(body) || {};

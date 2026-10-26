@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoney, moneyParts, toDay } from '../lib/format.js';
+import { formatCompact, formatMoney, moneyParts, toDay } from '../lib/format.js';
 import { passwordChecks, validateTransaction } from '../lib/validate.js';
 
 describe('formatMoney', () => {
@@ -16,6 +16,15 @@ describe('formatMoney', () => {
   it('uses a true minus sign for negatives and falls back to INR for unknown codes', () => {
     expect(formatMoney(-500)).toBe('−₹500.00');
     expect(formatMoney(10, 'XYZ')).toBe('₹10.00');
+  });
+
+  it('writes compact INR axis labels as K, L and Cr', () => {
+    expect(formatCompact(0)).toBe('₹0');
+    expect(formatCompact(538.4)).toBe('₹538');
+    expect(formatCompact(50000)).toBe('₹50K');
+    expect(formatCompact(3400)).toBe('₹3.4K');
+    expect(formatCompact(250000)).toBe('₹2.5L');
+    expect(formatCompact(-20000000)).toBe('−₹2Cr');
   });
 
   it('splits symbol, figure and decimals so they can be styled apart', () => {

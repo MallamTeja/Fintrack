@@ -63,7 +63,7 @@
 }
 
 .catbars__share {
-  min-width: 3.5ch;
+  min-width: 4ch;
   font-size: var(--text-xs);
   color: var(--color-muted);
   text-align: right;
@@ -75,81 +75,318 @@
   height: 4px;
 }
 
-.catbars__bar rect {
+.catbars__track {
+  fill: var(--color-paper-3);
+}
+
+.catbars__fill {
   fill: var(--color-out);
+}
+
+.catbars--in .catbars__fill {
+  fill: var(--color-accent);
+}
+
+.catbars__row.is-other .catbars__label {
+  color: var(--color-muted);
+}
+
+.catbars__row.is-other .catbars__fill {
+  fill: var(--color-rule-strong);
 }
 
 .catbars__row:first-child .catbars__label {
   font-weight: 600;
 }
 
-/* Trend chart */
-.trend {
+/* Shared chart frame, axes and legend */
+.chart {
+  position: relative;
   margin: 0;
   min-width: 0;
 }
 
-.trend svg {
+.chart__frame {
+  position: relative;
+  border-radius: var(--radius-sm);
+  touch-action: pan-y;
+}
+
+.chart__frame:focus-visible {
+  outline-offset: 4px;
+}
+
+.chart svg {
   overflow: visible;
 }
 
-.trend__grid {
+.chart__grid {
   stroke: var(--color-rule);
   stroke-width: 1;
   stroke-dasharray: 2 4;
 }
 
-.trend__base {
+.chart__base {
   stroke: var(--color-ink);
   stroke-width: 1;
 }
 
-.trend__tick,
-.trend__month {
+.chart__tick,
+.chart__xlabel {
   font-family: var(--font-body);
   font-size: 11px;
   fill: var(--color-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.trend__month.is-current {
+.chart__xlabel.is-current {
   fill: var(--color-ink);
   font-weight: 600;
 }
 
-.trend__in {
+.chart__hover {
+  fill: var(--color-paper-2);
+}
+
+.chart__cursor {
+  stroke: var(--color-rule-strong);
+  stroke-width: 1;
+}
+
+.chart__in {
   fill: var(--color-accent);
 }
 
-.trend__out {
+.chart__out {
   fill: var(--color-out);
 }
 
-.trend__legend {
+.chart__net {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.chart__netdot {
+  fill: var(--color-ink);
+  stroke: var(--color-paper);
+  stroke-width: 1.5;
+}
+
+.chart__legend {
   display: flex;
-  gap: var(--sp-5);
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-5);
   margin-top: var(--sp-2);
   font-size: var(--text-xs);
   color: var(--color-muted);
 }
 
-.trend__key {
+.chart__key {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
 }
 
-.trend__key::before {
+.chart__key::before {
   content: '';
+  flex: none;
   width: 10px;
   height: 10px;
   border-radius: 1px;
 }
 
-.trend__key--in::before {
+.chart__key--in::before {
   background: var(--color-accent);
 }
 
-.trend__key--out::before {
+.chart__key--out::before {
   background: var(--color-out);
+}
+
+.chart__key--net::before {
+  height: 0;
+  border-top: 2px solid var(--color-ink);
+}
+
+.chart__key--prev::before {
+  height: 0;
+  border-top: 2px dashed var(--color-rule-strong);
+}
+
+.chart__axisnote {
+  margin-left: auto;
+}
+
+/* Tooltip */
+.ctip {
+  position: absolute;
+  top: 0;
+  z-index: var(--z-base);
+  padding: var(--sp-2) var(--sp-3);
+  border: var(--hairline) solid var(--color-rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-xs);
+  pointer-events: none;
+}
+
+.ctip__title {
+  margin-bottom: var(--sp-1);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.ctip__rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px var(--sp-3);
+  margin: 0;
+}
+
+.ctip__rows dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.ctip__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--color-muted);
+}
+
+.ctip__key::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+.ctip__key--in::before {
+  background: var(--color-accent);
+}
+
+.ctip__key--out::before {
+  background: var(--color-out);
+}
+
+.ctip__key--net::before {
+  height: 0;
+  border-top: 2px solid var(--color-ink);
+}
+
+.ctip__key--prev::before {
+  height: 0;
+  border-top: 2px dashed var(--color-rule-strong);
+}
+
+/* Pace lines */
+.pace__cur {
+  fill: none;
+  stroke: var(--color-out);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.pace__prev {
+  fill: none;
+  stroke: var(--color-rule-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
+}
+
+.pace__dot {
+  fill: var(--color-out);
+  stroke: var(--color-paper);
+  stroke-width: 1.5;
+}
+
+.pace__dot--prev {
+  fill: var(--color-rule-strong);
+}
+
+/* Heatmap */
+.heat {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+}
+
+.heat__grid {
+  display: grid;
+  grid-template-columns: 2.25rem repeat(var(--weeks), minmax(0, 1fr));
+  gap: 3px;
+  max-width: 32rem;
+}
+
+.heat__row {
+  display: contents;
+}
+
+.heat__month,
+.heat__wd {
+  font-size: var(--text-2xs);
+  line-height: 1.2;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.heat__wd {
+  align-self: center;
+}
+
+.heat__cell {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 2px;
+}
+
+.heat--0 {
+  background: var(--color-heat-0);
+}
+
+.heat--1 {
+  background: var(--color-heat-1);
+}
+
+.heat--2 {
+  background: var(--color-heat-2);
+}
+
+.heat--3 {
+  background: var(--color-heat-3);
+}
+
+.heat--4 {
+  background: var(--color-heat-4);
+}
+
+.heat--future {
+  border: var(--hairline) dashed var(--color-rule);
+}
+
+.heat__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.heat__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.heat__legend .heat__cell {
+  width: 12px;
 }

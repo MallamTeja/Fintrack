@@ -1,6 +1,6 @@
 // One hand-drawn icon set: 24px grid, 1.5px stroke, square-ish terminals. Decorative by default.
 const PATHS = {
-  overview: (
+  dashboard: (
     <>
       <path d="M4 5h16M4 12h10M4 19h16" />
       <path d="M18 9v6" />

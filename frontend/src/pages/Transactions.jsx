@@ -31,7 +31,7 @@ export default function Transactions() {
   const [draft, setDraft] = useState(null); // values to restore after a failed save
   const [confirm, setConfirm] = useState(null);
 
-  // ?new=1 (from Overview) opens the drawer once.
+  // ?new=1 (from the Dashboard) opens the drawer once.
   useEffect(() => {
     if (params.get('new')) {
       setEditing('new');
@@ -235,7 +235,7 @@ export default function Transactions() {
           ) : (
             <>
               <p className="empty__title">The ledger is empty</p>
-              <p>Add your first income or expense. Overview, budgets and charts fill in from here.</p>
+              <p>Add your first income or expense. The dashboard, budgets and charts fill in from here.</p>
               <button type="button" className="btn btn--primary" onClick={() => setEditing('new')}>
                 Add first entry
               </button>

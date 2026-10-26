@@ -1,0 +1,438 @@
+/* Dashboard: a ruled ledger sheet. KPIs first, cash flow widest, then paired columns split by hairlines. */
+
+.dash-label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.dash-month {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.dash-aside {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.section__head .dash-aside + .section__link {
+  margin-left: var(--sp-3);
+}
+
+.dash-sub {
+  max-width: 60ch;
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.dash-sub strong,
+.insights strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.dash-sub strong.is-in {
+  color: var(--color-accent);
+}
+
+.dash-sub strong.is-out {
+  color: var(--color-out);
+}
+
+.dash-note {
+  font-size: var(--text-sm);
+  max-width: 52ch;
+}
+
+.dash-skel {
+  width: 100%;
+}
+
+.dash-empty {
+  padding-top: var(--sp-4);
+}
+
+/* Period bar */
+.dash-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3) var(--sp-6);
+  margin-top: calc(-1 * var(--sp-4));
+}
+
+.dash-period {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* The base .seg__opt span rule styles the pill; the label spans inside it stay plain text. */
+.dash-period .seg__opt span span {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  color: inherit;
+}
+
+.dash-period .seg__opt .dash-period__short {
+  display: none;
+}
+
+.dash-compare {
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+
+/* KPI strip: three ruled columns on wide screens, two on phones, one on the narrowest */
+.dash-kpis {
+  display: grid;
+  gap: var(--sp-4);
+  margin-top: calc(-1 * var(--sp-4));
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border-top: var(--hairline) solid var(--color-ink);
+}
+
+.kpi {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--sp-1);
+  min-width: 0;
+  padding: var(--sp-4) var(--sp-3) var(--sp-4) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.kpi:nth-child(2n) {
+  padding-left: var(--sp-4);
+  border-left: var(--hairline) solid var(--color-rule);
+}
+
+.kpi dd {
+  margin: 0;
+}
+
+.kpi__value {
+  min-height: 2.2rem;
+  margin-top: var(--sp-1);
+}
+
+.kpi__value .money--lg {
+  font-size: var(--text-lg);
+}
+
+.kpi__fig {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.kpi__fig--na {
+  color: var(--color-muted);
+}
+
+.kpi__unit {
+  margin-left: 0.04em;
+  font-size: 0.6em;
+  color: var(--color-muted);
+}
+
+.kpi__skel {
+  width: 70%;
+  height: 1.75rem;
+}
+
+.kpi__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+  font-size: var(--text-xs);
+}
+
+.kpi__delta {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.kpi__delta.is-flat {
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.kpi__arrow {
+  margin-right: 0.3em;
+  font-size: 0.8em;
+}
+
+.kpi__delta-skel {
+  display: inline-block;
+  width: 4rem;
+  height: 0.9rem;
+}
+
+.kpi__note {
+  color: var(--color-muted);
+}
+
+/* Income split */
+.split {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: var(--hairline) solid var(--color-rule);
+}
+
+.split__bar {
+  width: 100%;
+  height: 10px;
+}
+
+.split__out {
+  fill: var(--color-out);
+}
+
+.split__kept {
+  fill: var(--color-accent);
+}
+
+.split__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-1) var(--sp-4);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.split__legend strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* Grid */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-12);
+}
+
+.dash-cell {
+  position: relative;
+}
+
+/* Insights */
+.insights {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insights__row {
+  display: grid;
+  gap: var(--sp-1);
+  padding: var(--sp-3) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+
+.insights__row:first-child {
+  padding-top: 0;
+}
+
+/* Recent entries */
+.entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entries__row {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.entries__row:first-child {
+  padding-top: 0;
+}
+
+.entries__date {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.entries__main {
+  display: grid;
+  min-width: 0;
+}
+
+.entries__desc {
+  overflow: hidden;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.entries__cat {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* Budget and goal rows */
+.health {
+  display: grid;
+  gap: var(--sp-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.health__row {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.health__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--text-sm);
+}
+
+.health__cat {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.health__state {
+  flex: none;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.health__meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.health__meta strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+@media (max-width: 19.99rem) {
+  .kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kpi:nth-child(2n) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 29.99rem) {
+  .entries__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .entries__date {
+    display: none;
+  }
+
+  .dash-period,
+  .dash-period .seg {
+    width: 100%;
+  }
+
+  .dash-period .seg__opt > span {
+    padding: 0 var(--sp-2);
+  }
+
+  .dash-period .seg__opt .dash-period__long {
+    display: none;
+  }
+
+  .dash-period .seg__opt .dash-period__short {
+    display: inline;
+  }
+}
+
+@media (min-width: 48rem) {
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .kpi,
+  .kpi:nth-child(2n) {
+    padding: var(--sp-5) var(--sp-4) var(--sp-5) var(--sp-5);
+    border-left: var(--hairline) solid var(--color-rule);
+  }
+
+  .kpi:nth-child(3n + 1) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .kpi__value .money--lg,
+  .kpi__fig {
+    font-size: var(--text-xl);
+  }
+}
+
+/* Desktop: a 12 column sheet. Side-by-side sections are divided by a hairline in the gutter, not boxed. */
+@media (min-width: 64rem) {
+  .dash-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--sp-12) var(--sp-10);
+  }
+
+  .dash-cell--12 {
+    grid-column: span 12;
+  }
+
+  .dash-cell--7 {
+    grid-column: span 7;
+  }
+
+  .dash-cell--6 {
+    grid-column: span 6;
+  }
+
+  .dash-cell--5 {
+    grid-column: span 5;
+  }
+
+  .dash-cell--ruled::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(-1 * var(--sp-10) / 2);
+    border-left: var(--hairline) solid var(--color-rule);
+  }
+}

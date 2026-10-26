@@ -6,7 +6,7 @@ import { ThemeProvider, useTheme } from './context/ThemeContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { Login, Register } from './pages/Auth.jsx';
 import Budgets from './pages/Budgets.jsx';
-import Overview from './pages/Overview.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import Savings from './pages/Savings.jsx';
 import Settings from './pages/Settings.jsx';
 import Transactions from './pages/Transactions.jsx';
@@ -56,7 +56,8 @@ export function AppRoutes() {
           </RequireAuth>
         }
       >
-        <Route index element={<Overview />} />
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="transactions" element={<Transactions />} />
         <Route path="budgets" element={<Budgets />} />
         <Route path="savings" element={<Savings />} />
