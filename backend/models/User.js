@@ -44,9 +44,10 @@ const UserSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Method to compare password directly
-UserSchema.methods.comparePassword = function(candidatePassword) {
-    return this.password === candidatePassword;
+// Method to compare password using bcrypt
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+    const bcrypt = require('bcryptjs');
+    return await bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
