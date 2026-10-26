@@ -1,0 +1,36 @@
+# Local development stack for `supabase start` (also used by CI).
+# Hosted project settings live in the Supabase dashboard; keep them in sync by hand.
+project_id = "fintrack"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+# The API pages through results in chunks of this size.
+max_rows = 1000
+
+[db]
+port = 54322
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+# Same policy the API enforces: 8+ characters with upper, lower and a digit.
+minimum_password_length = 8
+password_requirements = "lower_upper_letters_digits"
+
+[auth.rate_limit]
+# The integration suite signs up and signs in many users from one IP.
+sign_in_sign_ups = 1000
+token_refresh = 1000
+
+[auth.email]
+enable_signup = true
+# Local only: sign-up returns a session immediately.
+enable_confirmations = false
+secure_password_change = false
