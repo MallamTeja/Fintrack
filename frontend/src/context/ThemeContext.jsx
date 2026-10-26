@@ -3,11 +3,6 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 const ThemeContext = createContext(null);
 const KEY = 'theme';
 
-function systemTheme() {
-  if (typeof window === 'undefined' || !window.matchMedia) return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function stored() {
   try {
     const t = localStorage.getItem(KEY);
@@ -19,16 +14,6 @@ function stored() {
 
 export function ThemeProvider({ children }) {
   const [choice, setChoice] = useState(() => stored());
-  const [system, setSystem] = useState(() => systemTheme());
-
-  useEffect(() => {
-    if (!window.matchMedia) return undefined;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const on = () => setSystem(mq.matches ? 'dark' : 'light');
-    mq.addEventListener?.('change', on);
-    return () => mq.removeEventListener?.('change', on);
-  }, []);
-
   useEffect(() => {
     const root = document.documentElement;
     if (choice) root.dataset.theme = choice;
@@ -51,7 +36,8 @@ export function ThemeProvider({ children }) {
     if (!stored() && (t === 'light' || t === 'dark')) setChoice(t);
   }, []);
 
-  const theme = choice || system;
+  // Light by default, whatever the operating system prefers; dark only when chosen.
+  const theme = choice || 'light';
   return (
     <ThemeContext.Provider value={{ theme, choice, setTheme, adoptServerTheme }}>{children}</ThemeContext.Provider>
   );

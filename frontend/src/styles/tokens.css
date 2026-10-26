@@ -109,36 +109,7 @@
   color-scheme: light;
 }
 
-/* Dark: a lamp-lit ledger. Warm umber paper, cream ink, accents lifted in lightness and eased in chroma. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --color-paper: oklch(19% 0.01 65);
-    --color-paper-2: oklch(23% 0.011 65);
-    --color-paper-3: oklch(27% 0.012 65);
-    --color-raised: oklch(24.5% 0.012 65);
-    --color-ink: oklch(92% 0.012 85);
-    --color-ink-2: oklch(82% 0.012 85);
-    --color-muted: oklch(70% 0.014 80);
-    --color-rule: oklch(31% 0.012 65);
-    --color-rule-strong: oklch(52% 0.012 70);
-    --color-accent: oklch(72% 0.1 155);
-    --color-accent-hover: oklch(78% 0.095 155);
-    --color-accent-ink: oklch(18% 0.03 155);
-    --color-accent-soft: oklch(26% 0.035 155);
-    --color-out: oklch(72% 0.12 32);
-    --color-out-hover: oklch(77% 0.11 32);
-    --color-out-ink: oklch(19% 0.01 65);
-    --color-out-soft: oklch(27% 0.04 32);
-    --color-warn: oklch(80% 0.12 80);
-    --color-warn-bar: oklch(76% 0.12 78);
-    --color-warn-soft: oklch(27% 0.04 80);
-    --color-focus: oklch(72% 0.1 155);
-    --color-scrim: oklch(10% 0.01 65 / 0.6);
-    --shadow-pop: 0 0 0 1px oklch(31% 0.012 65), 0 16px 40px -16px oklch(8% 0.01 65 / 0.7);
-    color-scheme: dark;
-  }
-}
-
+/* Light is always the default. Dark is opt-in from Settings: a lamp-lit ledger, warm umber paper and cream ink. */
 :root[data-theme='dark'] {
   --color-paper: oklch(19% 0.01 65);
   --color-paper-2: oklch(23% 0.011 65);
