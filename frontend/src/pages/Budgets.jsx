@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Icon from '../components/Icon.jsx';
 import Modal from '../components/Modal.jsx';
 import Money from '../components/Money.jsx';
@@ -6,33 +6,34 @@ import { Meter } from '../components/Charts.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { createBudget, deleteBudget, fetchBudgets, updateBudget } from '../lib/data.js';
+import { categoryOptions, useCategories } from '../lib/categories.js';
 import { formatMoney, formatMonth, percent } from '../lib/format.js';
+import { focusFirstError, useForm } from '../lib/useForm.js';
 import { invalidate, useResource } from '../lib/useResource.js';
-import { parseAmount, validateAmount, validateCategory } from '../lib/validate.js';
+import { LIMITS, parseAmount, validateBudget } from '../lib/validate.js';
 import { ConfirmDelete, ErrorNote } from './shared.jsx';
 import './Plans.css';
 
-function BudgetForm({ initial, onSubmit, error }) {
-  const [category, setCategory] = useState(initial?.category || '');
-  const [limit, setLimit] = useState(initial ? String(initial.limit) : '');
-  const [errors, setErrors] = useState({});
+function BudgetForm({ initial, onSubmit, error, categories }) {
+  const isNew = !initial;
+  const ref = useRef(null);
+  const form = useForm({ category: initial?.category || '', limit: initial ? String(initial.limit) : '' }, (v) =>
+    validateBudget(v, { isNew })
+  );
+  const { errors, bind } = form;
 
   const submit = (e) => {
     e.preventDefault();
-    const errs = {};
-    if (!initial) {
-      const c = validateCategory(category);
-      if (c) errs.category = c;
+    const errs = form.validateAll();
+    if (Object.keys(errs).length) {
+      focusFirstError(ref.current, errs);
+      return;
     }
-    const l = validateAmount(limit);
-    if (l) errs.limit = l.replace('Amount', 'Limit');
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
-    onSubmit({ category: category.trim(), limit: parseAmount(limit) });
+    onSubmit({ category: form.values.category.trim(), limit: parseAmount(form.values.limit) });
   };
 
   return (
-    <form id="budget-form" className="planform" onSubmit={submit} noValidate>
+    <form id="budget-form" ref={ref} className="planform" onSubmit={submit} noValidate>
       {error && (
         <p className="planform__error" role="alert">
           {error}
@@ -51,13 +52,17 @@ function BudgetForm({ initial, onSubmit, error }) {
           <input
             id="b-category"
             className="input"
-            maxLength={50}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            aria-invalid={errors.category ? 'true' : undefined}
-            aria-describedby="b-category-err b-category-hint"
+            maxLength={LIMITS.category}
+            list="b-category-list"
+            autoComplete="off"
             data-autofocus
+            {...bind('category', { describedBy: ['b-category-err', 'b-category-hint'] })}
           />
+          <datalist id="b-category-list">
+            {categoryOptions(categories, 'expense').map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
           <p id="b-category-hint" className="field__hint">
             Match the category you use on expenses, for example Food.
           </p>
@@ -74,12 +79,11 @@ function BudgetForm({ initial, onSubmit, error }) {
           id="b-limit"
           className="input input--money"
           inputMode="decimal"
+          autoComplete="off"
           placeholder="0.00"
-          value={limit}
-          onChange={(e) => setLimit(e.target.value)}
-          aria-invalid={errors.limit ? 'true' : undefined}
-          aria-describedby="b-limit-err"
+          maxLength={LIMITS.amountChars}
           data-autofocus={initial ? true : undefined}
+          {...bind('limit', { describedBy: ['b-limit-err'] })}
         />
         <p id="b-limit-err" className="field__error">
           {errors.limit}
@@ -89,17 +93,51 @@ function BudgetForm({ initial, onSubmit, error }) {
   );
 }
 
+/** Days after today in this month, and a per-day allowance for what is left (today included). */
+export function monthPace(remaining, today = new Date()) {
+  const last = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const daysLeft = last - today.getDate();
+  return { daysLeft, perDay: remaining > 0 ? remaining / (daysLeft + 1) : 0 };
+}
+
 function status(b, currency) {
   const pct = percent(b.current_spending, b.limit);
   if (pct > 100) return { tone: 'out', text: `Over by ${formatMoney(b.current_spending - b.limit, currency)}` };
   if (pct >= 80) return { tone: 'warn', text: `${Math.round(pct)}% used` };
-  return { tone: 'ok', text: `${formatMoney(Math.max(b.limit - b.current_spending, 0), currency)} left` };
+  return { tone: 'ok', text: `${Math.round(pct)}% used` };
+}
+
+function BudgetPace({ b, today, monthName }) {
+  const { currency } = useAuth();
+  const remaining = Math.max(b.limit - b.current_spending, 0);
+  const { daysLeft, perDay } = monthPace(remaining, today);
+  const days = daysLeft === 0 ? `Last day of ${monthName}` : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left in ${monthName}`;
+  return (
+    <p className="plan__left">
+      {remaining > 0 ? (
+        <>
+          <Money amount={remaining} size="sm" /> <span className="muted">remaining · {days}</span>
+          {perDay > 0 && (
+            <span className="muted">
+              {' '}
+              · about <span className="num">{formatMoney(perDay, currency)}</span> a day
+            </span>
+          )}
+        </>
+      ) : (
+        <span className="muted">Nothing remaining · {days}</span>
+      )}
+    </p>
+  );
 }
 
 export default function Budgets() {
   const { currency } = useAuth();
   const notify = useToast();
   const budgets = useResource(fetchBudgets, { keys: ['budgets', 'transactions'] });
+  const categories = useCategories();
+  const today = new Date();
+  const monthName = new Intl.DateTimeFormat('en-IN', { month: 'long' }).format(today);
   const [editing, setEditing] = useState(null);
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -127,7 +165,13 @@ export default function Budgets() {
       setEditing(null);
       invalidate('budgets');
     } catch (err) {
-      setFormError(err.status === 409 ? `There is already a budget for ${category}. Edit that one instead.` : err.message);
+      setFormError(
+        err.status === 409
+          ? `There is already a budget for ${category}. Edit that one instead.`
+          : err.status === 400
+            ? `Not saved: ${err.message}`
+            : err.message
+      );
       if (editing !== 'new') invalidate('budgets');
     } finally {
       setBusy(false);
@@ -207,6 +251,7 @@ export default function Budgets() {
                     <Money amount={b.limit} size="sm" className="muted" />
                   </p>
                   <Meter value={b.current_spending} max={b.limit} label={`${b.category}: share of limit used`} />
+                  <BudgetPace b={b} today={today} monthName={monthName} />
                   <div className="plan__actions">
                     <button type="button" className="btn btn--quiet" onClick={() => open(b)}>
                       <Icon name="edit" size={18} />
@@ -245,7 +290,13 @@ export default function Budgets() {
         }
       >
         {editing && (
-          <BudgetForm key={editing === 'new' ? 'new' : editing.id} initial={editing === 'new' ? null : editing} onSubmit={save} error={formError} />
+          <BudgetForm
+            key={editing === 'new' ? 'new' : editing.id}
+            initial={editing === 'new' ? null : editing}
+            onSubmit={save}
+            error={formError}
+            categories={categories}
+          />
         )}
       </Modal>
 

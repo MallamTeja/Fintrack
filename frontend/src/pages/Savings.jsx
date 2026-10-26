@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { CharCount, LabelRow } from '../components/Field.jsx';
 import Icon from '../components/Icon.jsx';
 import Modal from '../components/Modal.jsx';
 import Money from '../components/Money.jsx';
@@ -7,112 +8,149 @@ import { useToast } from '../context/ToastContext.jsx';
 import { createGoal, deleteGoal, fetchGoals, patchGoal, updateGoal } from '../lib/data.js';
 import { formatDate, monthsUntil, percent } from '../lib/format.js';
 import { invalidate, useResource } from '../lib/useResource.js';
-import { parseAmount, validateAmount } from '../lib/validate.js';
+import { focusFirstError, useForm } from '../lib/useForm.js';
+import { LIMITS, MIN_DATE, parseAmount, todayIso, validateCategory, validateGoal, validateGoalMove } from '../lib/validate.js';
 import { ConfirmDelete, ErrorNote } from './shared.jsx';
 import './Plans.css';
 
 function GoalForm({ initial, onSubmit, error }) {
-  const [v, setV] = useState({
-    title: initial?.title || '',
-    target: initial ? String(initial.target_amount) : '',
-    current: initial ? String(initial.current_amount) : '',
-    category: initial?.category || '',
-    due: initial?.due_date || '',
-  });
-  const [errors, setErrors] = useState({});
-  const set = (k) => (e) => setV((x) => ({ ...x, [k]: e.target.value }));
+  const isNew = !initial;
+  const ref = useRef(null);
+  const form = useForm(
+    {
+      title: initial?.title || '',
+      target: initial ? String(initial.target_amount) : '',
+      current: initial ? String(initial.current_amount) : '',
+      category: initial?.category || '',
+      due: initial?.due_date || '',
+    },
+    (v) => {
+      const errs = validateGoal(v, { isNew });
+      if (v.category.trim()) {
+        const c = validateCategory(v.category);
+        if (c) errs.category = c.replace('category', 'label');
+      }
+      return errs;
+    }
+  );
+  const { values, errors, bind } = form;
 
   const submit = (e) => {
     e.preventDefault();
-    const errs = {};
-    if (!v.title.trim()) errs.title = 'Name the goal.';
-    else if (v.title.trim().length > 100) errs.title = 'Keep the name under 100 characters.';
-    const t = validateAmount(v.target);
-    if (t) errs.target = t.replace('Amount', 'Target');
-    if (v.current.trim() !== '') {
-      const c = parseAmount(v.current);
-      if (Number.isNaN(c) || c < 0) errs.current = 'Enter zero or more.';
+    const errs = form.validateAll();
+    if (Object.keys(errs).length) {
+      focusFirstError(ref.current, errs);
+      return;
     }
-    setErrors(errs);
-    if (Object.keys(errs).length) return;
     onSubmit({
-      title: v.title.trim(),
-      target_amount: parseAmount(v.target),
-      current_amount: v.current.trim() === '' ? 0 : parseAmount(v.current),
-      category: v.category.trim() || undefined,
-      due_date: v.due || undefined,
+      title: values.title.trim(),
+      target_amount: parseAmount(values.target),
+      current_amount: values.current.trim() === '' ? 0 : parseAmount(values.current),
+      category: values.category.trim() || undefined,
+      due_date: values.due || undefined,
     });
   };
 
-  const f = (k, label, props = {}, hint) => (
+  const f = (k, label, props = {}, hint, count) => (
     <div className="field">
-      <label className="field__label" htmlFor={`g-${k}`}>
-        {label}
-      </label>
-      <input
-        id={`g-${k}`}
-        className="input"
-        value={v[k]}
-        onChange={set(k)}
-        aria-invalid={errors[k] ? 'true' : undefined}
-        aria-describedby={`g-${k}-err`}
-        {...props}
-      />
-      {hint && <p className="field__hint">{hint}</p>}
+      {count ? (
+        <LabelRow htmlFor={`g-${k}`} count={count}>
+          {label}
+        </LabelRow>
+      ) : (
+        <label className="field__label" htmlFor={`g-${k}`}>
+          {label}
+        </label>
+      )}
+      <input id={`g-${k}`} className="input" {...bind(k, { describedBy: [`g-${k}-err`, hint && `g-${k}-hint`, count && `g-${k}-count`] })} {...props} />
+      {hint && (
+        <p id={`g-${k}-hint`} className="field__hint">
+          {hint}
+        </p>
+      )}
       <p id={`g-${k}-err`} className="field__error">
         {errors[k]}
       </p>
     </div>
   );
+  const money = { inputMode: 'decimal', className: 'input input--money', placeholder: '0.00', autoComplete: 'off', maxLength: LIMITS.amountChars };
 
   return (
-    <form id="goal-form" className="planform" onSubmit={submit} noValidate>
+    <form id="goal-form" ref={ref} className="planform" onSubmit={submit} noValidate>
       {error && (
         <p className="planform__error" role="alert">
           {error}
         </p>
       )}
-      {f('title', 'Goal', { maxLength: 100, 'data-autofocus': true, placeholder: 'Emergency fund' })}
+      {f(
+        'title',
+        'Goal',
+        { maxLength: LIMITS.title, 'data-autofocus': true, placeholder: 'Emergency fund', autoComplete: 'off' },
+        null,
+        <CharCount id="g-title-count" value={values.title} max={LIMITS.title} />
+      )}
       <div className="planform__pair">
-        {f('target', 'Target', { inputMode: 'decimal', className: 'input input--money', placeholder: '0.00' })}
-        {f('current', 'Saved so far', { inputMode: 'decimal', className: 'input input--money', placeholder: '0.00' })}
+        {f('target', 'Target', money)}
+        {f('current', 'Saved so far', money, 'Up to 10 times the target.')}
       </div>
       <div className="planform__pair">
-        {f('category', 'Label', { maxLength: 50 }, 'Optional, for example Travel.')}
-        {f('due', 'Target date', { type: 'date' }, 'Optional.')}
+        {f('category', 'Label', { maxLength: LIMITS.category, autoComplete: 'off' }, 'Optional, for example Travel.')}
+        {f('due', 'Target date', { type: 'date', min: isNew ? todayIso() : MIN_DATE }, isNew ? 'Optional. Today or later.' : 'Optional.')}
       </div>
     </form>
   );
 }
 
-function AddMoneyForm({ goal, onSubmit }) {
-  const [amount, setAmount] = useState('');
-  const [error, setError] = useState('');
+function MoveMoneyForm({ goal, mode, onModeChange, onSubmit }) {
+  const ref = useRef(null);
+  const form = useForm({ amount: '' }, (v) => {
+    const e = validateGoalMove(v.amount, goal, mode);
+    return e ? { amount: e } : {};
+  });
   const submit = (e) => {
     e.preventDefault();
-    const err = validateAmount(amount);
-    setError(err);
-    if (!err) onSubmit(parseAmount(amount));
+    const errs = form.validateAll();
+    if (Object.keys(errs).length) {
+      focusFirstError(ref.current, errs);
+      return;
+    }
+    onSubmit(parseAmount(form.values.amount));
   };
   return (
-    <form id="addmoney-form" className="planform" onSubmit={submit} noValidate>
+    <form id="move-form" ref={ref} className="planform" onSubmit={submit} noValidate>
+      <fieldset className="txform__type">
+        <legend className="field__label">Move money</legend>
+        <div className="seg">
+          {[
+            ['add', 'Add money'],
+            ['withdraw', 'Withdraw'],
+          ].map(([v, label]) => (
+            <label key={v} className="seg__opt">
+              <input type="radio" name="move-mode" value={v} checked={mode === v} onChange={() => onModeChange(v)} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="field">
         <label className="field__label" htmlFor="am-amount">
-          Amount to add to {goal.title}
+          {mode === 'withdraw' ? `Amount to take from ${goal.title}` : `Amount to add to ${goal.title}`}
         </label>
         <input
           id="am-amount"
           className="input input--money"
           inputMode="decimal"
+          autoComplete="off"
           placeholder="0.00"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          aria-invalid={error ? 'true' : undefined}
-          aria-describedby="am-amount-err"
+          maxLength={LIMITS.amountChars}
           data-autofocus
+          {...form.bind('amount', { describedBy: ['am-amount-err', 'am-amount-hint'] })}
         />
+        <p id="am-amount-hint" className="field__hint">
+          Saved so far: <Money amount={goal.current_amount} size="sm" />
+        </p>
         <p id="am-amount-err" className="field__error">
-          {error}
+          {form.errors.amount}
         </p>
       </div>
     </form>
@@ -132,7 +170,7 @@ export default function Savings() {
   const notify = useToast();
   const goals = useResource(fetchGoals, { keys: ['savings'] });
   const [editing, setEditing] = useState(null);
-  const [adding, setAdding] = useState(null);
+  const [moving, setMoving] = useState(null); // { goal, mode }
   const [confirm, setConfirm] = useState(null);
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -159,17 +197,19 @@ export default function Savings() {
     }
   }
 
-  async function addMoney(amount) {
-    const goal = adding;
+  async function moveMoney(amount) {
+    const { goal, mode } = moving;
     const before = goals.data;
-    const next = Math.round((goal.current_amount + amount) * 100) / 100;
-    setAdding(null);
+    const delta = mode === 'withdraw' ? -amount : amount;
+    const next = Math.round((goal.current_amount + delta) * 100) / 100;
+    setMoving(null);
     goals.setData((d) => d.map((g) => (g.id === goal.id ? { ...g, current_amount: next } : g)));
     try {
       await patchGoal(goal.id, { current_amount: next });
+      invalidate('savings');
     } catch (err) {
       goals.setData(before);
-      notify(`Could not add to ${goal.title}: ${err.message}`);
+      notify(`Could not ${mode === 'withdraw' ? 'withdraw from' : 'add to'} ${goal.title}: ${err.message}`);
     }
   }
 
@@ -252,9 +292,17 @@ export default function Savings() {
                   )}
                 </p>
                 <div className="plan__actions">
-                  <button type="button" className="btn" onClick={() => setAdding(g)}>
+                  <button type="button" className="btn" onClick={() => setMoving({ goal: g, mode: 'add' })}>
                     <Icon name="coin" size={18} />
                     Add money
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--quiet"
+                    onClick={() => setMoving({ goal: g, mode: 'withdraw' })}
+                    disabled={g.current_amount <= 0}
+                  >
+                    Withdraw
                   </button>
                   <button
                     type="button"
@@ -303,22 +351,30 @@ export default function Savings() {
       </Modal>
 
       <Modal
-        open={Boolean(adding)}
-        onClose={() => setAdding(null)}
+        open={Boolean(moving)}
+        onClose={() => setMoving(null)}
         variant="dialog"
-        title="Add money"
+        title={moving?.mode === 'withdraw' ? 'Withdraw' : 'Add money'}
         footer={
           <>
-            <button type="button" className="btn" onClick={() => setAdding(null)}>
+            <button type="button" className="btn" onClick={() => setMoving(null)}>
               Cancel
             </button>
-            <button type="submit" form="addmoney-form" className="btn btn--primary">
-              Add
+            <button type="submit" form="move-form" className="btn btn--primary">
+              {moving?.mode === 'withdraw' ? 'Withdraw' : 'Add'}
             </button>
           </>
         }
       >
-        {adding && <AddMoneyForm goal={adding} onSubmit={addMoney} />}
+        {moving && (
+          <MoveMoneyForm
+            key={moving.goal.id}
+            goal={moving.goal}
+            mode={moving.mode}
+            onModeChange={(mode) => setMoving((m) => ({ ...m, mode }))}
+            onSubmit={moveMoney}
+          />
+        )}
       </Modal>
 
       <ConfirmDelete

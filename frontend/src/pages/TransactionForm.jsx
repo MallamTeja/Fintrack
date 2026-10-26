@@ -1,64 +1,79 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { CharCount, LabelRow } from '../components/Field.jsx';
+import { categoryOptions } from '../lib/categories.js';
 import { isoDay } from '../lib/format.js';
-import { parseAmount, validateTransaction } from '../lib/validate.js';
+import { focusFirstError, useForm } from '../lib/useForm.js';
+import { LIMITS, MIN_DATE, PAYMENT_METHODS, maxEntryDate, parseAmount, validateTransaction } from '../lib/validate.js';
 
-export const SUGGESTED_CATEGORIES = [
-  'Food',
-  'Groceries',
-  'Rent',
-  'Transport',
-  'Utilities',
-  'Health',
-  'Shopping',
-  'Entertainment',
-  'Salary',
-  'Freelance',
-];
+const blank = () => ({
+  type: 'expense',
+  amount: '',
+  description: '',
+  category: '',
+  date: isoDay(new Date()),
+  payment_method: 'other',
+  notes: '',
+});
 
-const blank = () => ({ type: 'expense', amount: '', description: '', category: '', date: isoDay(new Date()) });
+const fromInitial = (initial) => ({
+  type: initial.type === 'income' ? 'income' : 'expense',
+  amount: initial.amount === undefined || initial.amount === null ? '' : String(initial.amount),
+  description: initial.description || '',
+  category: initial.category || '',
+  date: initial.date || isoDay(new Date()),
+  payment_method: initial.payment_method || 'other',
+  notes: initial.notes || '',
+});
 
-/** Add or edit one entry. Calls onSubmit with a clean payload only when every field is valid. */
-export default function TransactionForm({ id = 'tx-form', initial, categories = [], onSubmit }) {
-  const [values, setValues] = useState(() =>
-    initial
-      ? {
-          type: initial.type,
-          amount: String(initial.amount ?? ''),
-          description: initial.description || '',
-          category: initial.category || '',
-          date: initial.date || isoDay(new Date()),
-        }
-      : blank()
-  );
-  const [errors, setErrors] = useState({});
-  const set = (k) => (e) => setValues((v) => ({ ...v, [k]: e.target.value }));
-  const options = [...new Set([...categories, ...SUGGESTED_CATEGORIES])];
+/**
+ * Add or edit one entry. Calls onSubmit with a clean payload only when every field is valid.
+ * categories: [{ category, type, count }] or plain strings, for autocomplete.
+ * initialErrors: field errors from a failed save, shown straight away.
+ */
+export default function TransactionForm({ id = 'tx-form', initial, categories = [], initialErrors, onSubmit }) {
+  const form = useForm(initial ? fromInitial(initial) : blank(), (v) => validateTransaction(v));
+  const { values, errors, bind, setValue } = form;
+  const formRef = useRef(null);
+  const options = categoryOptions(categories, values.type);
+
+  useEffect(() => {
+    if (initialErrors && Object.keys(initialErrors).length) form.setServerErrors(initialErrors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const submit = (e) => {
     e.preventDefault();
-    const errs = validateTransaction(values);
-    setErrors(errs);
+    const errs = form.validateAll();
     if (Object.keys(errs).length) {
-      const first = e.currentTarget.querySelector(`[name="${Object.keys(errs)[0]}"]`);
-      first?.focus();
+      focusFirstError(formRef.current, errs);
       return;
     }
+    const notes = values.notes.trim();
     onSubmit({
       type: values.type,
-      amount: Math.round(parseAmount(values.amount) * 100) / 100,
+      amount: parseAmount(values.amount),
       description: values.description.trim(),
       category: values.category.trim(),
       date: values.date || undefined,
+      payment_method: values.payment_method,
+      notes,
     });
   };
 
-  const err = (k) => ({
-    'aria-invalid': errors[k] ? 'true' : undefined,
-    'aria-describedby': `${id}-${k}-err`,
-  });
+  const ids = (k) => `${id}-${k}`;
+  const errText = (k) => (
+    <p id={`${ids(k)}-err`} className="field__error">
+      {errors[k]}
+    </p>
+  );
 
   return (
-    <form id={id} className="txform" onSubmit={submit} noValidate>
+    <form id={id} ref={formRef} className="txform" onSubmit={submit} noValidate>
+      {errors._form && (
+        <p className="planform__error" role="alert">
+          {errors._form}
+        </p>
+      )}
       <fieldset className="txform__type">
         <legend className="field__label">Kind of entry</legend>
         <div className="seg">
@@ -67,7 +82,7 @@ export default function TransactionForm({ id = 'tx-form', initial, categories = 
             ['income', 'Income'],
           ].map(([v, label]) => (
             <label key={v} className="seg__opt">
-              <input type="radio" name="type" value={v} checked={values.type === v} onChange={set('type')} />
+              <input type="radio" name="type" value={v} checked={values.type === v} onChange={() => setValue('type', v)} />
               <span>{label}</span>
             </label>
           ))}
@@ -75,87 +90,102 @@ export default function TransactionForm({ id = 'tx-form', initial, categories = 
       </fieldset>
 
       <div className="field">
-        <label className="field__label" htmlFor={`${id}-amount`}>
+        <label className="field__label" htmlFor={ids('amount')}>
           Amount
         </label>
         <input
-          id={`${id}-amount`}
-          name="amount"
+          id={ids('amount')}
           className="input input--money"
           inputMode="decimal"
           autoComplete="off"
           placeholder="0.00"
-          value={values.amount}
-          onChange={set('amount')}
+          maxLength={LIMITS.amountChars}
           data-autofocus
-          {...err('amount')}
+          {...bind('amount', { describedBy: [`${ids('amount')}-err`] })}
         />
-        <p id={`${id}-amount-err`} className="field__error">
-          {errors.amount}
-        </p>
+        {errText('amount')}
       </div>
 
       <div className="field">
-        <label className="field__label" htmlFor={`${id}-description`}>
-          Description
-        </label>
+        <LabelRow
+          htmlFor={ids('description')}
+          count={<CharCount id={`${ids('description')}-count`} value={values.description} max={LIMITS.description} />}
+        >
+          Description (optional)
+        </LabelRow>
         <input
-          id={`${id}-description`}
-          name="description"
+          id={ids('description')}
           className="input"
-          maxLength={200}
+          maxLength={LIMITS.description}
+          autoComplete="off"
           placeholder="What was it for?"
-          value={values.description}
-          onChange={set('description')}
-          {...err('description')}
+          {...bind('description', { describedBy: [`${ids('description')}-err`, `${ids('description')}-count`] })}
         />
-        <p id={`${id}-description-err`} className="field__error">
-          {errors.description}
-        </p>
+        {errText('description')}
       </div>
 
       <div className="txform__pair">
         <div className="field">
-          <label className="field__label" htmlFor={`${id}-category`}>
+          <label className="field__label" htmlFor={ids('category')}>
             Category
           </label>
           <input
-            id={`${id}-category`}
-            name="category"
+            id={ids('category')}
             className="input"
             list={`${id}-cats`}
-            maxLength={50}
+            maxLength={LIMITS.category}
             autoComplete="off"
-            value={values.category}
-            onChange={set('category')}
-            {...err('category')}
+            {...bind('category', { describedBy: [`${ids('category')}-err`] })}
           />
           <datalist id={`${id}-cats`}>
             {options.map((c) => (
               <option key={c} value={c} />
             ))}
           </datalist>
-          <p id={`${id}-category-err`} className="field__error">
-            {errors.category}
-          </p>
+          {errText('category')}
         </div>
         <div className="field">
-          <label className="field__label" htmlFor={`${id}-date`}>
+          <label className="field__label" htmlFor={ids('date')}>
             Date
           </label>
           <input
-            id={`${id}-date`}
-            name="date"
+            id={ids('date')}
             type="date"
             className="input"
-            value={values.date}
-            onChange={set('date')}
-            {...err('date')}
+            min={MIN_DATE}
+            max={maxEntryDate()}
+            {...bind('date', { describedBy: [`${ids('date')}-err`] })}
           />
-          <p id={`${id}-date-err`} className="field__error">
-            {errors.date}
-          </p>
+          {errText('date')}
         </div>
+      </div>
+
+      <div className="field">
+        <label className="field__label" htmlFor={ids('payment_method')}>
+          Payment method
+        </label>
+        <select id={ids('payment_method')} className="input" {...bind('payment_method', { describedBy: [`${ids('payment_method')}-err`] })}>
+          {PAYMENT_METHODS.map((m) => (
+            <option key={m.value} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        {errText('payment_method')}
+      </div>
+
+      <div className="field">
+        <LabelRow htmlFor={ids('notes')} count={<CharCount id={`${ids('notes')}-count`} value={values.notes} max={LIMITS.notes} />}>
+          Notes (optional)
+        </LabelRow>
+        <textarea
+          id={ids('notes')}
+          className="input"
+          rows={3}
+          maxLength={LIMITS.notes}
+          {...bind('notes', { describedBy: [`${ids('notes')}-err`, `${ids('notes')}-count`] })}
+        />
+        {errText('notes')}
       </div>
     </form>
   );
