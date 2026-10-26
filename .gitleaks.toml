@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Redaction markers left by the October 2026 history rewrite"
+regexes = ['''\*\*\*REMOVED\*\*\*''', '''<USER>:<PASSWORD>''']

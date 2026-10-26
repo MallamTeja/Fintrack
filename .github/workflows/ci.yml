@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: API tests against local Supabase
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase (Postgres + Auth + REST only)
+        working-directory: .
+        run: supabase start -x studio,imgproxy,storage-api,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta,mailpit
+
+      - name: Lint SQL (functions, policies)
+        working-directory: .
+        run: supabase db lint --level error
+
+      - name: Export local Supabase URL and anon key
+        working-directory: .
+        run: |
+          eval "$(supabase status -o env)"
+          KEY="${ANON_KEY:-$PUBLISHABLE_KEY}"
+          echo "::add-mask::$KEY"
+          echo "SUPABASE_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$KEY" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - name: Syntax check
+        run: for f in server.js $(git ls-files 'src/*.js' 'src/**/*.js' 'tests/**/*.js'); do node --check "$f"; done
+      - name: Unit + integration tests
+        run: npm test -- --ci
+        env:
+          NODE_ENV: test
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Boot smoke test
+        run: |
+          PORT=5050 NODE_ENV=production node server.js & echo $! > /tmp/pid
+          for i in $(seq 1 20); do curl -fs localhost:5050/api/health && break; sleep 1; done
+          curl -fs localhost:5050/api/health | grep -q '"status":"ok"'
+          curl -fs -o /dev/null localhost:5050/login.html
+          kill "$(cat /tmp/pid)"
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
