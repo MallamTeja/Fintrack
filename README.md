@@ -1,167 +1,140 @@
-# FinTrack – Personal Finance Manager
+# FinTrack
 
-FinTrack is a full-stack personal finance tracking application built using the MERN stack. It enables users to manage income, expenses, financial insights, and budgeting through a clean, intuitive interface.
+[![CI](https://github.com/MallamTeja/Fintrack/actions/workflows/ci.yml/badge.svg)](https://github.com/MallamTeja/Fintrack/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/MallamTeja/Fintrack/actions/workflows/codeql.yml/badge.svg)](https://github.com/MallamTeja/Fintrack/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+Personal finance tracker: log income and expenses, set monthly budgets per category
+and track savings goals.
 
----
+**Live:** https://fintrack-project1.vercel.app
 
-## Deployed Link
+## Stack
 
-Access the application here:  
-**https://fintrack-five-pink.vercel.app**
+| Layer | Tech |
+|---|---|
+| Frontend | Static HTML + Tailwind + vanilla JS / Chart.js (`frontend/public`) |
+| API | Node 22, Express (`backend/`), deployed as one Vercel function |
+| Auth | Supabase Auth (email + password, JWT access and refresh tokens) |
+| Database | Supabase Postgres with Row Level Security (`supabase/migrations`) |
+| CI | GitHub Actions: tests against a local Supabase, CodeQL, gitleaks, npm audit, Dependabot |
 
----
-
-## Overview
-
-FinTrack provides a reliable and minimal solution for tracking personal finances. It features:
-
-- A customizable dashboard
-- Transaction management
-- Filter options (by category, type, date)
-- Categorized record-keeping
-- Data insights and analysis
-
----
-
-## Features
-
-- View financial summaries on a modern dashboard
-- Add, edit, and view income or expense transactions
-- Use default and custom categories
-- Filter data by type, category, and date
-- Quick amount input buttons (₹100, ₹500, ₹1000, ₹5000)
-- Dark-themed responsive UI
-- AI insights and user authentication (planned)
-
----
-
-## Folder Structure
+## How it works
 
 ```
-Fintrack/
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── .env
-│   ├── server.js
-│   ├── test-connection.js
-│   └── package.json
-├── frontend/
-│   ├── index.html
-│   ├── dashboard.html
-│   ├── login.html
-│   ├── script.js
-│   ├── login.js
-│   ├── auth.js
-│   ├── styles.css
-│   ├── tailwind.config.js
-│   └── package.json
-└── README.md
+Browser ──fetch /api/* (Bearer <Supabase access token>)──► Express (Vercel function)
+                                                              │ verifies token with Supabase Auth
+                                                              │ queries as that user (anon key + user JWT)
+                                                              ▼
+                                                   Supabase Postgres ── RLS: user_id = auth.uid()
 ```
 
----
+The API never uses the service-role key. Every query runs as the signed-in user,
+so Postgres itself guarantees that people only see their own data, even if a
+route had a bug. `user_id` is filled from the token by a column default and is not
+writable by clients (column-level grants).
 
-## Tech Stack
+## Run locally
 
-### Frontend
+Requirements: Node 20.12+, Docker (for the local Supabase stack).
 
-- HTML5
-- CSS3
-- Tailwind CSS
-- JavaScript
-- React (planned)
+```bash
+git clone https://github.com/MallamTeja/Fintrack.git
+cd Fintrack
+npx supabase start            # local Postgres + Auth, applies supabase/migrations
+npx supabase status -o env    # shows API_URL and ANON_KEY
 
-### Backend
+cd backend
+cp .env.example .env          # put API_URL into SUPABASE_URL and ANON_KEY into SUPABASE_ANON_KEY
+npm install
+npm run dev                   # http://localhost:5000
+```
 
-- Node.js
-- Express.js
-- MongoDB (Mongoose)
+### Environment variables
 
-### Deployment
+| Name | Required | Notes |
+|---|---|---|
+| `SUPABASE_URL` | yes | Project URL |
+| `SUPABASE_ANON_KEY` | yes | Anon / publishable key (`SUPABASE_PUBLISHABLE_KEY` also accepted) |
+| `PORT` | no | Default `5000` |
+| `FRONTEND_URL` | no | Comma-separated extra origins allowed by CORS |
 
-- Frontend: Vercel
-- Backend: Local/Cloud Deployment
+On Vercel these are set automatically by the Supabase integration. The server refuses
+to start without them. `.env` files are git-ignored and CI scans every push for secrets.
 
----
+### Database changes
 
-## Installation and Setup
+Add a new file in `supabase/migrations/` (`npx supabase migration new <name>`), test it
+locally with `npx supabase db reset`, then push to `main`: the Supabase GitHub
+integration applies it to production. Every new table needs RLS policies and explicit grants.
 
-### Backend
+## API
+
+All routes except `/api/health`, `/api/auth/register`, `/api/auth/login` and
+`/api/auth/refresh` need `Authorization: Bearer <access token>`.
+
+| Method | Path | Body / query |
+|---|---|---|
+| GET | `/api/health` | |
+| POST | `/api/auth/register` | `name, email, password` (8+ chars, upper, lower, digit) |
+| POST | `/api/auth/login` | `email, password` → `{ token, refreshToken, expiresAt, user }` |
+| POST | `/api/auth/refresh` | `refreshToken` |
+| POST | `/api/auth/logout` | revokes the session |
+| GET | `/api/auth/me` | profile and preferences |
+| PUT | `/api/auth/preferences` | `theme` (`light`/`dark`), `currency` (ISO code), `notifications` |
+| GET | `/api/transactions` | `?type&category&startDate&endDate&page&limit` → `{ data, pagination }` |
+| POST | `/api/transactions` | `description, amount, type, category, date?` |
+| GET / PUT / PATCH / DELETE | `/api/transactions/:id` | |
+| GET | `/api/transactions/stats/summary` | totals by type and category |
+| GET / POST | `/api/budgets` | `category, limit`; list includes `current_spending` for this month |
+| PUT / PATCH / DELETE | `/api/budgets/:id` | `limit` |
+| GET / POST | `/api/savings-goals` (alias `/api/savings`) | `title, target_amount, current_amount?, category?, due_date?` |
+| PUT / PATCH / DELETE | `/api/savings-goals/:id` | |
+
+Errors are `{ success: false, error: { message } }` with a matching HTTP status.
+
+## Tests
 
 ```bash
 cd backend
-npm install
+npm run test:unit          # no services needed
+npm test                   # unit + integration; needs `npx supabase start` and backend/.env
 ```
 
-Create a `.env` file with:
+The integration suite signs up real users against the local stack and checks auth
+(login, refresh, logout, forged tokens, generic errors), CRUD for every resource,
+validation, literal matching of search input, and that one user can never read,
+change or delete another user's rows.
+
+## Project structure
 
 ```
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
+backend/
+  server.js              entry point (exports the app for Vercel)
+  src/app.js             middleware, routes, static files
+  src/auth.js            bearer token -> Supabase user + per-user DB client
+  src/routes/            auth, transactions, budgets, savings
+  src/validate.js        input validation
+  tests/                 unit + integration (Jest, Supertest)
+frontend/public/         pages, scripts and styles (js/api.js adds the token to every API call)
+supabase/
+  config.toml            local stack settings
+  migrations/            schema, RLS policies, grants
 ```
 
-Start backend server:
+## Known gaps
 
-```bash
-npm start
-```
+- The Savings Goals and Settings pages have no page logic yet (their scripts never existed).
+- "Upload statement" on the Add Transaction page has no backend.
+- Pages use inline scripts, so Content-Security-Policy is off.
+- Tokens live in `localStorage`.
 
-### Frontend
+See [SECURITY.md](SECURITY.md) for the security model and [CONTRIBUTING.md](CONTRIBUTING.md) to help.
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
----
-
-## Libraries and Tools Used
-
-```markdown
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-```
-
----
-
-## Author
-
-**Teja Mallam**  
-[GitHub](https://github.com/MallamTeja)  
-[LinkedIn](https://www.linkedin.com/in/tejamallam)  
-**Email:** tejamallam1233@gmail.com
-
----
-
-## Contributing
-
-Contributions are welcome. Please follow these steps:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature-name`)
-3. Make your changes
-4. Commit (`git commit -m "Add feature"`)
-5. Push (`git push origin feature-name`)
-6. Open a pull request
-
----
+Built by [Teja Mallam](https://github.com/MallamTeja) with
+[Karthik](https://github.com/Karthik-177), Kopparthi Rakesh and
+[Sri Sai Deepak Maddineni](https://github.com/maddinenisrisaideepak).
 
 ## License
 
-This project is licensed under the MIT License.
+[MIT](LICENSE)
