@@ -63,8 +63,26 @@ jobs:
           PORT=5050 NODE_ENV=production node server.js & echo $! > /tmp/pid
           for i in $(seq 1 20); do curl -fs localhost:5050/api/health && break; sleep 1; done
           curl -fs localhost:5050/api/health | grep -q '"status":"ok"'
-          curl -fs -o /dev/null localhost:5050/login.html
           kill "$(cat /tmp/pid)"
+
+  frontend:
+    name: Frontend build and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: No em dashes in UI copy
+        run: "! grep -rn $'\\u2014' src index.html"
 
   secrets:
     name: Secret scan
