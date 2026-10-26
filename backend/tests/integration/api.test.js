@@ -56,7 +56,9 @@ maybe('auth', () => {
     });
 
     test('forged and garbage tokens are rejected', async () => {
-        const forged = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTQwMDAtODAwMC0wMDAwMDAwMDAwMDAiLCJyb2xlIjoiYXV0aGVudGljYXRlZCJ9.c2lnbmF0dXJl';
+        // Token-shaped string built at runtime (no token literal in the repo).
+        const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+        const forged = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64({ sub: '00000000-0000-4000-8000-000000000000', role: 'authenticated' })}.c2lnbmF0dXJl`;
         for (const t of [forged, 'garbage']) {
             expect((await request(app).get('/api/transactions').set(auth(t))).status).toBe(401);
         }
