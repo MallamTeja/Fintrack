@@ -1,11 +1,20 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { SESSION_EVENT, clearSession, get, getToken, post, put, saveSession } from '../lib/api.js';
-import { normaliseCurrency } from '../lib/format.js';
+import { normaliseCurrency, setDateFormat } from '../lib/format.js';
 import { setRealtimeToken } from '../lib/realtime.js';
 
 const AuthContext = createContext(null);
 
-const DEFAULT_PREFS = { theme: null, currency: 'INR', notifications: true };
+export const DEFAULT_PREFS = {
+  theme: null,
+  currency: 'INR',
+  notifications: true,
+  month_start_day: 1,
+  date_format: 'DD/MM/YYYY',
+  week_start: 'monday',
+  monthly_income_target: null,
+  budget_alerts: true,
+};
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => getToken());
@@ -69,22 +78,38 @@ export function AuthProvider({ children }) {
     clearSession();
   }, []);
 
+  /** Saves any subset of preferences, plus `name`, optimistically; rolls back on failure. */
   const updatePreferences = useCallback(
     async (patch) => {
-      const prev = user?.preferences;
-      setUser((u) => (u ? { ...u, preferences: { ...u.preferences, ...patch } } : u));
+      const prev = user;
+      const { name, ...prefs } = patch;
+      setUser((u) => (u ? { ...u, ...(name !== undefined ? { name } : {}), preferences: { ...u.preferences, ...prefs } } : u));
       try {
         const body = await put('/auth/preferences', patch);
-        if (body?.preferences) {
-          setUser((u) => (u ? { ...u, preferences: { ...u.preferences, ...body.preferences } } : u));
-        }
+        const serverPrefs = body?.preferences || body?.data?.preferences;
+        const serverName = body?.name ?? body?.data?.name ?? body?.preferences?.name;
+        setUser((u) => {
+          if (!u) return u;
+          const { name: _n, ...cleanPrefs } = serverPrefs || {};
+          return {
+            ...u,
+            ...(typeof serverName === 'string' && serverName ? { name: serverName } : {}),
+            preferences: { ...u.preferences, ...cleanPrefs },
+          };
+        });
       } catch (err) {
-        setUser((u) => (u ? { ...u, preferences: prev } : u));
+        setUser(prev);
         throw err;
       }
     },
     [user]
   );
+
+  /** After the account is deleted there is nothing to sign out of on the server. */
+  const endSession = useCallback(() => clearSession(), []);
+
+  // Formatters are plain functions; keep their date format in step with the profile before children render.
+  setDateFormat(user?.preferences?.date_format);
 
   const value = useMemo(
     () => ({
@@ -96,8 +121,9 @@ export function AuthProvider({ children }) {
       register,
       logout,
       updatePreferences,
+      endSession,
     }),
-    [status, token, user, login, register, logout, updatePreferences]
+    [status, token, user, login, register, logout, updatePreferences, endSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,18 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Icon from '../components/Icon.jsx';
 import Modal from '../components/Modal.jsx';
 import Money from '../components/Money.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-import { createTx, deleteTx, fetchTransactions, updateTx } from '../lib/data.js';
+import { useCategories } from '../lib/categories.js';
+import { createTx, deleteTx, exportCsv, fetchTransactions, updateTx } from '../lib/data.js';
 import { formatDate, formatDay } from '../lib/format.js';
 import { invalidate, useResource } from '../lib/useResource.js';
+import { LIMITS, PAYMENT_METHODS, fieldErrorsFrom, paymentLabel } from '../lib/validate.js';
 import TransactionForm from './TransactionForm.jsx';
 import { ConfirmDelete, ErrorNote } from './shared.jsx';
 import './Transactions.css';
 
 const LIMIT = 20;
-const FILTER_KEYS = ['type', 'category', 'startDate', 'endDate'];
+const FILTER_KEYS = ['type', 'q', 'category', 'payment_method', 'source', 'startDate', 'endDate'];
+const TX_FIELDS = ['amount', 'description', 'category', 'date', 'type', 'payment_method', 'notes'];
+const label = (r) => r.description || r.category || 'this entry';
 
 export default function Transactions() {
   const notify = useToast();
@@ -27,6 +31,9 @@ export default function Transactions() {
   const pg = list.data?.pagination;
 
   const [categoryDraft, setCategoryDraft] = useState(filters.category);
+  const [searchDraft, setSearchDraft] = useState(filters.q);
+  const [exporting, setExporting] = useState(false);
+  const usedCategories = useCategories();
   const [editing, setEditing] = useState(null); // null | 'new' | row
   const [draft, setDraft] = useState(null); // values to restore after a failed save
   const [confirm, setConfirm] = useState(null);
@@ -40,6 +47,13 @@ export default function Transactions() {
       setParams(next, { replace: true });
     }
   }, [params, setParams]);
+
+  useEffect(() => {
+    if (searchDraft === filters.q) return undefined;
+    const t = setTimeout(() => updateFilter('q', searchDraft.trim()), 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchDraft]);
 
   useEffect(() => {
     if (categoryDraft === filters.category) return undefined;
@@ -65,11 +79,29 @@ export default function Transactions() {
 
   function clearFilters() {
     setCategoryDraft('');
+    setSearchDraft('');
     setParams(new URLSearchParams(), { replace: true });
   }
 
   const hasFilters = FILTER_KEYS.some((k) => filters[k]);
-  const categories = useMemo(() => [...new Set(rows.map((r) => r.category).filter(Boolean))], [rows]);
+  const categories = useMemo(() => {
+    const seen = new Set(usedCategories.map((c) => `${c.type}|${c.category}`));
+    const extra = rows
+      .filter((r) => r.category && !seen.has(`${r.type}|${r.category}`))
+      .map((r) => ({ category: r.category, type: r.type, count: 0 }));
+    return [...usedCategories, ...extra];
+  }, [rows, usedCategories]);
+
+  async function runExport() {
+    setExporting(true);
+    try {
+      await exportCsv({ startDate: filters.startDate || undefined, endDate: filters.endDate || undefined });
+    } catch (err) {
+      notify(`Export failed: ${err.message}`);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const totals = useMemo(
     () =>
@@ -97,10 +129,15 @@ export default function Transactions() {
     try {
       if (isNew) await createTx(payload);
       else await updateTx(target.id, payload);
-      invalidate('transactions', 'budgets', 'summary');
+      invalidate('transactions', 'budgets', 'summary', 'categories');
     } catch (err) {
       list.setData(before);
-      setDraft({ mode: isNew ? 'new' : target, values: payload });
+      const errors = err.status === 400 ? fieldErrorsFrom(err, TX_FIELDS) : {};
+      setDraft({ mode: isNew ? 'new' : target, values: payload, errors });
+      if (Object.keys(errors).length) {
+        setEditing(isNew ? 'new' : { ...target, ...payload });
+        return;
+      }
       notify(`Not saved: ${err.message}`, {
         action: { label: 'Reopen', onClick: () => setEditing(isNew ? 'new' : { ...target, ...payload }) },
       });
@@ -116,7 +153,7 @@ export default function Transactions() {
       invalidate('transactions', 'budgets', 'summary');
     } catch (err) {
       list.setData(before);
-      notify(`Could not delete "${row.description}": ${err.message}`);
+      notify(`Could not delete "${label(row)}": ${err.message}`);
     }
   }
 
@@ -131,17 +168,27 @@ export default function Transactions() {
             {pg ? `${pg.total} ${pg.total === 1 ? 'entry' : 'entries'}${hasFilters ? ' match these filters' : ' in the ledger'}.` : 'Every entry, newest first.'}
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn--primary"
-          onClick={() => {
-            setDraft(null);
-            setEditing('new');
-          }}
-        >
-          <Icon name="plus" size={18} />
-          Add entry
-        </button>
+        <div className="page__actions">
+          <button type="button" className="btn" onClick={runExport} disabled={exporting}>
+            <Icon name="export" size={18} />
+            {exporting ? 'Exporting…' : 'Export CSV'}
+          </button>
+          <Link to="/import" className="btn">
+            <Icon name="import" size={18} />
+            Import statement
+          </Link>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => {
+              setDraft(null);
+              setEditing('new');
+            }}
+          >
+            <Icon name="plus" size={18} />
+            Add entry
+          </button>
+        </div>
       </header>
 
       <form className="filters" role="search" aria-label="Filter transactions" onSubmit={(e) => e.preventDefault()}>
@@ -166,6 +213,20 @@ export default function Transactions() {
             ))}
           </div>
         </fieldset>
+        <div className="field filters__q">
+          <label className="field__label" htmlFor="f-q">
+            Search
+          </label>
+          <input
+            id="f-q"
+            className="input"
+            type="search"
+            placeholder="Description or notes"
+            maxLength={LIMITS.search}
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+          />
+        </div>
         <div className="field filters__cat">
           <label className="field__label" htmlFor="f-category">
             Category
@@ -175,9 +236,33 @@ export default function Transactions() {
             className="input"
             type="search"
             placeholder="Any"
+            maxLength={LIMITS.category}
             value={categoryDraft}
             onChange={(e) => setCategoryDraft(e.target.value)}
           />
+        </div>
+        <div className="field">
+          <label className="field__label" htmlFor="f-method">
+            Paid by
+          </label>
+          <select id="f-method" className="input" value={filters.payment_method} onChange={(e) => updateFilter('payment_method', e.target.value)}>
+            <option value="">Any method</option>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label className="field__label" htmlFor="f-source">
+            Source
+          </label>
+          <select id="f-source" className="input" value={filters.source} onChange={(e) => updateFilter('source', e.target.value)}>
+            <option value="">All sources</option>
+            <option value="manual">Manual</option>
+            <option value="import">Imported</option>
+          </select>
         </div>
         <div className="field">
           <label className="field__label" htmlFor="f-from">
@@ -227,7 +312,7 @@ export default function Transactions() {
           {hasFilters ? (
             <>
               <p className="empty__title">Nothing matches</p>
-              <p>No entries fit these filters. Widen the dates or clear the category.</p>
+              <p>No entries fit these filters. Widen the dates, change the search or clear the filters.</p>
               <button type="button" className="btn" onClick={clearFilters}>
                 Clear filters
               </button>
@@ -235,10 +320,15 @@ export default function Transactions() {
           ) : (
             <>
               <p className="empty__title">The ledger is empty</p>
-              <p>Add your first income or expense. The dashboard, budgets and charts fill in from here.</p>
-              <button type="button" className="btn btn--primary" onClick={() => setEditing('new')}>
-                Add first entry
-              </button>
+              <p>Add your first income or expense, or import a bank or UPI statement. The dashboard, budgets and charts fill in from here.</p>
+              <div className="empty__actions">
+                <button type="button" className="btn btn--primary" onClick={() => setEditing('new')}>
+                  Add first entry
+                </button>
+                <Link to="/import" className="btn">
+                  Import statement
+                </Link>
+              </div>
             </>
           )}
         </div>
@@ -276,9 +366,13 @@ export default function Transactions() {
                     </time>
                   </td>
                   <td className="ledger__desc">
-                    <span className="ledger__desc-text">{r.description}</span>
-                    <span className="ledger__meta">
-                      {formatDay(r.date)} · {r.category}
+                    <span className="ledger__desc-text">{r.description || r.category}</span>
+                    <span className="ledger__tags">
+                      <span className="ledger__meta-mobile">
+                        {formatDay(r.date)} · {r.category} ·{' '}
+                      </span>
+                      <span className="ledger__method">{paymentLabel(r.payment_method)}</span>
+                      {r.source === 'import' && <span className="tag">Imported</span>}
                     </span>
                   </td>
                   <td className="ledger__cat">{r.category}</td>
@@ -294,7 +388,7 @@ export default function Transactions() {
                         setEditing(r);
                       }}
                       disabled={r.pending}
-                      aria-label={`Edit ${r.description}`}
+                      aria-label={`Edit ${label(r)}`}
                     >
                       <Icon name="edit" size={18} />
                     </button>
@@ -303,7 +397,7 @@ export default function Transactions() {
                       className="icon-btn icon-btn--danger"
                       onClick={() => setConfirm(r)}
                       disabled={r.pending}
-                      aria-label={`Delete ${r.description}`}
+                      aria-label={`Delete ${label(r)}`}
                     >
                       <Icon name="trash" size={18} />
                     </button>
@@ -361,6 +455,7 @@ export default function Transactions() {
           <TransactionForm
             key={editing === 'new' ? 'new' : editing.id}
             initial={formInitial}
+            initialErrors={draft?.errors}
             categories={categories}
             onSubmit={save}
           />
@@ -370,7 +465,7 @@ export default function Transactions() {
       <ConfirmDelete
         open={Boolean(confirm)}
         title="Delete this entry?"
-        body={confirm ? `"${confirm.description}" will be removed from the ledger and from every total. This cannot be undone.` : ''}
+        body={confirm ? `"${label(confirm)}" will be removed from the ledger and from every total. This cannot be undone.` : ''}
         onCancel={() => setConfirm(null)}
         onConfirm={() => remove(confirm)}
       />

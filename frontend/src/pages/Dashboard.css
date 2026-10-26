@@ -58,6 +58,16 @@
   padding-top: var(--sp-4);
 }
 
+.dash-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.dash-empty .dash-empty__note {
+  font-size: var(--text-sm);
+}
+
 /* Period bar */
 .dash-bar {
   display: flex;

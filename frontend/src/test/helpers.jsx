@@ -19,15 +19,20 @@ export const fixtures = {
   goals: [{ id: 'g1', title: 'Emergency fund', target_amount: 200000, current_amount: 64000, category: 'Safety', due_date: '2027-06-30' }],
 };
 
-const json = (body, status = 200) =>
+export const json = (body, status = 200) =>
   Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
 
 /** Routes fetch calls to fixture data, the way the real API shapes them. */
-export function mockApi(overrides = {}) {
+export function mockApi(overrides = {}, handle) {
   const f = { ...fixtures, ...overrides };
   return vi.spyOn(globalThis, 'fetch').mockImplementation((url, opts = {}) => {
     const u = new URL(url, 'http://localhost');
     const p = u.pathname;
+    const custom = handle?.(p, opts, u);
+    if (custom) return custom;
+    if (p === '/api/transactions/categories') {
+      return json({ success: true, data: [{ category: 'Groceries', type: 'expense', count: 4 }, { category: 'Salary', type: 'income', count: 1 }] });
+    }
     if (p === '/api/config') return json({}, 404);
     if (p === '/api/auth/me') return json({ success: true, data: f.me });
     if (p === '/api/transactions/stats/summary') return json({ success: true, data: f.summary });

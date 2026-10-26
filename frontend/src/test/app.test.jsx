@@ -53,7 +53,7 @@ describe('transaction form validation', () => {
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '-5' } });
     fireEvent.submit(screen.getByLabelText('Amount').closest('form'));
     expect(screen.getByText('Amount must be more than zero.')).toBeInTheDocument();
-    expect(screen.getByText('Describe the entry.')).toBeInTheDocument();
+    expect(screen.queryByText('Describe the entry.')).toBeNull();
     expect(screen.getByText('Enter a category.')).toBeInTheDocument();
     expect(screen.getByLabelText('Amount')).toHaveAttribute('aria-invalid', 'true');
     expect(onSubmit).not.toHaveBeenCalled();
@@ -62,16 +62,20 @@ describe('transaction form validation', () => {
   it('submits a clean payload when valid', () => {
     const onSubmit = vi.fn();
     render(<TransactionForm onSubmit={onSubmit} />);
-    fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '1,250.456' } });
-    fireEvent.change(screen.getByLabelText('Description'), { target: { value: '  Electricity bill ' } });
+    fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '1,250.45' } });
+    fireEvent.change(screen.getByLabelText('Description (optional)'), { target: { value: '  Electricity bill ' } });
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Utilities' } });
+    fireEvent.change(screen.getByLabelText('Payment method'), { target: { value: 'upi' } });
+    fireEvent.change(screen.getByLabelText('Notes (optional)'), { target: { value: ' BESCOM, October ' } });
     fireEvent.submit(screen.getByLabelText('Amount').closest('form'));
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
-        amount: 1250.46,
+        amount: 1250.45,
         description: 'Electricity bill',
         category: 'Utilities',
         type: 'expense',
+        payment_method: 'upi',
+        notes: 'BESCOM, October',
       })
     );
   });
@@ -85,6 +89,7 @@ describe('every screen renders with API data', () => {
     ['/budgets', 'Budgets'],
     ['/savings', 'Savings'],
     ['/settings', 'Settings'],
+    ['/import', 'Import'],
   ];
   it.each(screens)('%s', async (path, heading) => {
     localStorage.setItem('token', 'test-token');

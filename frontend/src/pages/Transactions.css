@@ -1,13 +1,18 @@
 /* Filters */
 .filters {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sp-3) var(--sp-3);
-  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  align-items: flex-end;
+}
+
+.filters > * {
+  flex: 1 1 9.5rem;
+  min-width: 0;
 }
 
 .filters__type {
-  grid-column: 1 / -1;
+  flex: 1 1 100%;
   margin: 0;
   padding: 0;
   border: 0;
@@ -18,13 +23,13 @@
   width: 100%;
 }
 
-.filters__cat {
-  grid-column: 1 / -1;
+.filters__q {
+  flex: 2 1 100%;
 }
 
 .filters__clear {
-  grid-column: 1 / -1;
-  justify-self: start;
+  flex: 0 0 auto;
+  align-self: flex-end;
 }
 
 .txpage .filters .field__label {
@@ -32,24 +37,30 @@
   color: var(--color-muted);
 }
 
-@media (min-width: 56rem) {
-  .filters {
-    grid-template-columns: auto minmax(10rem, 1.2fr) minmax(9rem, 1fr) minmax(9rem, 1fr) auto;
-  }
-
-  .filters__type,
-  .filters__cat,
-  .filters__clear {
-    grid-column: auto;
+@media (min-width: 40rem) {
+  .filters__type {
+    flex: 0 0 auto;
   }
 
   .filters__type .seg {
     width: auto;
   }
 
-  .filters__clear {
-    align-self: end;
+  .filters__q {
+    flex: 2 1 16rem;
   }
+}
+
+.page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
 }
 
 /* Ledger table */
@@ -125,13 +136,26 @@
   text-overflow: ellipsis;
 }
 
-.ledger__meta {
-  display: none;
+.ledger__tags {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  margin-top: 2px;
   font-size: var(--text-xs);
   color: var(--color-muted);
   white-space: nowrap;
+}
+
+.ledger__meta-mobile {
+  display: none;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.ledger__method {
+  flex: none;
 }
 
 .ledger__cat {
@@ -222,8 +246,16 @@
     padding-left: 0;
   }
 
-  .ledger__meta {
-    display: block;
+  .ledger__meta-mobile {
+    display: inline;
+  }
+
+  .ledger__tags {
+    gap: var(--sp-1);
+  }
+
+  .ledger__tags .tag {
+    margin-left: var(--sp-1);
   }
 
   .ledger td.ledger__amt .money {

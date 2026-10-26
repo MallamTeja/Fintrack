@@ -107,7 +107,8 @@ async function refreshSession() {
   return refreshInFlight;
 }
 
-const NO_REFRESH = ['/auth/login', '/auth/register', '/auth/refresh'];
+// A 401 from these means wrong credentials, not an expired session.
+const NO_REFRESH = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/password'];
 
 export async function api(path, { method = 'GET', body, signal, retried = false } = {}) {
   const headers = { Accept: 'application/json' };
@@ -151,7 +152,45 @@ export const get = (path, opts) => api(path, { ...opts, method: 'GET' });
 export const post = (path, body) => api(path, { method: 'POST', body });
 export const put = (path, body) => api(path, { method: 'PUT', body });
 export const patch = (path, body) => api(path, { method: 'PATCH', body });
-export const del = (path) => api(path, { method: 'DELETE' });
+export const del = (path, body) => api(path, { method: 'DELETE', body });
+
+/**
+ * Downloads a file (for example the CSV export) with the bearer token attached.
+ * Returns { blob, filename }. Refreshes the session once on 401, like api().
+ */
+export async function download(path, { retried = false, signal } = {}) {
+  const headers = {};
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, { headers, signal });
+  } catch (err) {
+    if (err && err.name === 'AbortError') throw err;
+    throw new ApiError(messageFrom(null, 0), 0, null);
+  }
+  if (res.status === 401 && !retried && (await refreshSession())) return download(path, { retried: true, signal });
+  if (!res.ok) {
+    const body = await parse(res);
+    throw new ApiError(messageFrom(body, res.status), res.status, body);
+  }
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(disposition);
+  return { blob: await res.blob(), filename: match ? decodeURIComponent(match[1]) : '' };
+}
+
+/** Hands a Blob to the browser as a download. */
+export function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 /** Some endpoints wrap results in { data }, budgets and goals return raw arrays. */
 export function unwrap(body) {

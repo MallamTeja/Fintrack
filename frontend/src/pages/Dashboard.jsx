@@ -52,10 +52,8 @@ function useDashboardData(today, needOlder) {
   return { tx, older, recent, budgets, goals };
 }
 
-const dm = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' });
 function rangeLabel(w) {
-  const sameYear = w.start.getFullYear() === w.end.getFullYear();
-  return `${sameYear ? dm.format(w.start) : formatDate(w.start)} to ${formatDate(w.end)}`;
+  return `${formatDate(w.start)} to ${formatDate(w.end)}`;
 }
 
 const whole = (v, currency) => formatMoney(v, currency, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -247,9 +245,17 @@ export default function Dashboard() {
             Record a salary, a rent payment or a coffee. Cash flow, categories, pace and insights are worked out from
             your entries, so this page fills in as soon as the first one lands.
           </p>
-          <Link to="/transactions?new=1" className="btn btn--primary">
-            Add your first entry
-          </Link>
+          <div className="dash-empty__actions">
+            <Link to="/transactions?new=1" className="btn btn--primary">
+              Add your first entry
+            </Link>
+            <Link to="/import" className="btn">
+              Import statement
+            </Link>
+          </div>
+          <p className="dash-empty__note">
+            A bank or UPI statement (CSV, Excel or PDF) is read on this device. Only the rows you choose are saved.
+          </p>
         </section>
       ) : (
         <>

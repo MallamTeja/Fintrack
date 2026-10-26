@@ -1,8 +1,33 @@
 // Money and date formatting. INR uses Indian digit grouping (1,23,456.00).
 
-export const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP'];
+export const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD', 'JPY'];
 
-const LOCALE = { INR: 'en-IN', USD: 'en-US', EUR: 'en-IE', GBP: 'en-GB' };
+export const CURRENCY_NAMES = {
+  INR: 'Indian rupee',
+  USD: 'US dollar',
+  EUR: 'Euro',
+  GBP: 'British pound',
+  AED: 'UAE dirham',
+  SGD: 'Singapore dollar',
+  AUD: 'Australian dollar',
+  CAD: 'Canadian dollar',
+  JPY: 'Japanese yen',
+};
+
+const LOCALE = {
+  INR: 'en-IN',
+  USD: 'en-US',
+  EUR: 'en-IE',
+  GBP: 'en-GB',
+  AED: 'en-AE',
+  SGD: 'en-SG',
+  AUD: 'en-AU',
+  CAD: 'en-CA',
+  JPY: 'en-JP',
+};
+
+/** Currencies written without minor units. */
+const NO_DECIMALS = new Set(['JPY']);
 
 const cache = new Map();
 function nf(currency, opts = {}) {
@@ -13,8 +38,8 @@ function nf(currency, opts = {}) {
       new Intl.NumberFormat(LOCALE[currency] || 'en-IN', {
         style: 'currency',
         currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: NO_DECIMALS.has(currency) ? 0 : 2,
+        maximumFractionDigits: NO_DECIMALS.has(currency) ? 0 : 2,
         ...opts,
       })
     );
@@ -103,13 +128,40 @@ export function parseDay(day) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
-const dayFmt = new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short' });
-const fullFmt = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+// Display date format, set from the user's preferences (see AuthContext).
+export const DATE_FORMATS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
+let dateFormat = 'DD/MM/YYYY';
+
+export function setDateFormat(f) {
+  dateFormat = DATE_FORMATS.includes(f) ? f : 'DD/MM/YYYY';
+}
+export const getDateFormat = () => dateFormat;
+
+const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** Short day label: "26 Oct", or "Oct 26" when the user writes the month first. */
+export function formatDay(v, format = dateFormat) {
+  if (!v) return '';
+  const d = parseDay(v);
+  const day = String(d.getDate()).padStart(2, '0');
+  const mon = SHORT_MONTHS[d.getMonth()];
+  return format === 'DD/MM/YYYY' ? `${day} ${mon}` : `${mon} ${day}`;
+}
+
+/** Full date in the user's chosen format: 26/10/2026, 10/26/2026 or 2026-10-26. */
+export function formatDate(v, format = dateFormat) {
+  if (!v) return '';
+  const day = toDay(v);
+  if (!day) return '';
+  const [y, m, d] = day.split('-');
+  if (format === 'YYYY-MM-DD') return `${y}-${m}-${d}`;
+  if (format === 'MM/DD/YYYY') return `${m}/${d}/${y}`;
+  return `${d}/${m}/${y}`;
+}
+
 const monthFmt = new Intl.DateTimeFormat('en-IN', { month: 'long', year: 'numeric' });
 const shortMonthFmt = new Intl.DateTimeFormat('en-IN', { month: 'short' });
 
-export const formatDay = (v) => (v ? dayFmt.format(parseDay(v)) : '');
-export const formatDate = (v) => (v ? fullFmt.format(parseDay(v)) : '');
 export const formatMonth = (d) => monthFmt.format(d);
 export const formatShortMonth = (d) => shortMonthFmt.format(d);
 

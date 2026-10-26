@@ -6,21 +6,6 @@
   margin-bottom: var(--sp-2);
 }
 
-.settings__status {
-  min-height: 1lh;
-  margin-bottom: var(--sp-4);
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.settings__status--ok {
-  color: var(--color-accent);
-}
-
-.settings__status--error {
-  color: var(--color-out);
-}
-
 .setting {
   display: grid;
   gap: var(--sp-4);
@@ -39,8 +24,75 @@
 }
 
 .setting__body {
+  display: grid;
+  gap: var(--sp-4);
   min-width: 0;
-  max-width: 26rem;
+  max-width: 38rem;
+}
+
+.setform {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.setform__pair {
+  display: grid;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+@media (min-width: 36rem) {
+  .setform__pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.setform__fieldset {
+  display: grid;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.setform__fieldset .seg {
+  justify-self: start;
+}
+
+.setform__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-4);
+  padding-top: var(--sp-1);
+}
+
+.setform input[readonly] {
+  background: var(--color-paper-2);
+  color: var(--color-ink-2);
+}
+
+.setform__signout {
+  padding-top: var(--sp-4);
+  border-top: var(--hairline) solid var(--color-rule);
+}
+
+.setform__signout .btn {
+  padding-left: 0;
+}
+
+.switch-row {
+  display: grid;
+  gap: 0;
+}
+
+.switch-row .field__hint {
+  max-width: 48ch;
+}
+
+.setting--danger .section__title {
+  color: var(--color-out);
 }
 
 .setting__fieldset {
@@ -159,4 +211,12 @@
 .switch__label {
   font-size: var(--text-sm);
   font-weight: 600;
+}
+
+.setting__body > .btn {
+  justify-self: start;
+}
+
+.setform .input--money {
+  font-size: var(--text-base);
 }
