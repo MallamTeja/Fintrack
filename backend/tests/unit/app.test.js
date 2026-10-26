@@ -42,8 +42,8 @@ test('register validates before calling Supabase', async () => {
     expect(res.status).toBe(400);
 });
 
-test('static pages are served', async () => {
-    const res = await request(app).get('/login.html');
+test('public config exposes only the URL and anon key', async () => {
+    const res = await request(app).get('/api/config');
     expect(res.status).toBe(200);
-    expect(res.type).toMatch(/html/);
+    expect(Object.keys(res.body).sort()).toEqual(['supabaseAnonKey', 'supabaseUrl']);
 });

@@ -43,6 +43,11 @@ if (config.nodeEnv !== 'test') {
     app.use(['/api/auth/login', '/api/auth/register', '/api/auth/refresh'], limiter(20));
 }
 
+// Public client config for Supabase Realtime. The anon key is designed to be public; RLS protects the data.
+app.get('/api/config', (req, res) =>
+    res.json({ supabaseUrl: config.supabaseUrl, supabaseAnonKey: config.supabaseAnonKey })
+);
+
 app.get('/api/health', (req, res) => res.json({ success: true, status: 'ok', time: new Date().toISOString() }));
 
 const savings = require('./routes/savings');
@@ -53,10 +58,12 @@ app.use('/api/savings-goals', savings);
 app.use('/api/savings', savings);
 app.use('/api', notFound);
 
-// Static pages (frontend/public). Unknown non-API paths fall back to the login page.
-const publicDir = path.join(__dirname, '..', '..', 'frontend', 'public');
-app.use(express.static(publicDir, { extensions: ['html'], maxAge: config.nodeEnv === 'production' ? '1h' : 0 }));
-app.get('*', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+// Built React app (frontend/dist) for `npm start` locally. On Vercel the CDN serves it instead.
+const distDir = path.join(__dirname, '..', '..', 'frontend', 'dist');
+app.use(express.static(distDir, { index: false, maxAge: config.nodeEnv === 'production' ? '1h' : 0 }));
+app.get('*', (req, res) =>
+    res.sendFile(path.join(distDir, 'index.html'), (err) => (err ? notFound(req, res) : undefined))
+);
 
 app.use(errorHandler);
 
