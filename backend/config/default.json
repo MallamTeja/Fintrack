@@ -1,9 +1,0 @@
-{
-  "jwtSecret": "",
-  "mongoURI": "",
-  "port": 5000,
-  "websocket": {
-    "heartbeatInterval": 30000,
-    "reconnectInterval": 5000
-  }
-}
