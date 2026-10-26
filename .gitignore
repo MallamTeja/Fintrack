@@ -63,3 +63,4 @@ coverage
 # Debug
 .debug/ 
 .qodo
+!.env.example

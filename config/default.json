@@ -1,6 +1,6 @@
 {
-  "mongoURI": "mongodb+srv://your_mongodb_uri",
-  "jwtSecret": "your_jwt_secret",
+  "mongoURI": "",
+  "jwtSecret": "",
   "websocketPort": 8080,
   "websocket": {
     "heartbeatInterval": 30000,
