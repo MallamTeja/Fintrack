@@ -1,0 +1,162 @@
+.settings {
+  gap: 0;
+}
+
+.settings .page__head {
+  margin-bottom: var(--sp-2);
+}
+
+.settings__status {
+  min-height: 1lh;
+  margin-bottom: var(--sp-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.settings__status--ok {
+  color: var(--color-accent);
+}
+
+.settings__status--error {
+  color: var(--color-out);
+}
+
+.setting {
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-6) 0;
+  border-bottom: var(--hairline) solid var(--color-rule);
+}
+
+.setting__intro {
+  display: grid;
+  gap: var(--sp-1);
+  max-width: 40ch;
+}
+
+.setting__intro p {
+  font-size: var(--text-sm);
+}
+
+.setting__body {
+  min-width: 0;
+  max-width: 26rem;
+}
+
+.setting__fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.profile {
+  display: grid;
+  gap: var(--sp-3);
+  margin: 0;
+}
+
+.profile div {
+  display: grid;
+  gap: 2px;
+}
+
+.profile dt {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.profile dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 56rem) {
+  .setting {
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: var(--sp-12);
+    align-items: start;
+  }
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--control-h);
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch__track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border: var(--hairline) solid var(--color-rule-strong);
+  border-radius: 12px;
+  background: var(--color-paper-3);
+  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+
+.switch__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-ink-2);
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.switch input:checked + .switch__track {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.switch input:checked + .switch__track::after {
+  transform: translateX(20px);
+  background: var(--color-accent-ink);
+}
+
+.switch input:hover + .switch__track {
+  border-color: var(--color-ink-2);
+}
+
+.switch input:active + .switch__track::after {
+  transform: scale(0.9);
+}
+
+.switch input:checked:active + .switch__track::after {
+  transform: translateX(20px) scale(0.9);
+}
+
+.switch input:focus-visible + .switch__track {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.switch input:disabled + .switch__track {
+  opacity: 0.55;
+}
+
+.switch input:disabled {
+  cursor: not-allowed;
+}
+
+.switch__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

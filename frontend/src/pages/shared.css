@@ -1,0 +1,51 @@
+/* Shared page pieces: 404 and inline error notes */
+
+/* 404 */
+.notfound {
+  display: grid;
+  gap: var(--sp-4);
+  justify-items: start;
+  align-content: center;
+  min-height: 100dvh;
+  max-width: 40rem;
+  padding: var(--sp-12) var(--sp-6);
+  margin-inline: auto;
+}
+
+.notfound__code {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--color-muted);
+  padding-bottom: var(--sp-2);
+  border-bottom: 3px double var(--color-rule-strong);
+}
+
+.notfound__title {
+  font-size: var(--text-2xl);
+  font-weight: 400;
+  line-height: var(--lh-tight);
+}
+
+.notfound .btn {
+  margin-top: var(--sp-4);
+}
+
+/* Shared inline error */
+.errnote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
+  border: var(--hairline) solid var(--color-out);
+  border-radius: var(--radius);
+  background: var(--color-out-soft);
+  color: var(--color-out);
+  font-size: var(--text-sm);
+}
+
+.errnote .link-btn {
+  color: var(--color-out);
+}

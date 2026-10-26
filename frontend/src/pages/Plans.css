@@ -1,0 +1,212 @@
+/* Budgets and savings goals share one ruled-entry vocabulary. */
+
+.plan-skeleton {
+  height: 8rem;
+}
+
+.plan-sum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4) var(--sp-12);
+  margin: 0;
+}
+
+.plan-sum div {
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.plan-sum dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.plan-sum dd {
+  margin: 0;
+}
+
+.plans {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline) solid var(--color-ink);
+}
+
+.plans--goals {
+  border-top: 0;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-5) 0 var(--sp-3);
+  border-bottom: var(--hairline) solid var(--color-rule);
+  min-width: 0;
+}
+
+.plan__head {
+  grid-area: head;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.plan__title {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  min-width: 0;
+}
+
+.plan__state {
+  flex: none;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.plan__state--ok {
+  color: var(--color-muted);
+}
+
+.plan__state--warn {
+  color: var(--color-warn);
+}
+
+.plan__state--out {
+  color: var(--color-out);
+}
+
+.plan__state--done {
+  color: var(--color-accent);
+}
+
+.plan__meta {
+  grid-area: meta;
+  font-size: var(--text-sm);
+}
+
+.plan__figures {
+  grid-area: figures;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-1);
+}
+
+.plan .meter {
+  grid-area: meter;
+}
+
+.plan__left {
+  grid-area: left;
+  font-size: var(--text-sm);
+}
+
+.plan__actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  margin-top: var(--sp-1);
+}
+
+.plan__actions .btn:first-child {
+  margin-right: auto;
+  padding-left: 0;
+}
+
+.plan__actions .btn--quiet:first-child:hover {
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.plans--goals .plan__actions .btn:first-child {
+  padding-left: var(--sp-4);
+}
+
+/* Budget rows on wide screens: category | figures and meter | actions */
+@media (min-width: 56rem) {
+  .plans:not(.plans--goals) .plan {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) auto;
+    grid-template-areas:
+      'head figures actions'
+      'head meter actions';
+    column-gap: var(--sp-10);
+    align-items: center;
+    padding-block: var(--sp-5);
+  }
+
+  .plans:not(.plans--goals) .plan__head {
+    flex-direction: column;
+    gap: var(--sp-1);
+    align-self: start;
+  }
+
+  .plans:not(.plans--goals) .plan__actions {
+    margin: 0;
+  }
+
+  .plans:not(.plans--goals) .plan__actions .btn:first-child {
+    margin-right: 0;
+    padding-left: var(--sp-4);
+  }
+
+  /* Goals: two ruled columns, like facing ledger pages */
+  .plans--goals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sp-12);
+  }
+}
+
+/* Forms in the drawer */
+.planform {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.planform__pair {
+  display: grid;
+  gap: 0 var(--sp-3);
+}
+
+@media (min-width: 30rem) {
+  .planform__pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.planform__fixed {
+  display: grid;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: var(--hairline) solid var(--color-rule);
+  font-size: var(--text-sm);
+}
+
+.planform__fixed strong {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
+}
+
+.planform__error {
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--hairline) solid var(--color-out);
+  border-radius: var(--radius);
+  background: var(--color-out-soft);
+  color: var(--color-out);
+  font-size: var(--text-sm);
+}
