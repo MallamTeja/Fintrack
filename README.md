@@ -81,22 +81,42 @@ All routes except `/api/health`, `/api/auth/register`, `/api/auth/login` and
 | Method | Path | Body / query |
 |---|---|---|
 | GET | `/api/health` | |
-| POST | `/api/auth/register` | `name, email, password` (8+ chars, upper, lower, digit) |
+| POST | `/api/auth/register` | `name` (1-60, letters, spaces, `.'-`), `email` (max 254), `password` (8-72, upper, lower, digit) |
 | POST | `/api/auth/login` | `email, password` → `{ token, refreshToken, expiresAt, user }` |
 | POST | `/api/auth/refresh` | `refreshToken` |
 | POST | `/api/auth/logout` | revokes the session |
-| GET | `/api/auth/me` | profile and preferences |
-| PUT | `/api/auth/preferences` | `theme` (`light`/`dark`), `currency` (ISO code), `notifications` |
-| GET | `/api/transactions` | `?type&category&startDate&endDate&page&limit` → `{ data, pagination }` |
-| POST | `/api/transactions` | `description, amount, type, category, date?` |
+| GET | `/api/auth/me` | profile: `name` and `preferences` (all fields below) |
+| PUT | `/api/auth/preferences` | any of `name`, `theme` (`light`/`dark`), `currency` (`INR USD EUR GBP AED SGD AUD CAD JPY`), `notifications` (bool), `month_start_day` (1-28), `date_format` (`DD/MM/YYYY`, `MM/DD/YYYY`, `YYYY-MM-DD`), `week_start` (`monday`/`sunday`), `monthly_income_target` (amount or `null`), `budget_alerts` (bool) → `{ preferences, user }` |
+| POST | `/api/auth/password` | `currentPassword, newPassword`; 401 if the current password is wrong, 400 if the new one is weak. Other sessions are signed out |
+| DELETE | `/api/auth/account` | `{ "confirm": "DELETE" }`; deletes the user and all their data |
+| GET | `/api/transactions` | `?type&category&q&source&payment_method&startDate&endDate&page&limit` → `{ data, pagination }` |
+| POST | `/api/transactions` | `amount, type, category, description?, date?, notes?, payment_method?` |
 | GET / PUT / PATCH / DELETE | `/api/transactions/:id` | |
-| GET | `/api/transactions/stats/summary` | totals by type and category |
+| GET | `/api/transactions/stats/summary` | same filters; totals by type and category |
+| GET | `/api/transactions/categories` | `[{ category, type, count }]`, most used first |
+| GET | `/api/transactions/export.csv` | same filters (usually `startDate, endDate`); CSV download |
+| POST | `/api/transactions/import` | `{ fileName, rows: [{ date, description, amount, type, category, payment_method?, notes? }] }` (1-2000 rows, 1mb) → `{ received, inserted, duplicates, invalid: [{ index, errors }] }` |
 | GET / POST | `/api/budgets` | `category, limit`; list includes `current_spending` for this month |
 | PUT / PATCH / DELETE | `/api/budgets/:id` | `limit` |
 | GET / POST | `/api/savings-goals` (alias `/api/savings`) | `title, target_amount, current_amount?, category?, due_date?` |
 | PUT / PATCH / DELETE | `/api/savings-goals/:id` | |
 
-Errors are `{ success: false, error: { message } }` with a matching HTTP status.
+Validation rules (requests that break them get a 400 listing every problem; unknown fields are ignored):
+
+- **Amounts** (`amount`, `limit`, `target_amount`, `monthly_income_target`): greater than 0, at most 1,000,000,000, at most 2 decimals. `current_amount` may be 0 and at most 10 times `target_amount`.
+- **Transactions**: `type` is `income` or `expense`; `category` 1-50 characters, letters, numbers, spaces and `& - / . , ' ( )`; `description` 0-200; `notes` 0-500; `payment_method` one of `upi card cash bank wallet other` (default `other`); `date` ISO 8601, from 1970-01-01 up to 1 day ahead. Control characters are stripped from text.
+- **Savings goals**: `title` 1-100, `category` 0-50, `due_date` a valid date, not in the past when creating.
+- **Query**: `page` 1-10000, `limit` 1-500 (default 100), `type` as above, `category` up to 50, `q` up to 100 (matches description or category, case-insensitive, literal), `source` `manual`/`import`, `payment_method` as above, `startDate`/`endDate` ISO dates with `endDate >= startDate`; a date-only `endDate` includes that whole day.
+
+Each transaction has `notes`, `payment_method` and `source` (`manual` or `import`).
+**Import** fingerprints every row on the server as sha256 of `date|type|amount|description`
+(date as `YYYY-MM-DD`, amount with 2 decimals, description lowercased with spaces collapsed).
+Rows already imported, or repeated in the same file, count as `duplicates` and are skipped;
+invalid rows are reported by index and the rest are still imported. Limited to 10 imports per 15 minutes.
+**Export** columns are `date, type, category, description, amount, payment_method, notes, source`; cells that
+start with `= + - @` are prefixed with `'` so spreadsheets never run them as formulas.
+
+Errors are `{ success: false, error: { message, details? } }` with a matching HTTP status.
 
 ## Tests
 
@@ -137,7 +157,7 @@ noted, in light and dark. Built against the [Hallmark](https://github.com/Nutlop
 ## Known gaps
 
 - Tokens live in `localStorage`.
-- No bank-statement import yet.
+- Statement import parses files in the browser; scanned PDFs (images) need OCR, which is not supported.
 
 See [SECURITY.md](SECURITY.md) for the security model and [CONTRIBUTING.md](CONTRIBUTING.md) to help.
 
