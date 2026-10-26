@@ -28,7 +28,10 @@ app.use(
     })
 );
 app.use(compression());
-app.use(express.json({ limit: '50kb' }));
+// 50kb JSON bodies everywhere except the CSV import, which parses up to 1mb itself after auth.
+const IMPORT_PATH = '/api/transactions/import';
+const smallJson = express.json({ limit: '50kb' });
+app.use((req, res, next) => (req.path.toLowerCase().replace(/\/+$/, '') === IMPORT_PATH ? next() : smallJson(req, res, next)));
 
 if (config.nodeEnv !== 'test') {
     const limiter = (max) =>
@@ -40,7 +43,11 @@ if (config.nodeEnv !== 'test') {
             message: { success: false, error: { message: 'Too many requests, please try again later' } },
         });
     app.use('/api', limiter(300));
-    app.use(['/api/auth/login', '/api/auth/register', '/api/auth/refresh'], limiter(20));
+    app.use(
+        ['/api/auth/login', '/api/auth/register', '/api/auth/refresh', '/api/auth/password', '/api/auth/account'],
+        limiter(20)
+    );
+    app.use(IMPORT_PATH, limiter(10));
 }
 
 // Public client config for Supabase Realtime. The anon key is designed to be public; RLS protects the data.

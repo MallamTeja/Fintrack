@@ -106,10 +106,38 @@ maybe('transactions', () => {
 
     test('invalid input is rejected', async () => {
         const { token } = await signup();
-        for (const bad of [tx({ amount: -1 }), tx({ type: 'gift' }), tx({ date: 'nope' }), tx({ description: '' })]) {
+        const future = new Date(Date.now() + 3 * 86400000).toISOString();
+        for (const bad of [tx({ amount: -1 }), tx({ amount: 12.345 }), tx({ type: 'gift' }), tx({ date: 'nope' }), tx({ date: future }), tx({ category: '=cmd' }), tx({ description: 7 })]) {
             expect((await request(app).post('/api/transactions').set(auth(token)).send(bad)).status).toBe(400);
         }
         expect((await request(app).get('/api/transactions/not-a-uuid').set(auth(token))).status).toBe(404);
+        expect((await request(app).get('/api/transactions?limit=501').set(auth(token))).status).toBe(400);
+        expect((await request(app).get('/api/transactions?startDate=2026-02-01&endDate=2026-01-01').set(auth(token))).status).toBe(400);
+    });
+
+    test('description is optional; notes, payment_method and source are returned', async () => {
+        const { token } = await signup();
+        const res = await request(app)
+            .post('/api/transactions')
+            .set(auth(token))
+            .send({ amount: 99.5, type: 'expense', category: 'Food & Dining', notes: 'with friends', payment_method: 'upi', source: 'import' });
+        expect(res.status).toBe(201);
+        expect(res.body.data).toMatchObject({ description: '', notes: 'with friends', payment_method: 'upi', source: 'manual', amount: 99.5 });
+        expect(res.body.data).not.toHaveProperty('import_hash');
+        const patch = await request(app).patch(`/api/transactions/${res.body.data.id}`).set(auth(token)).send({ payment_method: 'card', notes: '' });
+        expect(patch.body.data).toMatchObject({ payment_method: 'card', notes: '' });
+    });
+
+    test('q searches description and category literally, including PostgREST reserved characters', async () => {
+        const { token } = await signup();
+        await request(app).post('/api/transactions').set(auth(token)).send(tx({ description: 'Dinner, "Big" (party) 100%' }));
+        await request(app).post('/api/transactions').set(auth(token)).send(tx({ description: 'Cab', category: 'Travel' }));
+        const search = async (q) => (await request(app).get('/api/transactions').query({ q }).set(auth(token))).body.data;
+        expect(await search('"big" (party) 100%')).toHaveLength(1);
+        expect(await search('travel')).toHaveLength(1);
+        expect(await search('zz%')).toHaveLength(0);
+        expect(await search('_')).toHaveLength(0);
+        expect(await search('a')).toHaveLength(2);
     });
 
     test('row level security: users cannot see or touch each other\'s rows', async () => {
@@ -156,7 +184,8 @@ maybe('budgets', () => {
 });
 
 maybe('savings goals', () => {
-    const goal = { title: 'Laptop', target_amount: 80000, current_amount: 5000, category: 'Tech', due_date: '2027-06-01' };
+    const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
+    const goal = { title: 'Laptop', target_amount: 80000, current_amount: 5000, category: 'Tech', due_date: nextYear };
 
     test('CRUD on both /api/savings-goals and /api/savings', async () => {
         const { token } = await signup();
@@ -165,6 +194,9 @@ maybe('savings goals', () => {
         const id = created.body._id;
         expect((await request(app).get('/api/savings').set(auth(token))).body).toHaveLength(1);
         expect((await request(app).patch(`/api/savings/${id}`).set(auth(token)).send({ current_amount: 9000 })).body.current_amount).toBe(9000);
+        expect((await request(app).patch(`/api/savings/${id}`).set(auth(token)).send({ current_amount: 800001 })).status).toBe(400);
+        expect((await request(app).post('/api/savings-goals').set(auth(token)).send({ ...goal, due_date: '2020-01-01' })).status).toBe(400);
+        expect((await request(app).patch(`/api/savings/${id}`).set(auth(token)).send({ due_date: '2020-01-01' })).status).toBe(200);
         expect((await request(app).delete(`/api/savings-goals/${id}`).set(auth(token))).status).toBe(200);
     });
 
@@ -175,5 +207,158 @@ maybe('savings goals', () => {
         await request(app).patch(`/api/savings-goals/${body._id}`).set(auth(alice.token)).send({ user_id: bob.user.id, title: 'Mine' });
         expect((await request(app).get('/api/savings-goals').set(auth(bob.token))).body).toHaveLength(0);
         expect((await request(app).get('/api/savings-goals').set(auth(alice.token))).body).toHaveLength(1);
+    });
+});
+
+const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
+const importRows = () => [
+    { date: daysAgo(10), description: 'Coffee  Day', amount: '120.50', type: 'expense', category: 'Food' },
+    { date: daysAgo(10), description: ' coffee day ', amount: 120.5, type: 'expense', category: 'Food' }, // same fingerprint
+    { date: daysAgo(9), description: 'Salary', amount: 50000, type: 'income', category: 'Salary', payment_method: 'bank' },
+    { date: daysAgo(8), description: 'Broken', amount: 'abc', type: 'expense', category: 'Food' },
+    { date: daysAgo(8), description: 'Metro card', amount: 300, type: 'expense', category: 'Travel', notes: 'monthly', payment_method: 'card', import_hash: 'client-supplied' },
+    { date: daysAgo(7), description: 'Lunch', amount: 250, type: 'expense', category: 'Food', source: 'manual' },
+];
+const doImport = (token, rows = importRows()) =>
+    request(app).post('/api/transactions/import').set(auth(token)).send({ fileName: 'statement.csv', rows });
+
+maybe('import, categories and export', () => {
+    test('import inserts valid rows, reports invalid ones and dedupes within the batch', async () => {
+        const { token } = await signup();
+        const res = await doImport(token);
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({ success: true, data: { received: 6, inserted: 4, duplicates: 1 } });
+        expect(res.body.data.invalid).toEqual([{ index: 3, errors: ['amount must be a number'] }]);
+
+        const imported = await request(app).get('/api/transactions?source=import').set(auth(token));
+        expect(imported.body.data).toHaveLength(4);
+        expect(imported.body.data.every((t) => t.source === 'import' && !('import_hash' in t))).toBe(true);
+        expect(imported.body.data.find((t) => t.description === 'Metro card')).toMatchObject({ notes: 'monthly', payment_method: 'card', amount: 300 });
+        expect((await request(app).get('/api/transactions?source=manual').set(auth(token))).body.data).toHaveLength(0);
+        expect((await request(app).get('/api/transactions?payment_method=bank').set(auth(token))).body.data).toHaveLength(1);
+    });
+
+    test('re-importing the same file only reports duplicates', async () => {
+        const { token } = await signup();
+        await doImport(token);
+        const again = await doImport(token);
+        expect(again.body.data).toMatchObject({ received: 6, inserted: 0, duplicates: 5 });
+        expect(again.body.data.invalid).toHaveLength(1);
+        expect((await request(app).get('/api/transactions').set(auth(token))).body.pagination.total).toBe(4);
+    });
+
+    test('imported rows are isolated per user', async () => {
+        const alice = await signup('Alice');
+        const bob = await signup('Bob');
+        await doImport(alice.token);
+        const bobs = await doImport(bob.token); // same fingerprints, different user: not duplicates
+        expect(bobs.body.data).toMatchObject({ inserted: 4, duplicates: 1 });
+        const aliceRows = (await request(app).get('/api/transactions').set(auth(alice.token))).body.data;
+        const bobRows = (await request(app).get('/api/transactions').set(auth(bob.token))).body.data;
+        expect(aliceRows).toHaveLength(4);
+        expect(bobRows).toHaveLength(4);
+        const aliceIds = new Set(aliceRows.map((t) => t.id));
+        expect(bobRows.some((t) => aliceIds.has(t.id))).toBe(false);
+        expect((await request(app).get(`/api/transactions/${aliceRows[0].id}`).set(auth(bob.token))).status).toBe(404);
+    });
+
+    test('import validates the envelope', async () => {
+        const { token } = await signup();
+        const post = (body) => request(app).post('/api/transactions/import').set(auth(token)).send(body);
+        expect((await post({ fileName: 'a.csv', rows: [] })).status).toBe(400);
+        expect((await post({ rows: importRows() })).status).toBe(400);
+        expect((await post({ fileName: 'a.csv', rows: new Array(2001).fill(importRows()[0]) })).status).toBe(400);
+    });
+
+    test('categories lists used categories, most used first, only for the caller', async () => {
+        const alice = await signup('Alice');
+        const bob = await signup('Bob');
+        await doImport(alice.token);
+        await request(app).post('/api/transactions').set(auth(bob.token)).send(tx({ category: 'Bobs Secret' }));
+        const res = await request(app).get('/api/transactions/categories').set(auth(alice.token));
+        expect(res.status).toBe(200);
+        expect(res.body.data).toEqual([
+            { category: 'Food', type: 'expense', count: 2 },
+            { category: 'Salary', type: 'income', count: 1 },
+            { category: 'Travel', type: 'expense', count: 1 },
+        ]);
+    });
+
+    test('export.csv returns escaped CSV for the date range', async () => {
+        const { token } = await signup();
+        await doImport(token);
+        await request(app).post('/api/transactions').set(auth(token)).send(tx({ description: '=HYPERLINK("http://evil")', date: `${daysAgo(1)}T12:00:00Z` }));
+        const res = await request(app).get('/api/transactions/export.csv').query({ startDate: daysAgo(8), endDate: daysAgo(0) }).set(auth(token));
+        expect(res.status).toBe(200);
+        expect(res.headers['content-type']).toMatch(/^text\/csv/);
+        expect(res.headers['content-disposition']).toMatch(/^attachment; filename="fintrack-\d{4}-\d{2}-\d{2}\.csv"$/);
+        const lines = res.text.trim().split('\r\n');
+        expect(lines[0]).toBe('date,type,category,description,amount,payment_method,notes,source');
+        expect(lines).toHaveLength(4); // header + Metro card, Lunch and the manual row (older rows filtered out)
+        expect(res.text).toContain(`${daysAgo(1)},expense,Food,"'=HYPERLINK(""http://evil"")",450.00,other,,manual`);
+        expect(res.text).toContain(`${daysAgo(8)},expense,Travel,Metro card,300.00,card,monthly,import`);
+        expect(res.text).not.toContain('Salary');
+    });
+});
+
+maybe('account settings', () => {
+    test('preferences round trip through /me', async () => {
+        const { token } = await signup('Teja');
+        const prefs = {
+            theme: 'dark',
+            currency: 'EUR',
+            notifications: false,
+            month_start_day: 25,
+            date_format: 'YYYY-MM-DD',
+            week_start: 'sunday',
+            monthly_income_target: 75000.5,
+            budget_alerts: false,
+        };
+        const put = await request(app).put('/api/auth/preferences').set(auth(token)).send({ ...prefs, name: 'Teja M', id: 'x' });
+        expect(put.status).toBe(200);
+        expect(put.body.preferences).toEqual(prefs);
+        const me = await request(app).get('/api/auth/me').set(auth(token));
+        expect(me.body.data).toMatchObject({ name: 'Teja M', preferences: prefs });
+
+        const cleared = await request(app).put('/api/auth/preferences').set(auth(token)).send({ monthly_income_target: null });
+        expect(cleared.body.preferences.monthly_income_target).toBeNull();
+        for (const bad of [{ month_start_day: 29 }, { currency: 'XYZ' }, { date_format: 'DD-MM' }, { week_start: 'friday' }, { name: 'R2D2' }]) {
+            expect((await request(app).put('/api/auth/preferences').set(auth(token)).send(bad)).status).toBe(400);
+        }
+    });
+
+    test('password change verifies the current password', async () => {
+        const { token, email } = await signup();
+        const change = (body) => request(app).post('/api/auth/password').set(auth(token)).send(body);
+        expect((await change({ currentPassword: 'Wrong1234', newPassword: 'NewPassw0rd' })).status).toBe(401);
+        expect((await change({ currentPassword: PASSWORD, newPassword: 'weak' })).status).toBe(400);
+        const ok = await change({ currentPassword: PASSWORD, newPassword: 'NewPassw0rd' });
+        expect(ok.status).toBe(200);
+        expect((await request(app).post('/api/auth/login').send({ email, password: PASSWORD })).status).toBe(401);
+        expect((await request(app).post('/api/auth/login').send({ email, password: 'NewPassw0rd' })).status).toBe(200);
+        // The caller's own session keeps working.
+        expect((await request(app).get('/api/auth/me').set(auth(token))).status).toBe(200);
+    });
+
+    test('account deletion removes the user and all their data', async () => {
+        const { token, email } = await signup();
+        const other = await signup('Other');
+        await request(app).post('/api/transactions').set(auth(other.token)).send(tx());
+        await doImport(token);
+        await request(app).post('/api/budgets').set(auth(token)).send({ category: 'Food', limit: 100 });
+
+        expect((await request(app).delete('/api/auth/account').set(auth(token)).send({})).status).toBe(400);
+        expect((await request(app).delete('/api/auth/account').set(auth(token)).send({ confirm: 'DELETE' })).status).toBe(200);
+
+        expect((await request(app).get('/api/auth/me').set(auth(token))).status).toBe(401);
+        expect((await request(app).post('/api/auth/login').send({ email, password: PASSWORD })).status).toBe(401);
+
+        // The email is free again and the new account starts empty.
+        const again = await request(app).post('/api/auth/register').send({ name: 'Again', email, password: PASSWORD });
+        expect(again.status).toBe(201);
+        expect((await request(app).get('/api/transactions').set(auth(again.body.token))).body.data).toHaveLength(0);
+        expect((await request(app).get('/api/budgets').set(auth(again.body.token))).body).toHaveLength(0);
+        // Other users are untouched.
+        expect((await request(app).get('/api/transactions').set(auth(other.token))).body.data).toHaveLength(1);
     });
 });

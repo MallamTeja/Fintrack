@@ -47,3 +47,28 @@ test('public config exposes only the URL and anon key', async () => {
     expect(res.status).toBe(200);
     expect(Object.keys(res.body).sort()).toEqual(['supabaseAnonKey', 'supabaseUrl']);
 });
+
+test.each([
+    ['get', '/api/transactions/categories'],
+    ['get', '/api/transactions/export.csv'],
+    ['post', '/api/transactions/import'],
+    ['post', '/api/auth/password'],
+    ['delete', '/api/auth/account'],
+])('%s %s requires a bearer token', async (method, path) => {
+    const res = await request(app)[method](path).send({});
+    expect(res.status).toBe(401);
+});
+
+test('JSON bodies are capped at 50kb', async () => {
+    const res = await request(app)
+        .post('/api/transactions')
+        .send({ description: 'x'.repeat(60 * 1024) });
+    expect(res.status).toBe(413);
+});
+
+test('the import route is exempt from the 50kb cap (it parses up to 1mb after auth)', async () => {
+    const res = await request(app)
+        .post('/api/transactions/import')
+        .send({ fileName: 'a.csv', rows: [{ description: 'x'.repeat(200 * 1024) }] });
+    expect(res.status).toBe(401); // reached auth instead of failing with 413
+});

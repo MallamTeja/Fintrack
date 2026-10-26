@@ -2,7 +2,7 @@
 const express = require('express');
 const { requireAuth } = require('../auth');
 const { HttpError, asyncHandler, fromDbError } = require('../http');
-const { isUuid, parseSavingsGoal } = require('../validate');
+const { isUuid, parseSavingsGoal, checkGoalAmounts } = require('../validate');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -39,6 +39,21 @@ router.post('/', asyncHandler(async (req, res) => {
 const update = asyncHandler(async (req, res) => {
     checkId(req);
     const changes = parseSavingsGoal(req.body, true);
+    // current_amount may be at most 10x target_amount: fill in whichever side is not being changed.
+    const hasTarget = changes.target_amount !== undefined;
+    const hasCurrent = changes.current_amount !== undefined;
+    if (hasTarget !== hasCurrent) {
+        const { data: goal, error } = await req.db
+            .from('savings_goals')
+            .select('target_amount, current_amount')
+            .eq('id', req.params.id)
+            .single();
+        if (error) throw fromDbError(error, NOT_FOUND);
+        checkGoalAmounts(
+            hasTarget ? changes.target_amount : goal.target_amount,
+            hasCurrent ? changes.current_amount : goal.current_amount
+        );
+    }
     const { data, error } = await req.db
         .from('savings_goals')
         .update(changes)

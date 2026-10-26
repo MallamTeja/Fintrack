@@ -28,4 +28,13 @@ function userClient(accessToken) {
     });
 }
 
-module.exports = { anonClient, userClient };
+/**
+ * New, unshared anon client for flows that sign in and then act on that session
+ * (password change). Its session lives only in this object, never across requests.
+ */
+function isolatedClient() {
+    assertConfig();
+    return createClient(config.supabaseUrl, config.supabaseAnonKey, clientOptions);
+}
+
+module.exports = { anonClient, userClient, isolatedClient };
