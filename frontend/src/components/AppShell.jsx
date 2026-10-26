@@ -7,8 +7,9 @@ import { startRealtime } from '../lib/realtime.js';
 import './AppShell.css';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', short: 'Dashboard', icon: 'dashboard', end: true, also: '/dashboard' },
+  { to: '/', label: 'Dashboard', short: 'Home', icon: 'dashboard', end: true, also: '/dashboard' },
   { to: '/transactions', label: 'Transactions', short: 'Ledger', icon: 'ledger' },
+  { to: '/import', label: 'Import', short: 'Import', icon: 'import' },
   { to: '/budgets', label: 'Budgets', short: 'Budgets', icon: 'budget' },
   { to: '/savings', label: 'Savings', short: 'Savings', icon: 'savings' },
   { to: '/settings', label: 'Settings', short: 'Settings', icon: 'settings' },

@@ -17,6 +17,8 @@ export default defineConfig({
   build: {
     target: 'es2020',
     sourcemap: false,
+    // pdf.js (about 530 kB) is only fetched when a PDF statement is opened on the Import page.
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: { react: ['react', 'react-dom', 'react-router-dom'] },

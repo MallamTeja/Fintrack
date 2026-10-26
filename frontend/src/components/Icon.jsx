@@ -63,6 +63,30 @@ const PATHS = {
   right: <path d="M9.5 6l6 6-6 6" />,
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   dot: <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />,
+  import: (
+    <>
+      <path d="M12 4v10M8 10l4 4 4-4" />
+      <path d="M5 15v4.5h14V15" />
+    </>
+  ),
+  export: (
+    <>
+      <path d="M12 14V4M8 8l4-4 4 4" />
+      <path d="M5 15v4.5h14V15" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6" />
+      <path d="M15 15l5 5" />
+    </>
+  ),
+  file: (
+    <>
+      <path d="M6.5 3.5h7l4 4v13h-11z" />
+      <path d="M13.5 3.5v4h4M9 12.5h6M9 16h6" />
+    </>
+  ),
   coin: (
     <>
       <circle cx="12" cy="12" r="7.5" />

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppShell from './components/AppShell.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -11,6 +11,9 @@ import Savings from './pages/Savings.jsx';
 import Settings from './pages/Settings.jsx';
 import Transactions from './pages/Transactions.jsx';
 import { NotFound } from './pages/shared.jsx';
+
+// The importer (CSV, Excel and PDF readers) loads on first visit to /import.
+const Import = lazy(() => import('./pages/Import.jsx'));
 
 function Booting() {
   return (
@@ -59,6 +62,14 @@ export function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="transactions" element={<Transactions />} />
+        <Route
+          path="import"
+          element={
+            <Suspense fallback={<Booting />}>
+              <Import />
+            </Suspense>
+          }
+        />
         <Route path="budgets" element={<Budgets />} />
         <Route path="savings" element={<Savings />} />
         <Route path="settings" element={<Settings />} />

@@ -13,9 +13,12 @@
     "@fontsource-variable/fraunces": "^5.3.0",
     "@fontsource-variable/instrument-sans": "^5.3.0",
     "@supabase/supabase-js": "^2.118.0",
+    "papaparse": "^5.7.0",
+    "pdfjs-dist": "^6.4.299",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.6"
+    "react-router-dom": "^6.30.6",
+    "read-excel-file": "^9.3.12"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
