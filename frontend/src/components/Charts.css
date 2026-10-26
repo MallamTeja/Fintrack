@@ -1,0 +1,155 @@
+/* Meter */
+.meter svg {
+  width: 100%;
+  height: 6px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.meter__track {
+  fill: var(--color-paper-3);
+}
+
+.meter__fill {
+  fill: var(--color-accent);
+}
+
+.meter__mark {
+  stroke: var(--color-paper);
+  stroke-width: 2;
+}
+
+.meter--near .meter__fill {
+  fill: var(--color-warn-bar);
+}
+
+.meter--over .meter__fill {
+  fill: var(--color-out);
+}
+
+.meter--goal .meter__mark {
+  display: none;
+}
+
+/* Category bars */
+.catbars {
+  display: grid;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catbars__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  row-gap: var(--sp-2);
+  column-gap: var(--sp-3);
+  align-items: baseline;
+}
+
+.catbars__label {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.catbars__value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+
+.catbars__share {
+  min-width: 3.5ch;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-align: right;
+}
+
+.catbars__bar {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 4px;
+}
+
+.catbars__bar rect {
+  fill: var(--color-out);
+}
+
+.catbars__row:first-child .catbars__label {
+  font-weight: 600;
+}
+
+/* Trend chart */
+.trend {
+  margin: 0;
+  min-width: 0;
+}
+
+.trend svg {
+  overflow: visible;
+}
+
+.trend__grid {
+  stroke: var(--color-rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.trend__base {
+  stroke: var(--color-ink);
+  stroke-width: 1;
+}
+
+.trend__tick,
+.trend__month {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.trend__month.is-current {
+  fill: var(--color-ink);
+  font-weight: 600;
+}
+
+.trend__in {
+  fill: var(--color-accent);
+}
+
+.trend__out {
+  fill: var(--color-out);
+}
+
+.trend__legend {
+  display: flex;
+  gap: var(--sp-5);
+  margin-top: var(--sp-2);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.trend__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.trend__key::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 1px;
+}
+
+.trend__key--in::before {
+  background: var(--color-accent);
+}
+
+.trend__key--out::before {
+  background: var(--color-out);
+}
