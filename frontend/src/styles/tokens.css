@@ -1,0 +1,167 @@
+/* Hallmark · genre: editorial · macrostructure: ledger workbench (side rail + ruled columns) · theme: studied (paper ledger) · nav: edge rail / bottom tabs · footer: none (app) */
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4 */
+
+/*
+  FinTrack design tokens. Every colour and font in the app comes from here.
+
+  Contrast, WCAG 2.1 ratios computed from the OKLCH values below (sRGB):
+  Light
+    ink on paper ............. 15.60:1   muted on paper ......... 5.54:1
+    muted on paper-3 ......... 4.75:1    muted on paper-2 ....... 5.04:1
+    accent on paper .......... 6.85:1    accent-ink on accent ... 6.85:1
+    accent on paper-2 ........ 6.23:1    accent on accent-soft .. 6.20:1
+    out on paper ............. 6.43:1    out-ink on out ......... 6.43:1
+    out on out-soft .......... 5.71:1    warn on paper .......... 5.66:1
+    warn on warn-soft ........ 5.14:1    warn-bar on paper ...... 3.43:1 (UI)
+    rule-strong on paper ..... 3.36:1 (input borders, UI)
+  Dark
+    ink on paper ............. 14.59:1   muted on paper ......... 6.91:1
+    muted on paper-2 ......... 6.33:1    muted on paper-3 ....... 5.65:1
+    accent on paper .......... 7.78:1    accent-ink on accent ... 7.86:1
+    accent on accent-soft .... 6.46:1    out on paper ........... 7.10:1
+    out on paper-2 ........... 6.50:1    out-ink on out ......... 7.10:1
+    out on out-soft .......... 5.87:1    warn on paper .......... 9.79:1
+    warn on warn-soft ........ 8.01:1    rule-strong on paper ... 3.35:1 (UI)
+*/
+
+:root {
+  /* Type */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-body: 'Instrument Sans Variable', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: clamp(2.25rem, 1.6rem + 2.6vw, 3.25rem);
+  --text-hero: clamp(2.75rem, 1.8rem + 4vw, 4.5rem);
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.25;
+  --lh-body: 1.55;
+
+  /* Space: 4px scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+
+  --radius: 6px;
+  --radius-sm: 4px;
+  --hairline: 1px;
+  --control-h: 44px;
+  --rail-w: 232px;
+  --tabbar-h: 64px;
+  --topbar-h: 56px;
+  --measure: 62ch;
+
+  --z-base: 1;
+  --z-sticky: 200;
+  --z-nav: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  --dur-fast: 150ms;
+  --dur: 200ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Colour: light, warm paper. Anchor hue ~80 (paper), accent 155 (ledger green) */
+  --color-paper: oklch(97.2% 0.012 85);
+  --color-paper-2: oklch(94% 0.014 85);
+  --color-paper-3: oklch(92% 0.016 85);
+  --color-raised: oklch(98.6% 0.008 85);
+  --color-ink: oklch(23% 0.015 70);
+  --color-ink-2: oklch(36% 0.015 70);
+  --color-muted: oklch(50% 0.014 70);
+  --color-rule: oklch(88% 0.014 80);
+  --color-rule-strong: oklch(62% 0.014 75);
+
+  --color-accent: oklch(44% 0.09 155);
+  --color-accent-hover: oklch(38% 0.085 155);
+  --color-accent-ink: oklch(97.2% 0.012 85);
+  --color-accent-soft: oklch(93.5% 0.03 155);
+
+  --color-out: oklch(48% 0.13 30);
+  --color-out-hover: oklch(42% 0.12 30);
+  --color-out-ink: oklch(97.2% 0.012 85);
+  --color-out-soft: oklch(93.5% 0.028 35);
+
+  --color-warn: oklch(50% 0.1 70);
+  --color-warn-bar: oklch(62% 0.125 75);
+  --color-warn-soft: oklch(94% 0.04 85);
+
+  --color-focus: oklch(44% 0.09 155);
+  --color-scrim: oklch(23% 0.015 70 / 0.38);
+  --shadow-pop: 0 1px 0 oklch(23% 0.015 70 / 0.04), 0 12px 32px -12px oklch(23% 0.015 70 / 0.22);
+
+  color-scheme: light;
+}
+
+/* Dark: a lamp-lit ledger. Warm umber paper, cream ink, accents lifted in lightness and eased in chroma. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-paper: oklch(19% 0.01 65);
+    --color-paper-2: oklch(23% 0.011 65);
+    --color-paper-3: oklch(27% 0.012 65);
+    --color-raised: oklch(24.5% 0.012 65);
+    --color-ink: oklch(92% 0.012 85);
+    --color-ink-2: oklch(82% 0.012 85);
+    --color-muted: oklch(70% 0.014 80);
+    --color-rule: oklch(31% 0.012 65);
+    --color-rule-strong: oklch(52% 0.012 70);
+    --color-accent: oklch(72% 0.1 155);
+    --color-accent-hover: oklch(78% 0.095 155);
+    --color-accent-ink: oklch(18% 0.03 155);
+    --color-accent-soft: oklch(26% 0.035 155);
+    --color-out: oklch(72% 0.12 32);
+    --color-out-hover: oklch(77% 0.11 32);
+    --color-out-ink: oklch(19% 0.01 65);
+    --color-out-soft: oklch(27% 0.04 32);
+    --color-warn: oklch(80% 0.12 80);
+    --color-warn-bar: oklch(76% 0.12 78);
+    --color-warn-soft: oklch(27% 0.04 80);
+    --color-focus: oklch(72% 0.1 155);
+    --color-scrim: oklch(10% 0.01 65 / 0.6);
+    --shadow-pop: 0 0 0 1px oklch(31% 0.012 65), 0 16px 40px -16px oklch(8% 0.01 65 / 0.7);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-paper: oklch(19% 0.01 65);
+  --color-paper-2: oklch(23% 0.011 65);
+  --color-paper-3: oklch(27% 0.012 65);
+  --color-raised: oklch(24.5% 0.012 65);
+  --color-ink: oklch(92% 0.012 85);
+  --color-ink-2: oklch(82% 0.012 85);
+  --color-muted: oklch(70% 0.014 80);
+  --color-rule: oklch(31% 0.012 65);
+  --color-rule-strong: oklch(52% 0.012 70);
+  --color-accent: oklch(72% 0.1 155);
+  --color-accent-hover: oklch(78% 0.095 155);
+  --color-accent-ink: oklch(18% 0.03 155);
+  --color-accent-soft: oklch(26% 0.035 155);
+  --color-out: oklch(72% 0.12 32);
+  --color-out-hover: oklch(77% 0.11 32);
+  --color-out-ink: oklch(19% 0.01 65);
+  --color-out-soft: oklch(27% 0.04 32);
+  --color-warn: oklch(80% 0.12 80);
+  --color-warn-bar: oklch(76% 0.12 78);
+  --color-warn-soft: oklch(27% 0.04 80);
+  --color-focus: oklch(72% 0.1 155);
+  --color-scrim: oklch(10% 0.01 65 / 0.6);
+  --shadow-pop: 0 0 0 1px oklch(31% 0.012 65), 0 16px 40px -16px oklch(8% 0.01 65 / 0.7);
+  color-scheme: dark;
+}
