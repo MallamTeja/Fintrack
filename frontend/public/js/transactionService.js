@@ -41,7 +41,7 @@ class TransactionService {
                 throw new Error('Failed to fetch transactions');
             }
             
-            this.transactions = await response.json();
+            this.transactions = unwrapApi(await response.json());
             this.notifySubscribers();
         } catch (error) {
             console.error('Error fetching transactions:', error);
@@ -66,7 +66,7 @@ class TransactionService {
                 throw new Error('Failed to add transaction');
             }
             
-            const newTransaction = await response.json();
+            const newTransaction = unwrapApi(await response.json());
             this.transactions.unshift(newTransaction);
             this.notifySubscribers();
             

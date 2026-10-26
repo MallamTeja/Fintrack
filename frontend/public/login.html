@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/api.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Theme color is handled via CSS variables for better cross-browser support -->
@@ -297,7 +298,7 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Login failed');
+                    throw new Error(apiErrorMessage(data, null) || 'Login failed');
                 }
 
                 if (data.success) {
@@ -305,12 +306,13 @@
                     
                     // Store token and user data
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('refreshToken', data.refreshToken);
                     localStorage.setItem('userData', JSON.stringify(data.user));
                     
                     // Redirect to dashboard
                     window.location.href = '/dashboard.html';
                 } else {
-                    throw new Error(data.error || 'Login failed');
+                    throw new Error(apiErrorMessage(data, null) || 'Login failed');
                 }
             } catch (error) {
                 hideLoading();
@@ -320,6 +322,5 @@
             }
         });
     </script>
-    <script type="module" src="js/utils/realTimeTest.js"></script>
 </body>
 </html>

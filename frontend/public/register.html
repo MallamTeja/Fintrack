@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="/js/api.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - FinTrack</title>
@@ -234,8 +235,8 @@
                 return;
             }
 
-            if (password.length < 6) {
-                passwordError.textContent = 'Password must be at least 6 characters';
+            if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password)) {
+                passwordError.textContent = 'Use 8+ characters with an uppercase letter, a lowercase letter and a digit';
                 passwordError.style.display = 'block';
                 return;
             }
@@ -264,11 +265,21 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Registration failed');
+                    throw new Error(apiErrorMessage(data, null) || 'Registration failed');
                 }
                 
-                // Store user data and token
+                if (!data.token) {
+                    // Email confirmation is switched on in Supabase: no session until the link is clicked.
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Register';
+                    nameError.textContent = 'Account created. Check your email to confirm it, then log in.';
+                    nameError.style.display = 'block';
+                    return;
+                }
+
+                // Store user data and session
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('refreshToken', data.refreshToken);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 
                 // Show success message and redirect

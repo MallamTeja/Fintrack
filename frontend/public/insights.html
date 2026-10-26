@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="/js/api.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>FinTrack - Insights</title>
@@ -9,7 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/transactionService.js"></script>
-    <script src="js/websocketService.js"></script>
     <script type="module" src="js/components/navbar.js"></script>
     <script type="module" src="js/auth/logoutHandler.js"></script>
     <!-- Theme management -->
@@ -157,7 +157,7 @@
           </svg>
           Insights
         </a>
-        <a href="SavingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
+        <a href="savingGoals.html" data-page="savingGoals" class="flex items-center gap-2 text-lg transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Savings Goals">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
@@ -646,7 +646,7 @@
           });
 
           if (response.ok) {
-            const transactions = await response.json();
+            const transactions = unwrapApi(await response.json());
             console.log('Loaded transactions:', transactions);
             updateInsightsStats(transactions);
           } else {
