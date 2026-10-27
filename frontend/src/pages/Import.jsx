@@ -121,6 +121,10 @@ function Help() {
           <dd>PhonePe, Google Pay and Paytm PDF statements with lines such as "Paid to" and "Received from".</dd>
         </div>
         <div>
+          <dt>Image PDFs</dt>
+          <dd>PDFs without selectable text, such as Union Bank downloads and scans, are read with text recognition. Check the amounts before importing.</dd>
+        </div>
+        <div>
           <dt>Privacy</dt>
           <dd>Parsing happens in this browser. Only the rows you choose are sent to your ledger.</dd>
         </div>
@@ -501,6 +505,7 @@ export default function Import() {
   const [analysis, setAnalysis] = useState(null);
   const [drafts, setDrafts] = useState([]);
   const [progress, setProgress] = useState({ sent: 0, total: 0 });
+  const [ocr, setOcr] = useState(null);
   const [result, setResult] = useState(null);
   const [failure, setFailure] = useState(null);
   const sentRows = useRef([]);
@@ -558,9 +563,11 @@ export default function Import() {
     setFile(f);
     setError('');
     setStage('reading');
+    setOcr(null);
     try {
-      await show(await readStatement(f, { password }));
+      await show(await readStatement(f, { password, onProgress: setOcr }));
     } catch (err) {
+      if (!(err instanceof StatementError)) console.error('Statement read failed', err);
       if (err instanceof StatementError && (err.code === 'need-password' || err.code === 'wrong-password')) {
         setError(err.code === 'wrong-password' ? err.message : '');
         setStage('password');
@@ -637,7 +644,13 @@ export default function Import() {
             Reading {file?.name}
           </h2>
           <span className="skeleton import-skeleton" aria-hidden="true" />
-          <p className="muted">Large PDF statements can take a few seconds.</p>
+          <p className="muted">
+            {!ocr
+              ? 'Large PDF statements can take a few seconds.'
+              : ocr.phase === 'loading'
+                ? 'This PDF has no text layer, so it is being read as an image. Loading text recognition (about 5 MB, once).'
+                : `Recognising text on page ${ocr.page} of ${ocr.pages}. This stays on your device.`}
+          </p>
         </div>
       )}
 

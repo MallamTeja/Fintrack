@@ -5,6 +5,7 @@ import { guessDayFirst, parseStatementDate } from '../lib/statement/dates.js';
 import { analyseLines, analyseRows, csvToRows, draftTotals, editDraft, groupLines, markDuplicates, toImportRow } from '../lib/statement/index.js';
 import { detectHeader, roleOfHeader } from '../lib/statement/table.js';
 import { parseUpiText } from '../lib/statement/upi.js';
+import { tsvToItems } from '../lib/statement/ocr.js';
 
 const HDFC = `"HDFC BANK Ltd.","Page No .: 1"
 "Statement of accounts"
@@ -302,5 +303,63 @@ describe('UPI app statements and PDF layout', () => {
 
   it('detects headers for the column mapping', () => {
     expect(detectHeader([['foo', 'bar', 'baz']])).toBeNull();
+  });
+});
+
+describe('vertically centred narration (Union Bank layout)', () => {
+  // Each entry's narration has one line above the date line and one below, as in Union Bank PDFs.
+  const item = (str, x, y) => ({ str, x, y, w: str.length * 4, h: 8, page: 1 });
+  const entry = (y, sl, date, narr1, narr2, debit, credit, bal) => [
+    item(narr1, 106, y + 5),
+    item(String(sl), 32, y), item(date, 50, y), ...(debit ? [item(debit, 376, y)] : []), ...(credit ? [item(credit, 452, y)] : []), item(bal, 530, y),
+    item(narr2, 106, y - 6),
+  ];
+  const items = [
+    item('Sl', 30, 300), item('Date', 64, 300), item('Particulars', 151, 300), item('Withdrawal', 340, 300), item('Deposit', 427, 300), item('Balance', 514, 300),
+    ...entry(270, 1, '05-09-2026', 'UPIAB/508250878620/CR/PULLAIA', 'H/SBIN/9866352390-2@ybl', '', '5,500.00', '9,732.35 Cr'),
+    ...entry(248, 2, '07-09-2026', 'UPIAR/129191139507/DR/VENNAP', 'US/UBIN/vsr@okaxis', '250.00', '', '9,482.35 Cr'),
+    ...entry(226, 3, '08-09-2026', 'UPIAR/169695810033/DR/SWIGGY', 'L/UTIB/swiggy@icici', '150.00', '', '9,332.35 Cr'),
+  ];
+
+  it('joins the line above the date line to its own entry', () => {
+    const r = analyseLines(groupLines(items));
+    expect(r.drafts).toHaveLength(3);
+    expect(r.drafts[0]).toMatchObject({ date: '2026-09-05', type: 'income', amount: 5500, description: 'Pullaia H', payment_method: 'upi' });
+    expect(r.drafts[1]).toMatchObject({ type: 'expense', amount: 250, description: 'Vennap Us' });
+    expect(r.drafts[2].notes).toContain('UPIAR/169695810033/DR/SWIGGY');
+    expect(r.drafts[2].notes).toContain('swiggy@icici');
+  });
+
+  it('leaves downward-wrapped narration with the entry above', () => {
+    const down = [
+      item('Date', 50, 300), item('Narration', 106, 300), item('Withdrawal', 376, 300), item('Deposit', 452, 300), item('Balance', 530, 300),
+      item('05-09-2026', 50, 280), item('UPI/1234/Grocer', 106, 280), item('120.00', 376, 280), item('900.00', 530, 280),
+      item('Mart/okaxis', 106, 272),
+      item('06-09-2026', 50, 260), item('NEFT/Salary', 106, 260), item('5,000.00', 452, 260), item('5,900.00', 530, 260),
+      item('ACME LTD', 106, 252),
+      item('07-09-2026', 50, 240), item('UPI/99/Tea', 106, 240), item('20.00', 376, 240), item('5,880.00', 530, 240),
+    ];
+    const r = analyseLines(groupLines(down));
+    expect(r.drafts).toHaveLength(3);
+    expect(r.drafts[0].notes || r.drafts[0].description).toContain('Mart');
+    expect(r.drafts[1].notes || r.drafts[1].description).toContain('ACME');
+  });
+});
+
+describe('tsvToItems', () => {
+  it('reads word rows and flips y so a page reads top to bottom', () => {
+    const tsv = [
+      'level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext',
+      '5\t1\t1\t1\t1\t1\t250\t100\t50\t20\t95\tHello',
+      '5\t1\t1\t1\t2\t1\t250\t200\t50\t20\t91\tWorld',
+      '4\t1\t1\t1\t2\t0\t250\t200\t50\t20\t-1\t',
+      '5\t1\t1\t1\t3\t1\t250\t300\t50\t20\t-1\t ',
+    ].join('\n');
+    const items = tsvToItems(tsv, 2, 2.5);
+    expect(items).toEqual([
+      { str: 'Hello', x: 100, y: -48, w: 20, h: 8, page: 2 },
+      { str: 'World', x: 100, y: -88, w: 20, h: 8, page: 2 },
+    ]);
+    expect(items[0].y).toBeGreaterThan(items[1].y);
   });
 });

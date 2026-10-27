@@ -66,5 +66,55 @@ export function linesToTable(lines) {
     });
     return row;
   });
-  return { rows, headerRow: found.headerRow, mapping: found.mapping, confidence: found.confidence };
+  return {
+    rows: attachCenteredWraps(rows, lines, found.headerRow, found.mapping),
+    headerRow: found.headerRow,
+    mapping: found.mapping,
+    confidence: found.confidence,
+  };
+}
+
+const MONEY_ROLES = ['debit', 'credit', 'amount', 'balance'];
+
+/**
+ * Some banks (Union Bank, for one) centre a wrapped narration vertically in its row, so the first
+ * line of the narration sits above the line with the date and amounts, and the last line sits below.
+ * Read top to bottom, that top line would join the entry above. When most dated lines have narration
+ * both directly above and directly below them, each such line is moved to the dated line it is
+ * nearest to. Statements that wrap only downwards are left as they are.
+ */
+export function attachCenteredWraps(rows, lines, headerRow, mapping) {
+  const filled = (row, role) => mapping[role] !== undefined && String(row[mapping[role]] || '').trim() !== '';
+  const kind = rows.map((row, i) => {
+    if (i <= headerRow) return 'head';
+    if (filled(row, 'date') && MONEY_ROLES.some((r) => filled(row, r))) return 'entry';
+    if (row.some((c) => String(c).trim()) && !MONEY_ROLES.some((r) => filled(row, r)) && !filled(row, 'date')) return 'wrap';
+    return 'other';
+  });
+  const entries = kind.map((k, i) => (k === 'entry' ? i : -1)).filter((i) => i >= 0);
+  if (entries.length < 3) return rows;
+  const samePage = (a, b) => lines[a] && lines[b] && lines[a].page === lines[b].page;
+  const centred = entries.filter(
+    (i) => kind[i - 1] === 'wrap' && kind[i + 1] === 'wrap' && samePage(i - 1, i) && samePage(i, i + 1)
+  ).length;
+  if (centred < entries.length * 0.5) return rows;
+
+  const out = rows.map((r) => r.slice());
+  const drop = new Set();
+  for (let n = 0; n < entries.length; n += 1) {
+    const next = entries[n];
+    const prev = n > 0 ? entries[n - 1] : -1;
+    // Walk up from the entry over the wrap lines directly above it.
+    for (let i = next - 1; i > prev && kind[i] === 'wrap' && samePage(i, next); i -= 1) {
+      const toNext = Math.abs(lines[i].y - lines[next].y);
+      const toPrev = prev >= 0 && samePage(i, prev) ? Math.abs(lines[prev].y - lines[i].y) : Infinity;
+      if (toNext > toPrev) break;
+      out[i].forEach((cell, c) => {
+        const t = String(cell).trim();
+        if (t) out[next][c] = out[next][c] ? `${t} ${out[next][c]}` : t;
+      });
+      drop.add(i);
+    }
+  }
+  return out.filter((_, i) => !drop.has(i));
 }

@@ -57,7 +57,7 @@ async function readXlsx(buf) {
   return rows.map((r) => r.map((c) => (c === null || c === undefined ? '' : c)));
 }
 
-async function readPdf(buf, password) {
+async function readPdf(buf, password, onProgress) {
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
     const worker = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url');
@@ -96,9 +96,23 @@ async function readPdf(buf, password) {
     });
     page.cleanup();
   }
+  if (!items.length) {
+    // No text layer: the bank drew the text as shapes, or the file is a scan. Read it with OCR.
+    try {
+      const { recognisePdf } = await import('./ocr.js');
+      items.push(...(await recognisePdf(doc, { onProgress })));
+    } catch (err) {
+      console.error('Text recognition failed', err);
+      await doc.destroy();
+      throw new StatementError(
+        'This PDF has no text layer and text recognition could not run. Check your connection and try again, or download the statement as CSV or Excel.',
+        'ocr-failed'
+      );
+    }
+  }
   await doc.destroy();
   if (!items.length) {
-    throw new StatementError('This PDF has no readable text. It may be a scanned image; download the statement as CSV or Excel instead.', 'no-text');
+    throw new StatementError('No text could be found in this PDF. Download the statement as CSV or Excel instead.', 'no-text');
   }
   return groupLines(items);
 }
@@ -107,7 +121,7 @@ async function readPdf(buf, password) {
  * Reads and analyses a statement file. Returns the analysis from analyseRows or analyseLines,
  * plus { kind, fileName }. Throws StatementError with a code for password prompts and unsupported files.
  */
-export async function readStatement(file, { password } = {}) {
+export async function readStatement(file, { password, onProgress } = {}) {
   const problem = checkFile(file);
   if (problem) throw new StatementError(problem, 'invalid-file');
   const kind = kindOf(file);
@@ -117,7 +131,7 @@ export async function readStatement(file, { password } = {}) {
 
   if (kind === 'pdf') {
     if (!startsWith(bytes, [0x25, 0x50, 0x44, 0x46])) throw new StatementError('This file is not a PDF, even though its name ends in .pdf.', 'invalid-file');
-    result = analyseLines(await readPdf(buf, password));
+    result = analyseLines(await readPdf(buf, password, onProgress));
   } else if (kind === 'xlsx' || (kind === 'xls' && startsWith(bytes, [0x50, 0x4b]))) {
     try {
       result = analyseRows(await readXlsx(buf));

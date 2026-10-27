@@ -40,7 +40,7 @@ export function categorise(text = '', type = 'expense') {
 /** Payment method from the narration: upi, card, cash, bank, wallet or other. */
 export function paymentMethodFrom(text = '') {
   const s = String(text);
-  if (/\b(upi|vpa|@ok[a-z]+|@ybl|@paytm|@ibl|@axl|@apl|phonepe|google\s?pay|gpay|bhim)\b|@[a-z]{2,}\b/i.test(s)) return 'upi';
+  if (/\b(upi(?:a[rb])?|vpa|@ok[a-z]+|@ybl|@paytm|@ibl|@axl|@apl|phonepe|google\s?pay|gpay|bhim)\b|@[a-z]{2,}\b/i.test(s)) return 'upi';
   if (/\b(paytm\s?wallet|wallet|amazon\s?pay\s?balance|mobikwik|freecharge)\b/i.test(s)) return 'wallet';
   if (/\b(atm|cash\s?withdrawal|nwd|cash\s?wdl|cash\s?deposit|cdm|by\s?cash)\b/i.test(s)) return 'cash';
   if (/\b(pos|card|visa|mastercard|rupay|debit\s?card|credit\s?card|ecom|vps|ipay)\b/i.test(s)) return 'card';
@@ -49,7 +49,7 @@ export function paymentMethodFrom(text = '') {
 }
 
 const NOISE = new Set([
-  'upi', 'dr', 'cr', 'p2m', 'p2a', 'p2p', 'to', 'from', 'by', 'via', 'transfer', 'trf', 'payment', 'pay', 'paid', 'sent',
+  'upi', 'upiar', 'upiab', 'dr', 'cr', 'p2m', 'p2a', 'p2p', 'to', 'from', 'by', 'via', 'transfer', 'trf', 'payment', 'pay', 'paid', 'sent',
   'received', 'using', 'na', 'nil', 'imps', 'neft', 'rtgs', 'mmt', 'pos', 'ecom', 'vps', 'ipay', 'inb', 'mb', 'ib', 'ref',
   'txn', 'utr', 'collect', 'request', 'mandate', 'others', 'other', 'upiintent', 'upi intent', 'cms', 'ach', 'nach',
   'debit', 'credit', 'card', 'xx', 'no', 'for',
@@ -88,7 +88,7 @@ const isNoiseToken = (t) => {
 export function cleanDescription(raw = '') {
   const text = String(raw).replace(/\s+/g, ' ').trim();
   if (!text) return '';
-  const packed = (text.match(/[/\-*|]/g) || []).length >= 2 && /^(?:(?:to|by)\s+(?:transfer|trf)[\s-]*)?(upi|imps|neft|rtgs|mmt|pos|ecom|vps|ach|nach|inb|mb|ib)\b/i.test(text);
+  const packed = (text.match(/[/\-*|]/g) || []).length >= 2 && /^(?:(?:to|by)\s+(?:transfer|trf)[\s-]*)?(upi(?:a[rb])?|imps|neft|rtgs|mmt|pos|ecom|vps|ach|nach|inb|mb|ib)\b/i.test(text);
   if (!packed) {
     const atm = /^(?:atm|nwd|awb)\b/i.test(text);
     if (atm) return 'ATM cash withdrawal';

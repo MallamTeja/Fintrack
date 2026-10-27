@@ -157,7 +157,7 @@ noted, in light and dark. Built against the [Hallmark](https://github.com/Nutlop
 ## Known gaps
 
 - Tokens live in `localStorage`.
-- Statement import parses files in the browser; scanned PDFs (images) need OCR, which is not supported.
+- PDFs without a text layer are read with in-browser OCR (tesseract.js, engine and English data fetched from jsDelivr on first use). Accuracy depends on print quality, so the preview step matters.
 
 See [SECURITY.md](SECURITY.md) for the security model and [CONTRIBUTING.md](CONTRIBUTING.md) to help.
 
