@@ -3,6 +3,17 @@
 // The recognition engine and English language data are fetched once from a CDN and then cached.
 
 const SCALE = 2.5; // about 180 dpi, enough for statement print
+const PAGE_TIMEOUT = 60000;
+
+function withTimeout(promise, ms, what) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Timed out: ${what}`)), ms);
+    }),
+  ]).finally(() => clearTimeout(timer));
+}
 
 /** Turns Tesseract TSV output into positioned items like PDF text items (y grows upwards). */
 export function tsvToItems(tsv, page, scale = SCALE) {
@@ -43,8 +54,8 @@ export async function recognisePdf(doc, { maxPages = 20, onProgress } = {}) {
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, canvas, viewport }).promise;
-      const { data } = await worker.recognize(canvas, {}, { tsv: true });
+      await withTimeout(page.render({ canvasContext: ctx, canvas, viewport }).promise, PAGE_TIMEOUT, `render page ${p}`);
+      const { data } = await withTimeout(worker.recognize(canvas, {}, { tsv: true }), PAGE_TIMEOUT, `recognise page ${p}`);
       items.push(...tsvToItems(data.tsv, p));
       page.cleanup();
       canvas.width = 0;

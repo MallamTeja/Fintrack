@@ -94,7 +94,7 @@ async function readPdf(buf, password, onProgress) {
       const [, , , d, x, y] = it.transform;
       items.push({ str: it.str, x, y, w: it.width, h: Math.abs(it.height || d) || 10, page: p });
     });
-    page.cleanup();
+    // No page.cleanup() here: a cleaned page never finishes rendering its images, which OCR needs.
   }
   if (!items.length) {
     // No text layer: the bank drew the text as shapes, or the file is a scan. Read it with OCR.
