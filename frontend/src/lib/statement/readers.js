@@ -103,14 +103,14 @@ async function readPdf(buf, password, onProgress) {
       items.push(...(await recognisePdf(doc, { onProgress })));
     } catch (err) {
       console.error('Text recognition failed', err);
-      await doc.destroy();
+      await task.destroy();
       throw new StatementError(
         'This PDF has no text layer and text recognition could not run. Check your connection and try again, or download the statement as CSV or Excel.',
         'ocr-failed'
       );
     }
   }
-  await doc.destroy();
+  await task.destroy();
   if (!items.length) {
     throw new StatementError('No text could be found in this PDF. Download the statement as CSV or Excel instead.', 'no-text');
   }
