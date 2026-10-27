@@ -1,17 +1,21 @@
 version: 2
+# One bundled pull request per ecosystem per week. Major versions are left for
+# deliberate upgrades so the PR list stays short.
 updates:
   - package-ecosystem: npm
-    directory: /backend
-    schedule: { interval: weekly }
+    directories: [/backend, /frontend]
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
     groups:
-      minor-and-patch:
-        update-types: [minor, patch]
-  - package-ecosystem: npm
-    directory: /frontend
-    schedule: { interval: weekly }
-    groups:
-      minor-and-patch:
-        update-types: [minor, patch]
+      npm:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 1
+    groups:
+      actions:
+        patterns: ["*"]
