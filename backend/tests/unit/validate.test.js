@@ -370,3 +370,23 @@ describe('parseTransactionQuery', () => {
         rejects(() => v.parseTransactionQuery(query), re);
     });
 });
+
+describe('payees', () => {
+    const { parsePayee, parsePayeeKey, parseTransaction } = require('../../src/validate');
+    it('accepts upi and name keys and a 1-100 character name', () => {
+        expect(parsePayee({ key: 'upi:9866352390-2', name: 'Pullaiah Mallam' })).toEqual({ key: 'upi:9866352390-2', name: 'Pullaiah Mallam' });
+        expect(parsePayeeKey('name:swiggy')).toBe('name:swiggy');
+    });
+    it('rejects bad keys and names', () => {
+        expect(() => parsePayeeKey('UPI:ABC')).toThrow();
+        expect(() => parsePayeeKey('upi:')).toThrow();
+        expect(() => parsePayeeKey('x:abcdef')).toThrow();
+        expect(() => parsePayee({ key: 'upi:abc', name: '' })).toThrow();
+        expect(() => parsePayee({ key: 'upi:abc', name: 'x'.repeat(101) })).toThrow();
+    });
+    it('lets transactions carry a payee_key', () => {
+        const t = parseTransaction({ amount: 10, type: 'expense', category: 'Food', payee_key: 'upi:swiggy' });
+        expect(t.payee_key).toBe('upi:swiggy');
+        expect(() => parseTransaction({ amount: 10, type: 'expense', category: 'Food', payee_key: 'bad' })).toThrow();
+    });
+});

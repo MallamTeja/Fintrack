@@ -349,3 +349,81 @@ describe('savings goals: 10x rule on partial updates', () => {
         expect((await request(app).patch(`/api/savings-goals/${id}`).send({ target_amount: 89.99 })).status).toBe(400);
     });
 });
+
+describe('payees', () => {
+    const tx = (over = {}) => ({
+        id: over.id || 'a', type: 'income', amount: '100.00', description: 'Pullaia H', category: 'Other income',
+        notes: 'UPIAB/1/CR/PULLAIA H/SBIN/9866352390-2@ybl', payee_key: 'upi:9866352390-2', date: '2026-09-18T00:00:00+00:00', ...over,
+    });
+
+    test('GET /api/payees groups by payee_key, totals money both ways and prefers the saved name', async () => {
+        global.fakeDb = makeDb((s) => {
+            if (s.table === 'transactions') {
+                return {
+                    data: [
+                        tx({ id: 'a' }),
+                        tx({ id: 'b', amount: '5500', date: '2026-09-05T00:00:00+00:00' }),
+                        tx({ id: 'c', type: 'expense', amount: '20', payee_key: 'upi:q018762163', description: 'Sri Maru', notes: 'x q018762163@yb' }),
+                    ],
+                    error: null,
+                };
+            }
+            if (s.table === 'payees') return { data: [{ key: 'upi:9866352390-2', name: 'Pullaiah Mallam' }], error: null };
+            throw new Error('unexpected');
+        });
+        const res = await request(app).get('/api/payees');
+        expect(res.status).toBe(200);
+        const byKey = Object.fromEntries(res.body.data.map((p) => [p.key, p]));
+        expect(byKey['upi:9866352390-2']).toMatchObject({
+            name: 'Pullaiah Mallam', named: true, count: 2, received: 5600, paid: 0, upi_id: '9866352390-2@ybl',
+            first_date: '2026-09-05T00:00:00+00:00', last_date: '2026-09-18T00:00:00+00:00',
+        });
+        expect(byKey['upi:q018762163']).toMatchObject({ name: 'Sri Maru', named: false, paid: 20, upi_id: 'q018762163@yb' });
+    });
+
+    test('PUT /api/payees saves the name and renames every linked transaction', async () => {
+        const seen = [];
+        global.fakeDb = makeDb((s) => {
+            seen.push(s);
+            if (s.table === 'payees' && has(s, 'update')) return { data: [], error: null };
+            if (s.table === 'payees' && has(s, 'insert')) return { data: [{ key: 'upi:abc', name: 'Ravi Kumar' }], error: null };
+            if (s.table === 'transactions' && has(s, 'update')) return { data: [{ id: 1 }, { id: 2 }], error: null };
+            throw new Error('unexpected');
+        });
+        const res = await request(app).put('/api/payees').send({ key: 'upi:abc', name: '  Ravi Kumar ' });
+        expect(res.status).toBe(200);
+        expect(res.body.data).toEqual({ key: 'upi:abc', name: 'Ravi Kumar', updated: 2 });
+        const txUpdate = seen.find((s) => s.table === 'transactions');
+        expect(op(txUpdate, 'update')[1]).toEqual({ description: 'Ravi Kumar' });
+        expect(op(txUpdate, 'eq')).toEqual(['eq', 'payee_key', 'upi:abc']);
+        expect(op(seen.find((s) => has(s, 'insert')), 'insert')[1]).toEqual({ key: 'upi:abc', name: 'Ravi Kumar' });
+    });
+
+    test('PUT /api/payees rejects bad keys', async () => {
+        global.fakeDb = makeDb(() => {
+            throw new Error('should not query');
+        });
+        const res = await request(app).put('/api/payees').send({ key: 'nope', name: 'X' });
+        expect(res.status).toBe(400);
+    });
+
+    test('import uses the saved payee name and fingerprints by payee', async () => {
+        let inserted;
+        global.fakeDb = makeDb((s) => {
+            if (s.table === 'transactions' && has(s, 'select')) return { data: [], error: null };
+            if (s.table === 'payees') return { data: [{ key: 'upi:abc', name: 'Ravi Kumar' }], error: null };
+            if (has(s, 'insert')) {
+                inserted = op(s, 'insert')[1];
+                return { data: null, error: null };
+            }
+            throw new Error('unexpected');
+        });
+        const res = await request(app)
+            .post('/api/transactions/import')
+            .send({ fileName: 's.pdf', rows: [row({ description: 'Ravi K', payee_key: 'upi:abc' }), row({ description: 'Tea' })] });
+        expect(res.status).toBe(200);
+        expect(inserted[0]).toMatchObject({ description: 'Ravi Kumar', payee_key: 'upi:abc' });
+        expect(inserted[0].import_hash).toBe(importHash({ ...row({ description: 'Ravi K' }), payee_key: 'upi:abc' }));
+        expect(inserted[1]).toMatchObject({ description: 'Tea', payee_key: null });
+    });
+});

@@ -7,12 +7,14 @@ const normalizeDescription = (s) => String(s || '').toLowerCase().replace(/\s+/g
 
 /**
  * Fingerprint of an imported row: sha256 hex of
- * `YYYY-MM-DD|type|amount with 2 decimals|normalized description`.
+ * `YYYY-MM-DD|type|amount with 2 decimals|payee_key or normalized description`.
  * Computed on validated values only; a client supplied hash is never trusted.
  */
-function importHash({ date, type, amount, description }) {
+function importHash({ date, type, amount, description, payee_key: payeeKey }) {
     const day = new Date(date).toISOString().slice(0, 10);
-    const key = `${day}|${type}|${Number(amount).toFixed(2)}|${normalizeDescription(description)}`;
+    // Rows linked to a payee are fingerprinted by payee, so renaming a payee never breaks duplicate checks.
+    const who = payeeKey || normalizeDescription(description);
+    const key = `${day}|${type}|${Number(amount).toFixed(2)}|${who}`;
     return crypto.createHash('sha256').update(key, 'utf8').digest('hex');
 }
 
@@ -38,7 +40,7 @@ function prepareImport(rawRows) {
         }
         seen.add(import_hash);
         // Every row gets the same keys: a bulk insert must not turn a missing key into NULL.
-        rows.push({ description: '', notes: '', payment_method: 'other', ...value, source: 'import', import_hash });
+        rows.push({ description: '', notes: '', payment_method: 'other', payee_key: null, ...value, source: 'import', import_hash });
     });
     return { rows, invalid, duplicates };
 }

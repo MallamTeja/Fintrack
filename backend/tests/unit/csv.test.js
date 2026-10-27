@@ -51,7 +51,7 @@ describe('prepareImport', () => {
         expect(out.rows).toHaveLength(3);
         for (const r of out.rows) {
             expect(Object.keys(r).sort()).toEqual(
-                ['amount', 'category', 'date', 'description', 'import_hash', 'notes', 'payment_method', 'source', 'type'].sort()
+                ['amount', 'category', 'date', 'description', 'import_hash', 'notes', 'payee_key', 'payment_method', 'source', 'type'].sort()
             );
             expect(r.source).toBe('import');
             expect(r.import_hash).toBe(importHash(r));
@@ -102,5 +102,20 @@ describe('CSV export', () => {
         expect(lines[1]).toBe('2026-10-01,expense,Food,"\'=HYPERLINK(""http://x"")",1200.00,upi,"a, b",import');
         expect(lines[2]).toBe('');
         expect(toCsv([])).toBe('date,type,category,description,amount,payment_method,notes,source\r\n');
+    });
+});
+
+describe('payee fingerprints', () => {
+    const base = { date: '2026-09-05', type: 'income', amount: 5500, category: 'Other income' };
+    it('fingerprints by payee_key when present, so a rename keeps the same hash', () => {
+        const a = importHash({ ...base, description: 'Pullaia H', payee_key: 'upi:9866352390-2' });
+        const b = importHash({ ...base, description: 'Pullaiah Mallam', payee_key: 'upi:9866352390-2' });
+        expect(a).toBe(b);
+        expect(importHash({ ...base, description: 'Pullaia H' })).not.toBe(a);
+    });
+    it('matches the SQL backfill formula', () => {
+        const crypto = require('crypto');
+        const expected = crypto.createHash('sha256').update('2026-09-05|income|5500.00|upi:abc', 'utf8').digest('hex');
+        expect(importHash({ ...base, description: 'x', payee_key: 'upi:abc' })).toBe(expected);
     });
 });

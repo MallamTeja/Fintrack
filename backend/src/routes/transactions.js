@@ -8,7 +8,7 @@ const { prepareImport, toCsv } = require('../csv');
 const router = express.Router();
 router.use(requireAuth);
 
-const COLUMNS = 'id, type, category, amount, description, notes, payment_method, source, date, created_at, updated_at';
+const COLUMNS = 'id, type, category, amount, description, notes, payment_method, source, payee_key, date, created_at, updated_at';
 const toApi = (row) => ({ ...row, _id: row.id, amount: Number(row.amount) });
 const NOT_FOUND = 'Transaction not found';
 // PostgREST returns at most this many rows per request (Supabase default max_rows).
@@ -153,6 +153,16 @@ router.post('/import', express.json({ limit: '1mb' }), asyncHandler(async (req, 
         for (const r of data) existing.add(r.import_hash);
     }
     const fresh = rows.filter((r) => !existing.has(r.import_hash));
+
+    // Names the user gave a payee win over the name read from the statement.
+    const keys = [...new Set(fresh.map((r) => r.payee_key).filter(Boolean))];
+    const names = new Map();
+    for (let i = 0; i < keys.length; i += 100) {
+        const { data, error } = await req.db.from('payees').select('key, name').in('key', keys.slice(i, i + 100));
+        if (error) throw fromDbError(error);
+        for (const p of data) names.set(p.key, p.name);
+    }
+    for (const r of fresh) if (names.has(r.payee_key)) r.description = names.get(r.payee_key);
 
     let inserted = 0;
     if (fresh.length) {

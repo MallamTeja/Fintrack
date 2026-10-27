@@ -27,6 +27,9 @@ const DATE_FORMATS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'];
 const WEEK_STARTS = ['monday', 'sunday'];
 const THEMES = ['light', 'dark'];
 
+// 'upi:<handle>' or 'name:<lowercased name>'; see supabase/migrations/20261027000000_payees.sql.
+const PAYEE_KEY_RE = /^(upi|name):[\p{Ll}\p{Lo}\p{M}\p{N} ._@&'-]+$/u;
+
 const isUuid = (v) => typeof v === 'string' && UUID_RE.test(v);
 
 /** Remove control characters; `multiline` keeps line breaks (CRLF and CR become LF). */
@@ -128,6 +131,30 @@ function transactionDate(v, field, errors) {
     return d.toISOString();
 }
 
+function payeeKey(v, field, errors) {
+    if (typeof v !== 'string' || v.length < 5 || v.length > 120 || !PAYEE_KEY_RE.test(v)) {
+        errors.push(`${field} must look like upi:<handle> or name:<lowercase name>, 5-120 characters`);
+        return undefined;
+    }
+    return v;
+}
+
+/** Body for PUT /api/payees: { key, name }. */
+function parsePayee(body) {
+    if (!isObject(body)) throw new HttpError(400, 'Expected a JSON object');
+    const errors = [];
+    const key = body.key === undefined ? (errors.push('key is required'), undefined) : payeeKey(body.key, 'key', errors);
+    const name = body.name === undefined ? (errors.push('name is required'), undefined) : text(body.name, 'name', { max: 100, errors });
+    return finish(errors, { key, name });
+}
+
+/** A payee key from a query string or body, for lookups and deletes. */
+function parsePayeeKey(v) {
+    const errors = [];
+    const key = v === undefined ? (errors.push('key is required'), undefined) : payeeKey(v, 'key', errors);
+    return finish(errors, key);
+}
+
 const oneOf = (allowed, message) => (v, field, errors) => {
     if (typeof v !== 'string' || !allowed.includes(v)) errors.push(message || `${field} must be one of: ${allowed.join(', ')}`);
     return v;
@@ -174,6 +201,7 @@ const transactionRules = {
     date: { required: false, parse: (v, f, errors) => transactionDate(v, f, errors) },
     notes: { allowEmpty: true, parse: (v, f, errors) => text(v, f, { min: 0, max: 500, multiline: true, errors }) },
     payment_method: { parse: oneOf(PAYMENT_METHODS) },
+    payee_key: { parse: (v, f, errors) => payeeKey(v, f, errors) },
 };
 const importRowRules = { ...transactionRules, date: { ...transactionRules.date, required: true } };
 
@@ -390,6 +418,8 @@ function parseTransactionQuery(query) {
 }
 
 module.exports = {
+    parsePayee,
+    parsePayeeKey,
     isUuid,
     stripControl,
     parseIsoDate,

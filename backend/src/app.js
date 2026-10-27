@@ -63,6 +63,7 @@ app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/budgets', require('./routes/budgets'));
 app.use('/api/savings-goals', savings);
 app.use('/api/savings', savings);
+app.use('/api/payees', require('./routes/payees'));
 app.use('/api', notFound);
 
 // Built React app (frontend/dist) for `npm start` locally. On Vercel the CDN serves it instead.
