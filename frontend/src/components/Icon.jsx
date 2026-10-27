@@ -32,6 +32,13 @@ const PATHS = {
       <circle cx="9" cy="17" r="2" />
     </>
   ),
+  people: (
+    <>
+      <circle cx="9" cy="8.5" r="3" />
+      <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+      <path d="M15.5 6a3 3 0 0 1 0 5.5M17 14a5.5 5.5 0 0 1 3.5 5" />
+    </>
+  ),
   plus: <path d="M12 5v14M5 12h14" />,
   edit: (
     <>

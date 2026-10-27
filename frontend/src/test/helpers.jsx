@@ -23,6 +23,11 @@ export const json = (body, status = 200) =>
   Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
 
 /** Routes fetch calls to fixture data, the way the real API shapes them. */
+export const PAYEES = [
+  { key: 'upi:9866352390-2', name: 'Pullaiah', named: false, upi_id: '9866352390-2@ybl', count: 2, received: 6500, paid: 0, first_date: '2026-09-05T00:00:00Z', last_date: '2026-09-18T00:00:00Z' },
+  { key: 'name:swiggy', name: 'Swiggy', named: false, upi_id: '', count: 3, received: 146, paid: 219, first_date: '2026-09-23T00:00:00Z', last_date: '2026-09-29T00:00:00Z' },
+];
+
 export function mockApi(overrides = {}, handle) {
   const f = { ...fixtures, ...overrides };
   return vi.spyOn(globalThis, 'fetch').mockImplementation((url, opts = {}) => {
@@ -38,6 +43,14 @@ export function mockApi(overrides = {}, handle) {
     if (p === '/api/transactions/stats/summary') return json({ success: true, data: f.summary });
     if (p === '/api/transactions' && (opts.method || 'GET') === 'GET') {
       return json({ success: true, data: f.transactions, pagination: { page: 1, limit: 20, total: f.transactions.length, totalPages: 1 } });
+    }
+    if (p === '/api/payees') return json({ success: true, data: f.payees || PAYEES });
+    if (p === '/api/payees/detail') {
+      const key = u.searchParams.get('key');
+      const payee = (f.payees || PAYEES).find((x) => x.key === key);
+      if (!payee) return json({ success: false, error: { message: 'No transactions for this payee' } }, 404);
+      const tx = { id: 'p1', _id: 'p1', type: 'income', amount: 5500, description: payee.name, category: 'Other income', notes: 'UPIAB/1/CR/PULLAIA H/SBIN/9866352390-2@ybl', payee_key: key, source: 'import', payment_method: 'upi', date: '2026-09-05T00:00:00Z' };
+      return json({ success: true, data: { payee, transactions: [tx] } });
     }
     if (p === '/api/budgets') return json(f.budgets);
     if (p === '/api/savings-goals') return json(f.goals);

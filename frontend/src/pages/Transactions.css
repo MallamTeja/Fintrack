@@ -321,3 +321,14 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
+.ledger__person {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule-strong);
+  text-underline-offset: 0.2em;
+}
+
+.ledger__person:hover {
+  text-decoration-color: currentColor;
+}

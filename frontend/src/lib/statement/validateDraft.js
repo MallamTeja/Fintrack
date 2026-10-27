@@ -31,5 +31,6 @@ export function toImportRow(d) {
     payment_method: d.payment_method || 'other',
   };
   if (d.notes && d.notes.trim()) row.notes = d.notes.trim().slice(0, 500);
+  if (d.payee_key) row.payee_key = d.payee_key;
   return row;
 }

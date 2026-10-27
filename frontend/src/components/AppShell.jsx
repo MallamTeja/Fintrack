@@ -10,6 +10,7 @@ const NAV = [
   { to: '/', label: 'Dashboard', short: 'Home', icon: 'dashboard', end: true, also: '/dashboard' },
   { to: '/transactions', label: 'Transactions', short: 'Ledger', icon: 'ledger' },
   { to: '/import', label: 'Import', short: 'Import', icon: 'import' },
+  { to: '/people', label: 'People', short: 'People', icon: 'people', tab: false },
   { to: '/budgets', label: 'Budgets', short: 'Budgets', icon: 'budget' },
   { to: '/savings', label: 'Savings', short: 'Savings', icon: 'savings' },
   { to: '/settings', label: 'Settings', short: 'Settings', icon: 'settings' },
@@ -141,7 +142,7 @@ export default function AppShell() {
       </main>
 
       <nav className="tabbar" aria-label="Sections">
-        {NAV.map((n) => (
+        {NAV.filter((n) => n.tab !== false).map((n) => (
           <NavLink key={n.to} to={linkTo(n)} end={n.end} className="tabbar__link">
             <Icon name={n.icon} size={22} />
             <span>{n.short}</span>

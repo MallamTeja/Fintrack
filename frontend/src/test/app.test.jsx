@@ -90,6 +90,8 @@ describe('every screen renders with API data', () => {
     ['/savings', 'Savings'],
     ['/settings', 'Settings'],
     ['/import', 'Import'],
+    ['/people', 'People'],
+    ['/people/upi%3A9866352390-2', 'Pullaiah'],
   ];
   it.each(screens)('%s', async (path, heading) => {
     localStorage.setItem('token', 'test-token');

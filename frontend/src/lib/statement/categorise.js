@@ -1,3 +1,5 @@
+import { brandName, joinWrappedName } from './payee.js';
+
 // Keyword rules that turn a bank narration into a category, a payment method and a readable description.
 
 // Checked in order; the first rule whose pattern matches wins. `type` limits a rule to income or expense.
@@ -95,7 +97,8 @@ export function cleanDescription(raw = '') {
     return text.slice(0, 200);
   }
   const tokens = text.split(/\s*[/|*\-]\s*/);
-  const name = tokens.map((t) => t.trim()).find((t) => !isNoiseToken(t) && /\p{L}{2,}/u.test(t));
-  if (!name) return text.slice(0, 200);
-  return titleCase(name).slice(0, 200);
+  const found = tokens.map((t) => t.trim()).find((t) => !isNoiseToken(t) && /\p{L}{2,}/u.test(t));
+  if (!found) return text.slice(0, 200);
+  const name = joinWrappedName(found);
+  return (brandName(name) || titleCase(name)).slice(0, 200);
 }

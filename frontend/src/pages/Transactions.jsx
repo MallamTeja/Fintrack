@@ -5,7 +5,7 @@ import Modal from '../components/Modal.jsx';
 import Money from '../components/Money.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { useCategories } from '../lib/categories.js';
-import { createTx, deleteTx, exportCsv, fetchTransactions, updateTx } from '../lib/data.js';
+import { createTx, deleteTx, exportCsv, fetchTransactions, payeePath, updateTx } from '../lib/data.js';
 import { formatDate, formatDay } from '../lib/format.js';
 import { invalidate, useResource } from '../lib/useResource.js';
 import { LIMITS, PAYMENT_METHODS, fieldErrorsFrom, paymentLabel } from '../lib/validate.js';
@@ -366,7 +366,13 @@ export default function Transactions() {
                     </time>
                   </td>
                   <td className="ledger__desc">
-                    <span className="ledger__desc-text">{r.description || r.category}</span>
+                    {r.payee_key ? (
+                      <Link to={payeePath(r.payee_key)} className="ledger__desc-text ledger__person" title="See everything with this person">
+                        {r.description || r.category}
+                      </Link>
+                    ) : (
+                      <span className="ledger__desc-text">{r.description || r.category}</span>
+                    )}
                     <span className="ledger__tags">
                       <span className="ledger__meta-mobile">
                         {formatDay(r.date)} · {r.category} ·{' '}

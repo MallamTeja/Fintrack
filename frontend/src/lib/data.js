@@ -136,3 +136,16 @@ export async function exportCsv({ startDate, endDate } = {}) {
 
 export const changePassword = (currentPassword, newPassword) => post('/auth/password', { currentPassword, newPassword });
 export const deleteAccount = () => del('/auth/account', { confirm: 'DELETE' });
+
+// People and businesses (payees) built from imported transactions.
+export const PAYEE_NAME_MAX = 100;
+export const payeePath = (key) => `/people/${encodeURIComponent(key)}`;
+export async function fetchPayees(signal) {
+  return unwrap(await get('/payees', { signal })) || [];
+}
+export async function fetchPayee(key, signal) {
+  const data = unwrap(await get(`/payees/detail${toQuery({ key })}`, { signal }));
+  return { payee: data.payee, transactions: (data.transactions || []).map(normTx) };
+}
+export const renamePayee = async (key, name) => unwrap(await put('/payees', { key, name }));
+export const forgetPayeeName = (key) => del('/payees', { key });

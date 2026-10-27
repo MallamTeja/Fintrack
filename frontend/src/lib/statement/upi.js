@@ -1,4 +1,5 @@
 // PhonePe, Google Pay and Paytm statements: text lines like "Paid to Swiggy  DEBIT  ₹250".
+import { payeeKeyFrom } from './payee.js';
 import { parseMoney } from './amounts.js';
 import { categorise } from './categorise.js';
 import { parseStatementDate } from './dates.js';
@@ -86,6 +87,7 @@ export function parseUpiText(lines) {
       raw: window,
       description,
       notes: '',
+      payee_key: payeeKeyFrom(window, name),
       category: categorise(`${name} ${window}`, type),
       payment_method: /wallet/i.test(window) ? 'wallet' : 'upi',
       guessedType: false,

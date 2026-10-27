@@ -202,3 +202,29 @@ describe('savings and budgets', () => {
     expect(screen.getByText(/(days? left in|Last day of) /)).toBeInTheDocument();
   });
 });
+
+describe('people', () => {
+  it('lists payees, searches them and renames one everywhere', async () => {
+    localStorage.setItem('token', 'test-token');
+    let saved;
+    mockApi({}, (p, opts) => {
+      if (p === '/api/payees' && opts.method === 'PUT') {
+        saved = JSON.parse(opts.body);
+        return json({ success: true, data: { key: saved.key, name: saved.name, updated: 2 } });
+      }
+      return undefined;
+    });
+    renderApp('/people');
+    expect(await screen.findByText('Pullaiah')).toBeInTheDocument();
+    expect(screen.getByText('9866352390-2@ybl')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search'), { target: { value: 'swig' } });
+    expect(screen.queryByText('Pullaiah')).not.toBeInTheDocument();
+    expect(screen.getByText('Swiggy')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search'), { target: { value: '' } });
+    fireEvent.click(screen.getByText('Pullaiah'));
+    const input = await screen.findByLabelText('Full name');
+    fireEvent.change(input, { target: { value: '  Pullaiah Mallam ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
+    await waitFor(() => expect(saved).toEqual({ key: 'upi:9866352390-2', name: 'Pullaiah Mallam' }));
+  });
+});

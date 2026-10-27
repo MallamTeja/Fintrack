@@ -1,4 +1,5 @@
 // Turns a statement table (rows of cells from CSV, Excel or a PDF layout) into draft transactions.
+import { payeeKeyFrom } from './payee.js';
 import { parseMoney, readDirection } from './amounts.js';
 import { categorise, cleanDescription, paymentMethodFrom } from './categorise.js';
 import { guessDayFirst, parseStatementDate } from './dates.js';
@@ -267,9 +268,11 @@ export function buildDrafts(rows, { headerRow = -1, mapping = {}, dayFirst } = {
 export function describe(narration, type) {
   const raw = String(narration || '').trim();
   const description = (cleanDescription(raw) || (type === 'income' ? 'Money in' : 'Money out')).slice(0, 200);
+  const packed = raw && raw !== description;
   return {
     description,
-    notes: raw && raw !== description ? raw.slice(0, 500) : '',
+    notes: packed ? raw.slice(0, 500) : '',
+    payee_key: packed ? payeeKeyFrom(raw, description) : payeeKeyFrom(raw, ''),
     category: categorise(raw, type),
     payment_method: paymentMethodFrom(raw),
   };

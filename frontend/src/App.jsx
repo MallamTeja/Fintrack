@@ -7,6 +7,7 @@ import { ToastProvider } from './context/ToastContext.jsx';
 import { Login, Register } from './pages/Auth.jsx';
 import Budgets from './pages/Budgets.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import { People, Person } from './pages/People.jsx';
 import Savings from './pages/Savings.jsx';
 import Settings from './pages/Settings.jsx';
 import Transactions from './pages/Transactions.jsx';
@@ -70,6 +71,8 @@ export function AppRoutes() {
             </Suspense>
           }
         />
+        <Route path="people" element={<People />} />
+        <Route path="people/:key" element={<Person />} />
         <Route path="budgets" element={<Budgets />} />
         <Route path="savings" element={<Savings />} />
         <Route path="settings" element={<Settings />} />

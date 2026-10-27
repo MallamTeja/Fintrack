@@ -6,6 +6,7 @@ import { analyseLines, analyseRows, csvToRows, draftTotals, editDraft, groupLine
 import { detectHeader, roleOfHeader } from '../lib/statement/table.js';
 import { parseUpiText } from '../lib/statement/upi.js';
 import { tsvToItems } from '../lib/statement/ocr.js';
+import { brandName, joinWrappedName, payeeKeyFrom, upiIdFrom } from '../lib/statement/payee.js';
 
 const HDFC = `"HDFC BANK Ltd.","Page No .: 1"
 "Statement of accounts"
@@ -128,7 +129,7 @@ describe('categorise and describe', () => {
   it('pulls the payee out of packed UPI and bank narrations', () => {
     expect(cleanDescription('UPI-SWIGGY-SWIGGY@ICICI-ICIC0DC0099-412345678901-PAYMENT')).toBe('Swiggy');
     expect(cleanDescription('TO TRANSFER-UPI/DR/412345678901/RAPIDO/YESB/rapido@ybl/UPI--')).toBe('Rapido');
-    expect(cleanDescription('UPI/P2M/412345678901/ZOMATO LTD/UPI/YES BANK')).toBe('Zomato Ltd');
+    expect(cleanDescription('UPI/P2M/412345678901/ZOMATO LTD/UPI/YES BANK')).toBe('Zomato');
     expect(cleanDescription('MMT/IMPS/412345678901/RAMESH KUMAR/SBIN0001234')).toBe('Ramesh Kumar');
     expect(cleanDescription('NEFT-HDFCN52025101512345-ACME TECHNOLOGIES PVT LTD-0001')).toBe('Acme Technologies Pvt Ltd');
     expect(cleanDescription('BESCOM   BILL PAYMENT')).toBe('BESCOM BILL PAYMENT');
@@ -227,6 +228,7 @@ describe('bank tables', () => {
       category: 'Eating out',
       payment_method: 'upi',
       notes: 'UPI-SWIGGY-SWIGGY@ICICI-ICIC0DC0099-412345678901-PAYMENT',
+      payee_key: 'name:swiggy',
     });
   });
 });
@@ -324,8 +326,8 @@ describe('vertically centred narration (Union Bank layout)', () => {
   it('joins the line above the date line to its own entry', () => {
     const r = analyseLines(groupLines(items));
     expect(r.drafts).toHaveLength(3);
-    expect(r.drafts[0]).toMatchObject({ date: '2026-09-05', type: 'income', amount: 5500, description: 'Pullaia H', payment_method: 'upi' });
-    expect(r.drafts[1]).toMatchObject({ type: 'expense', amount: 250, description: 'Vennap Us' });
+    expect(r.drafts[0]).toMatchObject({ date: '2026-09-05', type: 'income', amount: 5500, description: 'Pullaiah', payment_method: 'upi' });
+    expect(r.drafts[1]).toMatchObject({ type: 'expense', amount: 250, description: 'Vennapus' });
     expect(r.drafts[2].notes).toContain('UPIAR/169695810033/DR/SWIGGY');
     expect(r.drafts[2].notes).toContain('swiggy@icici');
   });
@@ -361,5 +363,39 @@ describe('tsvToItems', () => {
       { str: 'World', x: 100, y: -88, w: 20, h: 8, page: 2 },
     ]);
     expect(items[0].y).toBeGreaterThan(items[1].y);
+  });
+});
+
+describe('payee names and keys', () => {
+  it('joins names a bank wrapped mid-word but keeps initials', () => {
+    expect(joinWrappedName('PULLAIA H')).toBe('PULLAIAH');
+    expect(joinWrappedName('VENNAP US')).toBe('VENNAPUS');
+    expect(joinWrappedName('BALAJI C')).toBe('BALAJI C');
+    expect(joinWrappedName('SRI SAI J')).toBe('SRI SAI J');
+    expect(joinWrappedName('MARVEL H')).toBe('MARVEL H');
+  });
+  it('names known businesses', () => {
+    expect(brandName('FLIPKART')).toBe('Flipkart');
+    expect(brandName('Swiggy L')).toBe('Swiggy');
+    expect(brandName('Shadow fa')).toBe('Shadowfax');
+    expect(brandName('Ravi')).toBe('');
+  });
+  it('cleans Union Bank UPI narrations into full names', () => {
+    expect(cleanDescription('UPIAB/508250878620/CR/PULLAIA H/SBIN/9866352390-2@ybl')).toBe('Pullaiah');
+    expect(cleanDescription('UPIAB/613124582666/CR/Swiggy L/UTIB/swiggy.refunds')).toBe('Swiggy');
+    expect(cleanDescription('UPIAR/663304210940/DR/RELIANC E/CITI/jio@citibank')).toBe('Reliance');
+  });
+  it('keys payees by UPI handle, by bank-code handle, or by brand', () => {
+    expect(payeeKeyFrom('UPIAB/1/CR/PULLAIA H/SBIN/9866352390-2@ybl', 'Pullaiah')).toBe('upi:9866352390-2');
+    expect(payeeKeyFrom('UPIAR/1/DR/BHUKYA /SBIN/manojbhukya072', 'Bhukya')).toBe('upi:manojbhukya072');
+    expect(payeeKeyFrom('UPIAR/1/DR/ SWIGGY/ICIC/upiswiggy @icic', 'Swiggy')).toBe('name:swiggy');
+    expect(payeeKeyFrom('NEFT ACME LTD', 'Acme Ltd')).toBe('name:acme ltd');
+    expect(payeeKeyFrom('', '')).toBe('');
+    expect(upiIdFrom('x/SBIN/9866352390-2@ybl')).toBe('9866352390-2@ybl');
+  });
+  it('sends payee_key with imported rows', () => {
+    const [d] = analyseRows(csvToRows('Date,Narration,Withdrawal,Deposit\n05/09/2026,UPIAB/508250878620/CR/PULLAIA H/SBIN/9866352390-2@ybl,,5500')).drafts;
+    expect(d.description).toBe('Pullaiah');
+    expect(toImportRow(d).payee_key).toBe('upi:9866352390-2');
   });
 });
